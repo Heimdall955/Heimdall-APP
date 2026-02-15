@@ -317,8 +317,8 @@ export default function HomeScreen() {
                 />
               </View>
               <View style={styles.chatPromoText}>
-                <Text style={styles.chatPromoTitle}>¿Tienes dudas?</Text>
-                <Text style={styles.chatPromoSubtitle}>Pregúntale a Hani, tu asistente IA</Text>
+                <Text style={styles.chatPromoTitle}>{t('haveQuestions')}</Text>
+                <Text style={styles.chatPromoSubtitle}>{t('askHani')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={24} color={Colors.primary} />
             </View>
