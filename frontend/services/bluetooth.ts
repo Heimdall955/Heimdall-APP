@@ -47,8 +47,8 @@ type ScanCallback = (device: ScannedDevice) => void;
 type StateCallback = (state: 'scanning' | 'connected' | 'disconnected' | 'error') => void;
 
 class BluetoothService {
-  private manager: BleManager | null = null;
-  private connectedDevice: Device | null = null;
+  private manager: any = null;
+  private connectedDevice: any = null;
   private biometricCallback: BiometricCallback | null = null;
   private stateCallback: StateCallback | null = null;
   private isScanning: boolean = false;
@@ -66,8 +66,12 @@ class BluetoothService {
   };
 
   constructor() {
-    if (Platform.OS !== 'web') {
-      this.manager = new BleManager();
+    if (Platform.OS !== 'web' && BleManager) {
+      try {
+        this.manager = new BleManager();
+      } catch (e) {
+        console.log('BleManager initialization failed:', e);
+      }
     }
   }
 
