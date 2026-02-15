@@ -264,6 +264,19 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* HANI Passport - Google Wallet */}
+        {currentDog && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>HANI Passport</Text>
+            <WalletCard
+              dogId={currentDog.id}
+              dogName={currentDog.name}
+              dogBreed={currentDog.breed}
+              dogPhoto={currentDog.avatar}
+            />
+          </View>
+        )}
+
         {/* Exercise Library Preview */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
