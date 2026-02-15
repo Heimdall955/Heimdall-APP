@@ -163,8 +163,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
 export default function PerfilScreen() {
   const router = useRouter();
   const { currentDog, user, logout, dogs, refreshDogs, setCurrentDog } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
-  const [language, setLanguage] = useState<Language>('es');
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [dogImage, setDogImage] = useState<string | null>(null);
@@ -177,10 +177,7 @@ export default function PerfilScreen() {
   const [editChip, setEditChip] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const t = TRANSLATIONS[language];
-
   useEffect(() => {
-    loadLanguage();
     loadDogImage();
   }, []);
 
@@ -194,13 +191,6 @@ export default function PerfilScreen() {
     }
   }, [currentDog]);
 
-  const loadLanguage = async () => {
-    const savedLang = await SecureStore.getItemAsync('app_language');
-    if (savedLang && (savedLang === 'es' || savedLang === 'en' || savedLang === 'it')) {
-      setLanguage(savedLang);
-    }
-  };
-
   const loadDogImage = async () => {
     if (currentDog?.id) {
       const savedImage = await SecureStore.getItemAsync(`dog_image_${currentDog.id}`);
@@ -211,8 +201,7 @@ export default function PerfilScreen() {
   };
 
   const changeLanguage = async (newLang: Language) => {
-    setLanguage(newLang);
-    await SecureStore.setItemAsync('app_language', newLang);
+    await setLanguage(newLang);
     setShowLanguageModal(false);
   };
 
@@ -224,10 +213,10 @@ export default function PerfilScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      t.logout,
-      t.logoutConfirm,
+      t('logout'),
+      t('logoutConfirm'),
       [
-        { text: t.cancel, style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
           text: t.logout, 
           style: 'destructive',
