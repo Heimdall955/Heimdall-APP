@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { Card } from '../components/ui';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Base de datos de ejercicios
 const EJERCICIOS_DB: Record<string, Ejercicio> = {
