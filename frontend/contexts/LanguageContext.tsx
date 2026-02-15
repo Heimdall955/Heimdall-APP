@@ -573,6 +573,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     personalizedAI: 'Personalized AI assistant',
     goToHome: 'Go to home',
     
+    // Google Wallet
+    digitalIdCard: 'Digital ID Card',
+    addToGoogleWallet: 'Add to Google Wallet',
+    walletCardDescription: 'Carry your dog\'s ID with you always in Google Wallet',
+    
     // Bluetooth/ESP32
     scanForDevices: 'Scan for devices',
     stopScanning: 'Stop scanning',
