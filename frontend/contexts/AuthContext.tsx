@@ -157,9 +157,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginWithGoogle = async () => {
-    const redirectUrl = Platform.OS === 'web'
-      ? (typeof window !== 'undefined' ? window.location.origin + '/' : `${BACKEND_URL}/`)
-      : Linking.createURL('/');
+    // For web: always use current window origin for OAuth redirect
+    // For native: use deep linking
+    let redirectUrl: string;
+    if (Platform.OS === 'web') {
+      // In browser environment, use window.location.origin
+      // This ensures OAuth works across all deployment environments (preview, production, custom domains)
+      redirectUrl = typeof window !== 'undefined' && window.location?.origin 
+        ? window.location.origin + '/' 
+        : '/';
+    } else {
+      redirectUrl = Linking.createURL('/');
+    }
     
     const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
     
