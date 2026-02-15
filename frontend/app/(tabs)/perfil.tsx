@@ -101,7 +101,7 @@ export default function PerfilScreen() {
       base64: true,
     });
 
-    if (!result("cancel")ed && result.assets[0].base64) {
+    if (!result.canceled && result.assets[0].base64) {
       const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
       setDogImage(base64Image);
       if (currentDog?.id) {
