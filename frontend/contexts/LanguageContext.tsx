@@ -571,6 +571,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     availableDevices: 'Available devices',
     useSimulator: 'Use simulator',
     realDevice: 'Real device',
+    disconnectConfirm: 'Are you sure you want to disconnect the vest?',
   },
   it: {
     // General
