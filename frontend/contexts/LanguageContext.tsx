@@ -1,0 +1,670 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { SecureStore } from '../utils/secureStore';
+
+export type Language = 'es' | 'en' | 'it';
+
+// Traducciones completas de la app
+export const TRANSLATIONS: Record<Language, Record<string, string>> = {
+  es: {
+    // General
+    loading: 'Cargando...',
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    delete: 'Eliminar',
+    edit: 'Editar',
+    confirm: 'Confirmar',
+    back: 'Volver',
+    next: 'Siguiente',
+    done: 'Hecho',
+    error: 'Error',
+    success: 'Éxito',
+    
+    // Navigation
+    home: 'Inicio',
+    health: 'Salud',
+    education: 'Educación',
+    chat: 'Chat',
+    profile: 'Perfil',
+    
+    // Home Screen
+    goodMorning: 'Buenos días',
+    goodAfternoon: 'Buenas tardes',
+    goodEvening: 'Buenas noches',
+    positiveEducation: 'Educación en Positivo',
+    todaySession: 'Sesión de Hoy',
+    yourProgress: 'Tu Progreso',
+    quickAccess: 'Accesos rápidos',
+    exerciseLibrary: 'Biblioteca de Ejercicios',
+    viewAll: 'Ver todo',
+    greatJob: '¡Gran trabajo! Has ganado',
+    bonesToday: 'huesos hoy',
+    viewRewards: 'Ver premios',
+    level: 'Nivel',
+    exercises: 'Ejercicios',
+    practice: 'Práctica',
+    bones: 'Huesos',
+    almostLevel: '¡Casi llegas al Nivel',
+    days: 'Días',
+    nextGoal: 'Siguiente',
+    haveQuestions: '¿Tienes dudas?',
+    askHani: 'Pregúntale a Hani, tu asistente IA',
+    
+    // Quick Access
+    vest: 'Chaleco',
+    gpsRoutes: 'Rutas GPS',
+    history: 'Historial',
+    academy: 'Academia',
+    pro: 'PRO',
+    
+    // Health Screen
+    health360: 'Salud 360°',
+    realTimeMonitoring: 'Monitorización en tiempo real',
+    heartRate: 'Frecuencia Cardíaca',
+    temperature: 'Temperatura',
+    activity: 'Actividad',
+    stress: 'Estrés',
+    bpm: 'lpm',
+    high: 'Alta',
+    medium: 'Media',
+    low: 'Bajo',
+    normal: 'Normal',
+    connectVest: 'Conectar Chaleco',
+    vestConnected: 'Chaleco conectado',
+    vestDisconnected: 'Chaleco desconectado',
+    medicalHistory: 'Historial Médico',
+    viewMedicalHistory: 'Ver historial completo',
+    lastVaccine: 'Última vacuna',
+    lastDeworming: 'Última desparasitación',
+    lastVetVisit: 'Última visita veterinaria',
+    
+    // Education Screen
+    heimdallAcademy: 'Academia Heimdall',
+    heimdallBones: 'Huesos Heimdall',
+    todaySessionTitle: 'Sesión de Hoy',
+    guidedPrograms: 'Programas Guiados',
+    basicEducation: 'Educación Básica',
+    solidFoundations: 'Fundamentos sólidos',
+    calmControl: 'Calma y Control',
+    emotionalManagement: 'Gestión emocional',
+    canineWorld: 'Mundo Canino',
+    positiveSocialization: 'Socialización positiva',
+    puppyStart: 'Inicio Cachorro',
+    firstSteps: 'Primeros pasos',
+    basic: 'Básico',
+    emotional: 'Emocional',
+    social: 'Social',
+    puppies: 'Cachorros',
+    recommendedGames: 'Juegos Recomendados',
+    mentalPuzzle: 'Puzzle Mental',
+    tugOfWar: 'Tira y Afloja',
+    difficulty: 'Dificultad',
+    bond: 'Vínculo',
+    
+    // Chat Screen
+    chatWithHani: 'Chat con Hani',
+    askAnything: 'Pregunta lo que quieras sobre tu perro',
+    typeMessage: 'Escribe tu mensaje...',
+    send: 'Enviar',
+    haniGreeting: '¡Hola! Soy Hani, tu asistente de educación canina. ¿En qué puedo ayudarte hoy?',
+    thinking: 'Pensando...',
+    
+    // Profile Screen
+    myPack: 'Mi manada',
+    invite: 'Invitar',
+    mainOwner: 'Dueño principal',
+    clinicalFile: 'Ficha Clínica',
+    country: 'País',
+    vet: 'Veterinario',
+    allergies: 'Alergias',
+    notAssigned: 'Sin asignar',
+    noneRegistered: 'Ninguna registrada',
+    editClinicalFile: 'Editar ficha clínica',
+    goToPro: 'Pásate a PRO',
+    activatePro: 'Activar PRO',
+    settings: 'Ajustes',
+    notifications: 'Notificaciones',
+    privacy: 'Privacidad y datos',
+    help: 'Ayuda',
+    language: 'Idioma',
+    logout: 'Cerrar sesión',
+    logoutConfirm: '¿Estás seguro de que quieres cerrar sesión?',
+    age: 'Edad',
+    weight: 'Peso',
+    breed: 'Raza',
+    editProfile: 'Editar Perfil',
+    name: 'Nombre',
+    changePhoto: 'Cambiar foto',
+    selectLanguage: 'Seleccionar Idioma',
+    spanish: 'Español',
+    english: 'English',
+    italian: 'Italiano',
+    years: 'años',
+    months: 'meses',
+    and: 'y',
+    chip: 'Chip',
+    videoAnalysis: 'Análisis de video',
+    vetReports: 'Informes veterinarios',
+    unlimitedChat: 'Chat ilimitado con Hani',
+    editDogProfile: 'Editar perfil de tu perro',
+    dogName: 'Nombre del perro',
+    dogAge: 'Edad (meses)',
+    dogWeight: 'Peso (kg)',
+    dogBreed: 'Raza',
+    chipId: 'Número de chip',
+    
+    // Lessons
+    step: 'Paso',
+    of: 'de',
+    complete: 'Completar',
+    lessonCompleted: '¡Lección Completada!',
+    practicalExercise: 'Tu Ejercicio Práctico',
+    backToEducation: 'Volver a Educación',
+    proTip: 'Consejo Pro',
+    whatYouWillLearn: 'Lo que aprenderás:',
+    commonMistakes: 'Errores Comunes a Evitar:',
+    previous: 'Anterior',
+    
+    // Exercises
+    completed: 'completados',
+    instructions: 'Instrucciones:',
+    repetitions: 'repeticiones',
+    exercisesCompleted: '¡Ejercicios Completados!',
+    
+    // Routes
+    routes: 'Rutas',
+    startRoute: 'Iniciar Ruta',
+    stopRoute: 'Detener',
+    saveRoute: 'Guardar Ruta',
+    routeHistory: 'Historial de Rutas',
+    noRoutes: 'Aún no tienes rutas guardadas',
+    routeSaved: 'Ruta guardada',
+    distance: 'Distancia',
+    duration: 'Duración',
+    
+    // PRO
+    proBenefits: 'Beneficios PRO',
+    monthlyPlan: 'Mensual',
+    yearlyPlan: 'Anual',
+    mostPopular: 'MÁS POPULAR',
+    savingsPercent: 'Ahorra',
+    activateNow: 'Activar PRO Ahora',
+    restorePurchases: 'Restaurar compras',
+    guarantee: 'Garantía de 7 días',
+    guaranteeText: 'Si no estás satisfecho, te devolvemos el dinero sin preguntas.',
+    alreadyPro: '¡Ya eres PRO!',
+    enjoyPremium: 'Disfruta de todas las funciones premium de Heimdall',
+    
+    // Medical History
+    addEvent: 'Añadir evento',
+    vaccines: 'Vacunas',
+    deworming: 'Desparasitación',
+    vetVisits: 'Visitas veterinarias',
+    medications: 'Medicamentos',
+    surgeries: 'Cirugías',
+    other: 'Otros',
+    noEvents: 'No hay eventos registrados',
+    eventAdded: 'Evento añadido',
+    eventDeleted: 'Evento eliminado',
+  },
+  en: {
+    // General
+    loading: 'Loading...',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    confirm: 'Confirm',
+    back: 'Back',
+    next: 'Next',
+    done: 'Done',
+    error: 'Error',
+    success: 'Success',
+    
+    // Navigation
+    home: 'Home',
+    health: 'Health',
+    education: 'Education',
+    chat: 'Chat',
+    profile: 'Profile',
+    
+    // Home Screen
+    goodMorning: 'Good morning',
+    goodAfternoon: 'Good afternoon',
+    goodEvening: 'Good evening',
+    positiveEducation: 'Positive Education',
+    todaySession: "Today's Session",
+    yourProgress: 'Your Progress',
+    quickAccess: 'Quick Access',
+    exerciseLibrary: 'Exercise Library',
+    viewAll: 'View all',
+    greatJob: 'Great job! You earned',
+    bonesToday: 'bones today',
+    viewRewards: 'View rewards',
+    level: 'Level',
+    exercises: 'Exercises',
+    practice: 'Practice',
+    bones: 'Bones',
+    almostLevel: 'Almost at Level',
+    days: 'Days',
+    nextGoal: 'Next',
+    haveQuestions: 'Have questions?',
+    askHani: 'Ask Hani, your AI assistant',
+    
+    // Quick Access
+    vest: 'Vest',
+    gpsRoutes: 'GPS Routes',
+    history: 'History',
+    academy: 'Academy',
+    pro: 'PRO',
+    
+    // Health Screen
+    health360: 'Health 360°',
+    realTimeMonitoring: 'Real-time monitoring',
+    heartRate: 'Heart Rate',
+    temperature: 'Temperature',
+    activity: 'Activity',
+    stress: 'Stress',
+    bpm: 'bpm',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    normal: 'Normal',
+    connectVest: 'Connect Vest',
+    vestConnected: 'Vest connected',
+    vestDisconnected: 'Vest disconnected',
+    medicalHistory: 'Medical History',
+    viewMedicalHistory: 'View complete history',
+    lastVaccine: 'Last vaccine',
+    lastDeworming: 'Last deworming',
+    lastVetVisit: 'Last vet visit',
+    
+    // Education Screen
+    heimdallAcademy: 'Heimdall Academy',
+    heimdallBones: 'Heimdall Bones',
+    todaySessionTitle: "Today's Session",
+    guidedPrograms: 'Guided Programs',
+    basicEducation: 'Basic Education',
+    solidFoundations: 'Solid foundations',
+    calmControl: 'Calm & Control',
+    emotionalManagement: 'Emotional management',
+    canineWorld: 'Canine World',
+    positiveSocialization: 'Positive socialization',
+    puppyStart: 'Puppy Start',
+    firstSteps: 'First steps',
+    basic: 'Basic',
+    emotional: 'Emotional',
+    social: 'Social',
+    puppies: 'Puppies',
+    recommendedGames: 'Recommended Games',
+    mentalPuzzle: 'Mental Puzzle',
+    tugOfWar: 'Tug of War',
+    difficulty: 'Difficulty',
+    bond: 'Bond',
+    
+    // Chat Screen
+    chatWithHani: 'Chat with Hani',
+    askAnything: 'Ask anything about your dog',
+    typeMessage: 'Type your message...',
+    send: 'Send',
+    haniGreeting: "Hi! I'm Hani, your canine education assistant. How can I help you today?",
+    thinking: 'Thinking...',
+    
+    // Profile Screen
+    myPack: 'My pack',
+    invite: 'Invite',
+    mainOwner: 'Main owner',
+    clinicalFile: 'Clinical File',
+    country: 'Country',
+    vet: 'Veterinarian',
+    allergies: 'Allergies',
+    notAssigned: 'Not assigned',
+    noneRegistered: 'None registered',
+    editClinicalFile: 'Edit clinical file',
+    goToPro: 'Go PRO',
+    activatePro: 'Activate PRO',
+    settings: 'Settings',
+    notifications: 'Notifications',
+    privacy: 'Privacy and data',
+    help: 'Help',
+    language: 'Language',
+    logout: 'Log out',
+    logoutConfirm: 'Are you sure you want to log out?',
+    age: 'Age',
+    weight: 'Weight',
+    breed: 'Breed',
+    editProfile: 'Edit Profile',
+    name: 'Name',
+    changePhoto: 'Change photo',
+    selectLanguage: 'Select Language',
+    spanish: 'Español',
+    english: 'English',
+    italian: 'Italiano',
+    years: 'years',
+    months: 'months',
+    and: 'and',
+    chip: 'Chip',
+    videoAnalysis: 'Video analysis',
+    vetReports: 'Veterinary reports',
+    unlimitedChat: 'Unlimited chat with Hani',
+    editDogProfile: 'Edit your dog profile',
+    dogName: 'Dog name',
+    dogAge: 'Age (months)',
+    dogWeight: 'Weight (kg)',
+    dogBreed: 'Breed',
+    chipId: 'Chip number',
+    
+    // Lessons
+    step: 'Step',
+    of: 'of',
+    complete: 'Complete',
+    lessonCompleted: 'Lesson Completed!',
+    practicalExercise: 'Your Practical Exercise',
+    backToEducation: 'Back to Education',
+    proTip: 'Pro Tip',
+    whatYouWillLearn: 'What you will learn:',
+    commonMistakes: 'Common Mistakes to Avoid:',
+    previous: 'Previous',
+    
+    // Exercises
+    completed: 'completed',
+    instructions: 'Instructions:',
+    repetitions: 'repetitions',
+    exercisesCompleted: 'Exercises Completed!',
+    
+    // Routes
+    routes: 'Routes',
+    startRoute: 'Start Route',
+    stopRoute: 'Stop',
+    saveRoute: 'Save Route',
+    routeHistory: 'Route History',
+    noRoutes: 'No saved routes yet',
+    routeSaved: 'Route saved',
+    distance: 'Distance',
+    duration: 'Duration',
+    
+    // PRO
+    proBenefits: 'PRO Benefits',
+    monthlyPlan: 'Monthly',
+    yearlyPlan: 'Yearly',
+    mostPopular: 'MOST POPULAR',
+    savingsPercent: 'Save',
+    activateNow: 'Activate PRO Now',
+    restorePurchases: 'Restore purchases',
+    guarantee: '7-day guarantee',
+    guaranteeText: "If you're not satisfied, we'll refund your money, no questions asked.",
+    alreadyPro: "You're already PRO!",
+    enjoyPremium: 'Enjoy all premium features of Heimdall',
+    
+    // Medical History
+    addEvent: 'Add event',
+    vaccines: 'Vaccines',
+    deworming: 'Deworming',
+    vetVisits: 'Vet visits',
+    medications: 'Medications',
+    surgeries: 'Surgeries',
+    other: 'Other',
+    noEvents: 'No events registered',
+    eventAdded: 'Event added',
+    eventDeleted: 'Event deleted',
+  },
+  it: {
+    // General
+    loading: 'Caricamento...',
+    save: 'Salva',
+    cancel: 'Annulla',
+    delete: 'Elimina',
+    edit: 'Modifica',
+    confirm: 'Conferma',
+    back: 'Indietro',
+    next: 'Avanti',
+    done: 'Fatto',
+    error: 'Errore',
+    success: 'Successo',
+    
+    // Navigation
+    home: 'Home',
+    health: 'Salute',
+    education: 'Educazione',
+    chat: 'Chat',
+    profile: 'Profilo',
+    
+    // Home Screen
+    goodMorning: 'Buongiorno',
+    goodAfternoon: 'Buon pomeriggio',
+    goodEvening: 'Buonasera',
+    positiveEducation: 'Educazione Positiva',
+    todaySession: 'Sessione di Oggi',
+    yourProgress: 'I Tuoi Progressi',
+    quickAccess: 'Accesso Rapido',
+    exerciseLibrary: 'Libreria Esercizi',
+    viewAll: 'Vedi tutto',
+    greatJob: 'Ottimo lavoro! Hai guadagnato',
+    bonesToday: 'ossa oggi',
+    viewRewards: 'Vedi premi',
+    level: 'Livello',
+    exercises: 'Esercizi',
+    practice: 'Pratica',
+    bones: 'Ossa',
+    almostLevel: 'Quasi al Livello',
+    days: 'Giorni',
+    nextGoal: 'Prossimo',
+    haveQuestions: 'Hai domande?',
+    askHani: 'Chiedi a Hani, il tuo assistente IA',
+    
+    // Quick Access
+    vest: 'Gilet',
+    gpsRoutes: 'Percorsi GPS',
+    history: 'Cronologia',
+    academy: 'Accademia',
+    pro: 'PRO',
+    
+    // Health Screen
+    health360: 'Salute 360°',
+    realTimeMonitoring: 'Monitoraggio in tempo reale',
+    heartRate: 'Frequenza Cardiaca',
+    temperature: 'Temperatura',
+    activity: 'Attività',
+    stress: 'Stress',
+    bpm: 'bpm',
+    high: 'Alta',
+    medium: 'Media',
+    low: 'Basso',
+    normal: 'Normale',
+    connectVest: 'Connetti Gilet',
+    vestConnected: 'Gilet connesso',
+    vestDisconnected: 'Gilet disconnesso',
+    medicalHistory: 'Cartella Clinica',
+    viewMedicalHistory: 'Vedi cartella completa',
+    lastVaccine: 'Ultimo vaccino',
+    lastDeworming: 'Ultima sverminazione',
+    lastVetVisit: 'Ultima visita veterinaria',
+    
+    // Education Screen
+    heimdallAcademy: 'Accademia Heimdall',
+    heimdallBones: 'Ossa Heimdall',
+    todaySessionTitle: 'Sessione di Oggi',
+    guidedPrograms: 'Programmi Guidati',
+    basicEducation: 'Educazione Base',
+    solidFoundations: 'Basi solide',
+    calmControl: 'Calma e Controllo',
+    emotionalManagement: 'Gestione emotiva',
+    canineWorld: 'Mondo Canino',
+    positiveSocialization: 'Socializzazione positiva',
+    puppyStart: 'Inizio Cucciolo',
+    firstSteps: 'Primi passi',
+    basic: 'Base',
+    emotional: 'Emotivo',
+    social: 'Sociale',
+    puppies: 'Cuccioli',
+    recommendedGames: 'Giochi Consigliati',
+    mentalPuzzle: 'Puzzle Mentale',
+    tugOfWar: 'Tiro alla Fune',
+    difficulty: 'Difficoltà',
+    bond: 'Legame',
+    
+    // Chat Screen
+    chatWithHani: 'Chat con Hani',
+    askAnything: 'Chiedi qualsiasi cosa sul tuo cane',
+    typeMessage: 'Scrivi il tuo messaggio...',
+    send: 'Invia',
+    haniGreeting: 'Ciao! Sono Hani, il tuo assistente per l\'educazione canina. Come posso aiutarti oggi?',
+    thinking: 'Sto pensando...',
+    
+    // Profile Screen
+    myPack: 'Il mio branco',
+    invite: 'Invita',
+    mainOwner: 'Proprietario principale',
+    clinicalFile: 'Scheda Clinica',
+    country: 'Paese',
+    vet: 'Veterinario',
+    allergies: 'Allergie',
+    notAssigned: 'Non assegnato',
+    noneRegistered: 'Nessuna registrata',
+    editClinicalFile: 'Modifica scheda clinica',
+    goToPro: 'Passa a PRO',
+    activatePro: 'Attiva PRO',
+    settings: 'Impostazioni',
+    notifications: 'Notifiche',
+    privacy: 'Privacy e dati',
+    help: 'Aiuto',
+    language: 'Lingua',
+    logout: 'Esci',
+    logoutConfirm: 'Sei sicuro di voler uscire?',
+    age: 'Età',
+    weight: 'Peso',
+    breed: 'Razza',
+    editProfile: 'Modifica Profilo',
+    name: 'Nome',
+    changePhoto: 'Cambia foto',
+    selectLanguage: 'Seleziona Lingua',
+    spanish: 'Español',
+    english: 'English',
+    italian: 'Italiano',
+    years: 'anni',
+    months: 'mesi',
+    and: 'e',
+    chip: 'Chip',
+    videoAnalysis: 'Analisi video',
+    vetReports: 'Referti veterinari',
+    unlimitedChat: 'Chat illimitata con Hani',
+    editDogProfile: 'Modifica il profilo del tuo cane',
+    dogName: 'Nome del cane',
+    dogAge: 'Età (mesi)',
+    dogWeight: 'Peso (kg)',
+    dogBreed: 'Razza',
+    chipId: 'Numero chip',
+    
+    // Lessons
+    step: 'Passo',
+    of: 'di',
+    complete: 'Completa',
+    lessonCompleted: 'Lezione Completata!',
+    practicalExercise: 'Il Tuo Esercizio Pratico',
+    backToEducation: 'Torna all\'Educazione',
+    proTip: 'Consiglio Pro',
+    whatYouWillLearn: 'Cosa imparerai:',
+    commonMistakes: 'Errori Comuni da Evitare:',
+    previous: 'Precedente',
+    
+    // Exercises
+    completed: 'completati',
+    instructions: 'Istruzioni:',
+    repetitions: 'ripetizioni',
+    exercisesCompleted: 'Esercizi Completati!',
+    
+    // Routes
+    routes: 'Percorsi',
+    startRoute: 'Inizia Percorso',
+    stopRoute: 'Ferma',
+    saveRoute: 'Salva Percorso',
+    routeHistory: 'Cronologia Percorsi',
+    noRoutes: 'Ancora nessun percorso salvato',
+    routeSaved: 'Percorso salvato',
+    distance: 'Distanza',
+    duration: 'Durata',
+    
+    // PRO
+    proBenefits: 'Benefici PRO',
+    monthlyPlan: 'Mensile',
+    yearlyPlan: 'Annuale',
+    mostPopular: 'PIÙ POPOLARE',
+    savingsPercent: 'Risparmia',
+    activateNow: 'Attiva PRO Ora',
+    restorePurchases: 'Ripristina acquisti',
+    guarantee: 'Garanzia di 7 giorni',
+    guaranteeText: 'Se non sei soddisfatto, ti rimborsiamo senza domande.',
+    alreadyPro: 'Sei già PRO!',
+    enjoyPremium: 'Goditi tutte le funzioni premium di Heimdall',
+    
+    // Medical History
+    addEvent: 'Aggiungi evento',
+    vaccines: 'Vaccini',
+    deworming: 'Sverminazione',
+    vetVisits: 'Visite veterinarie',
+    medications: 'Farmaci',
+    surgeries: 'Interventi',
+    other: 'Altri',
+    noEvents: 'Nessun evento registrato',
+    eventAdded: 'Evento aggiunto',
+    eventDeleted: 'Evento eliminato',
+  },
+};
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => Promise<void>;
+  t: (key: string) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguageState] = useState<Language>('es');
+
+  useEffect(() => {
+    loadLanguage();
+  }, []);
+
+  const loadLanguage = async () => {
+    try {
+      const savedLang = await SecureStore.getItemAsync('app_language');
+      if (savedLang && (savedLang === 'es' || savedLang === 'en' || savedLang === 'it')) {
+        setLanguageState(savedLang);
+      }
+    } catch (error) {
+      console.log('Error loading language:', error);
+    }
+  };
+
+  const setLanguage = async (lang: Language) => {
+    setLanguageState(lang);
+    await SecureStore.setItemAsync('app_language', lang);
+  };
+
+  const t = (key: string): string => {
+    return TRANSLATIONS[language][key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within LanguageProvider');
+  }
+  return context;
+}
+
+// Helper to get language name for AI
+export function getLanguageName(lang: Language): string {
+  switch (lang) {
+    case 'es': return 'Spanish';
+    case 'en': return 'English';
+    case 'it': return 'Italian';
+  }
+}
