@@ -253,7 +253,7 @@ export default function HomeScreen() {
 
         {/* Quick Access */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Accesos rápidos</Text>
+          <Text style={styles.sectionTitle}>{t('quickAccess')}</Text>
           <View style={styles.quickAccessGrid}>
             {quickAccessItems.map((item) => (
               <TouchableOpacity
