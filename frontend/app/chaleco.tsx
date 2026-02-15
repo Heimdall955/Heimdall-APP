@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useBluetooth } from '../contexts/BluetoothContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Card, Button } from '../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 
 export default function ChalecoScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
   const {
     isScanning,
     isConnected,
