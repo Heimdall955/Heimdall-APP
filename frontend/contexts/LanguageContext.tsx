@@ -855,6 +855,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     availableDevices: 'Dispositivi disponibili',
     useSimulator: 'Usa simulatore',
     realDevice: 'Dispositivo reale',
+    disconnectConfirm: 'Sei sicuro di voler disconnettere il gilet?',
   },
 };
 
