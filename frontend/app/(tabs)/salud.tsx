@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBluetooth } from '../../contexts/BluetoothContext';
 import { Card, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 interface MedicalEvent {
   id: string;
@@ -15,39 +21,85 @@ interface MedicalEvent {
   color: string;
 }
 
-const mockMedicalEvents: MedicalEvent[] = [
-  { id: '1', type: 'vaccine', title: 'Vacuna antirrábica', date: '2024-06-15', icon: 'medical', color: Colors.success },
-  { id: '2', type: 'checkup', title: 'Revisión general', date: '2024-05-20', icon: 'clipboard', color: Colors.info },
-  { id: '3', type: 'deworming', title: 'Desparasitación', date: '2024-04-10', icon: 'bug', color: Colors.warning },
-];
+const eventTypeConfig: Record<string, { icon: string; color: string }> = {
+  vaccine: { icon: 'medical', color: Colors.success },
+  checkup: { icon: 'clipboard', color: Colors.info },
+  deworming: { icon: 'bug', color: Colors.warning },
+  medication: { icon: 'medkit', color: Colors.accentEducation },
+  note: { icon: 'document-text', color: Colors.gray },
+};
 
 export default function SaludScreen() {
+  const router = useRouter();
   const { currentDog } = useAuth();
+  const { isConnected, biometricData, startSimulation, stopSimulation } = useBluetooth();
   const [refreshing, setRefreshing] = useState(false);
-  const [sensorsActive, setSensorsActive] = useState(true);
-  const [batteryLevel, setBatteryLevel] = useState(78);
   const [chartPeriod, setChartPeriod] = useState<'24h' | '7d'>('24h');
+  const [medicalEvents, setMedicalEvents] = useState<MedicalEvent[]>([]);
+  const [heartRateHistory, setHeartRateHistory] = useState<number[]>([72, 78, 85, 72, 68, 75, 82, 78]);
 
+  // Update heart rate history from biometric data
+  useEffect(() => {
+    if (isConnected && biometricData.heartRate > 0) {
+      setHeartRateHistory(prev => {
+        const newHistory = [...prev.slice(-11), biometricData.heartRate];
+        return newHistory;
+      });
+    }
+  }, [isConnected, biometricData.heartRate]);
+
+  const loadMedicalEvents = useCallback(async () => {
+    if (!currentDog) return;
+    
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      const response = await axios.get(
+        `${BACKEND_URL}/api/medical-events/${currentDog.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      const events = response.data.slice(0, 3).map((e: any) => ({
+        id: e.id,
+        type: e.type,
+        title: e.title,
+        date: e.date,
+        ...eventTypeConfig[e.type] || eventTypeConfig.note,
+      }));
+      
+      setMedicalEvents(events);
+    } catch (error) {
+      console.log('Error loading medical events');
+    }
+  }, [currentDog]);
+
+  useEffect(() => {
+    loadMedicalEvents();
+  }, [loadMedicalEvents]);
+
+  // Calculate health metrics based on biometric data
   const healthMetrics = {
-    physical: 75,
-    sleep: 88,
-    mental: 92,
+    physical: isConnected ? Math.min(100, Math.max(50, 100 - Math.abs(biometricData.heartRate - 75))) : 75,
+    sleep: isConnected && biometricData.movement === 'low' ? 88 : 75,
+    mental: isConnected ? (biometricData.heartRate < 100 ? 92 : 70) : 85,
     nutrition: 85,
   };
 
-  // Mock heart rate data
   const heartRateData = chartPeriod === '24h' 
-    ? [72, 78, 85, 72, 68, 75, 82, 78]
-    : [74, 76, 78, 75, 72, 70, 73, 77, 80, 75, 72, 74];
+    ? heartRateHistory.slice(-8)
+    : heartRateHistory;
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadMedicalEvents();
     setRefreshing(false);
   };
 
   const toggleSensors = () => {
-    setSensorsActive(!sensorsActive);
+    if (isConnected) {
+      stopSimulation();
+    } else {
+      startSimulation();
+    }
   };
 
   return (
