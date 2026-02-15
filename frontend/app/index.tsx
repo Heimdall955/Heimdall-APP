@@ -1,16 +1,32 @@
-import { Text, View, StyleSheet, Image } from "react-native";
-
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import React, { useEffect } from 'react';
+import { View, ActivityIndicator, StyleSheet, Image, Text } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAuth } from '../contexts/AuthContext';
+import { Colors, FontSizes } from '../constants/theme';
 
 export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  const router = useRouter();
+  const { isAuthenticated, isLoading, onboardingCompleted, dogs } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.replace('/onboarding/idioma');
+      } else if (!onboardingCompleted || dogs.length === 0) {
+        router.replace('/onboarding/perro');
+      } else {
+        router.replace('/(tabs)');
+      }
+    }
+  }, [isLoading, isAuthenticated, onboardingCompleted, dogs]);
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoText}>HEIMDALL</Text>
+        <Text style={styles.subtitle}>Bienestar Canino</Text>
+      </View>
+      <ActivityIndicator size="large" color={Colors.primary} />
     </View>
   );
 }
@@ -18,13 +34,23 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoText: {
+    fontSize: 42,
+    fontWeight: '800',
+    color: Colors.secondary,
+    letterSpacing: 4,
+  },
+  subtitle: {
+    fontSize: FontSizes.lg,
+    color: Colors.primary,
+    marginTop: 8,
   },
 });

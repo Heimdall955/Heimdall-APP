@@ -1,0 +1,236 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { Button, Input } from '../../components/ui';
+import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+
+export default function RegistroScreen() {
+  const router = useRouter();
+  const { login, register, loginWithGoogle, isLoading } = useAuth();
+  
+  const [isLogin, setIsLogin] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+
+  const validate = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!isLogin && !name.trim()) {
+      newErrors.name = 'El nombre es requerido';
+    }
+    if (!email.trim()) {
+      newErrors.email = 'El email es requerido';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Email inválido';
+    }
+    if (!password.trim()) {
+      newErrors.password = 'La contraseña es requerida';
+    } else if (password.length < 6) {
+      newErrors.password = 'Mínimo 6 caracteres';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    
+    try {
+      if (isLogin) {
+        await login(email, password);
+      } else {
+        await register(email, password, name);
+      }
+      router.push('/onboarding/perro');
+    } catch (error: any) {
+      Alert.alert(
+        'Error',
+        error.response?.data?.detail || 'Ha ocurrido un error. Inténtalo de nuevo.'
+      );
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo iniciar sesión con Google');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+
+          <View style={styles.header}>
+            <Ionicons name="paw" size={60} color={Colors.primary} />
+            <Text style={styles.title}>{isLogin ? 'Bienvenido de vuelta' : 'Crear cuenta'}</Text>
+            <Text style={styles.subtitle}>
+              {isLogin ? 'Inicia sesión para continuar' : 'Regístrate para comenzar'}
+            </Text>
+          </View>
+
+          <View style={styles.form}>
+            {!isLogin && (
+              <Input
+                label="Nombre"
+                placeholder="Tu nombre"
+                value={name}
+                onChangeText={setName}
+                icon="person-outline"
+                error={errors.name}
+                autoCapitalize="words"
+              />
+            )}
+            
+            <Input
+              label="Email"
+              placeholder="tu@email.com"
+              value={email}
+              onChangeText={setEmail}
+              icon="mail-outline"
+              keyboardType="email-address"
+              error={errors.email}
+            />
+            
+            <Input
+              label="Contraseña"
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              icon="lock-closed-outline"
+              secureTextEntry
+              error={errors.password}
+            />
+
+            <Button
+              title={isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+              onPress={handleSubmit}
+              loading={isLoading}
+              style={styles.submitButton}
+            />
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>o continúa con</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+              <Ionicons name="logo-google" size={24} color={Colors.text} />
+              <Text style={styles.googleButtonText}>Continuar con Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.switchMode} 
+              onPress={() => setIsLogin(!isLogin)}
+            >
+              <Text style={styles.switchModeText}>
+                {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
+                <Text style={styles.switchModeLink}>
+                  {isLogin ? 'Regístrate' : 'Inicia sesión'}
+                </Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: Spacing.lg,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  title: {
+    fontSize: FontSizes.xxl,
+    fontWeight: '700',
+    color: Colors.text,
+    marginTop: Spacing.md,
+  },
+  subtitle: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+    marginTop: Spacing.xs,
+  },
+  form: {
+    flex: 1,
+  },
+  submitButton: {
+    marginTop: Spacing.md,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: Spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.grayLight,
+  },
+  dividerText: {
+    color: Colors.textSecondary,
+    paddingHorizontal: Spacing.md,
+    fontSize: FontSizes.sm,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.grayLight,
+    gap: Spacing.sm,
+  },
+  googleButtonText: {
+    fontSize: FontSizes.md,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  switchMode: {
+    marginTop: Spacing.lg,
+    alignItems: 'center',
+  },
+  switchModeText: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+  },
+  switchModeLink: {
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+});
