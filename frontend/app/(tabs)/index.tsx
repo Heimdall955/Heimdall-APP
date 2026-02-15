@@ -271,11 +271,15 @@ export default function HomeScreen() {
           </View>
           
           {[
-            { title: 'Señales Básicas', subtitle: 'Sentado, Tumbado, Quieto', icon: 'paw', color: Colors.primary, xp: 5 },
-            { title: 'Control de Impulsos', subtitle: 'Espera, Deja, Suelta', icon: 'hand-left', color: Colors.accentPurple, xp: 10 },
-            { title: 'Socialización', subtitle: 'Perros, Personas, Entornos', icon: 'search', color: Colors.accentMint, xp: 15 },
+            { id: 'senales-basicas', title: 'Señales Básicas', subtitle: 'Sentado, Tumbado, Quieto', icon: 'paw', color: Colors.primary, xp: 5 },
+            { id: 'control-impulsos', title: 'Control de Impulsos', subtitle: 'Espera, Deja, Suelta', icon: 'hand-left', color: Colors.accentPurple, xp: 10 },
+            { id: 'socializacion', title: 'Socialización', subtitle: 'Perros, Personas, Entornos', icon: 'search', color: Colors.accentMint, xp: 15 },
           ].map((exercise, index) => (
-            <TouchableOpacity key={index} style={styles.exerciseCard}>
+            <TouchableOpacity 
+              key={index} 
+              style={styles.exerciseCard}
+              onPress={() => router.push(`/ejercicio?id=${exercise.id}`)}
+            >
               <View style={[styles.exerciseIcon, { backgroundColor: exercise.color + '20' }]}>
                 <Ionicons name={exercise.icon as any} size={24} color={exercise.color} />
               </View>
