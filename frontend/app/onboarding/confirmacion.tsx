@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, SafeAreaView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '../../components/ui';
 import { Colors, Spacing, FontSizes } from '../../constants/theme';
 
 export default function ConfirmacionScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
+  const { t } = useLanguage();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -29,7 +31,11 @@ export default function ConfirmacionScreen() {
   }, []);
 
   const handleStart = () => {
-    router.replace('/(tabs)');
+    // Use dismissAll to clear onboarding stack then navigate to tabs
+    router.dismissAll();
+    setTimeout(() => {
+      router.replace('/(tabs)');
+    }, 100);
   };
 
   return (
@@ -45,33 +51,33 @@ export default function ConfirmacionScreen() {
         </Animated.View>
 
         <Animated.View style={[styles.textContainer, { opacity: fadeAnim }]}>
-          <Text style={styles.title}>¡Todo listo!</Text>
+          <Text style={styles.title}>{t('done')}!</Text>
           <Text style={styles.subtitle}>
-            Ahora Heimdall vigila a{' '}
-            <Text style={styles.dogName}>{currentDog?.name || 'tu perro'}</Text>
+            {t('nowWatching')}{' '}
+            <Text style={styles.dogName}>{currentDog?.name || t('yourDog')}</Text>
           </Text>
           <Text style={styles.description}>
-            Hemos configurado todo para que puedas monitorear la salud y bienestar de tu compañero peludo.
+            {t('configuredDescription')}
           </Text>
         </Animated.View>
 
         <View style={styles.features}>
           <View style={styles.featureItem}>
             <Ionicons name="heart" size={24} color={Colors.primary} />
-            <Text style={styles.featureText}>Monitoreo de salud 360°</Text>
+            <Text style={styles.featureText}>{t('health360')}</Text>
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="chatbubbles" size={24} color={Colors.primary} />
-            <Text style={styles.featureText}>Asistente IA personalizado</Text>
+            <Text style={styles.featureText}>{t('personalizedAI')}</Text>
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="school" size={24} color={Colors.primary} />
-            <Text style={styles.featureText}>Educación positiva</Text>
+            <Text style={styles.featureText}>{t('positiveEducation')}</Text>
           </View>
         </View>
 
         <Button
-          title="Ir al inicio"
+          title={t('goToHome')}
           onPress={handleStart}
           style={styles.button}
           size="lg"
