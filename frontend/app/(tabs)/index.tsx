@@ -169,13 +169,13 @@ export default function HomeScreen() {
             <View style={styles.sessionOverlay}>
               <View style={styles.sessionBadges}>
                 <View style={styles.levelBadge}>
-                  <Text style={styles.levelBadgeText}>Nivel Intermedio</Text>
+                  <Text style={styles.levelBadgeText}>{t('intermediate')}</Text>
                 </View>
                 <View style={styles.priorityBadge}>
-                  <Text style={styles.priorityBadgeText}>PRIORIDAD ALTA</Text>
+                  <Text style={styles.priorityBadgeText}>{t('highPriority')}</Text>
                 </View>
               </View>
-              <Text style={styles.sessionTitle}>La Llamada Perfecta</Text>
+              <Text style={styles.sessionTitle}>{t('thePerfectCall')}</Text>
               <View style={styles.sessionMeta}>
                 <View style={styles.sessionMetaItem}>
                   <Ionicons name="time-outline" size={16} color={Colors.white} />
