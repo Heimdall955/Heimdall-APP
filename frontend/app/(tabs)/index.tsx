@@ -9,7 +9,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
 import { Card, StatusBadge, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
-import { DogStatus } from '../../types';
+// Define DogStatus type locally to avoid import issues
+interface DogStatus {
+  status: 'calm' | 'active' | 'anxious' | 'sleeping' | 'playing';
+  bones: number;
+  level_progress: number;
+  level_target: number;
+}
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
