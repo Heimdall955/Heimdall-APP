@@ -18,6 +18,8 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="chaleco" options={{ presentation: 'modal' }} />
             <Stack.Screen name="historial-medico" options={{ presentation: 'card' }} />
+            <Stack.Screen name="rutas" options={{ presentation: 'card' }} />
+            <Stack.Screen name="pro" options={{ presentation: 'modal' }} />
           </Stack>
         </BluetoothProvider>
       </AuthProvider>
