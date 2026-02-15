@@ -251,23 +251,30 @@ export default function SaludScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Historial Médico</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/historial-medico')}>
               <Text style={styles.viewAllText}>Ver todo</Text>
             </TouchableOpacity>
           </View>
           <Card variant="elevated">
-            {mockMedicalEvents.map((event, index) => (
-              <View key={event.id} style={[styles.eventItem, index < mockMedicalEvents.length - 1 && styles.eventItemBorder]}>
-                <View style={[styles.eventIcon, { backgroundColor: event.color + '20' }]}>
-                  <Ionicons name={event.icon as any} size={20} color={event.color} />
+            {medicalEvents.length > 0 ? (
+              medicalEvents.map((event, index) => (
+                <View key={event.id} style={[styles.eventItem, index < medicalEvents.length - 1 && styles.eventItemBorder]}>
+                  <View style={[styles.eventIcon, { backgroundColor: event.color + '20' }]}>
+                    <Ionicons name={event.icon as any} size={20} color={event.color} />
+                  </View>
+                  <View style={styles.eventInfo}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <Text style={styles.eventDate}>{new Date(event.date).toLocaleDateString('es-ES')}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
                 </View>
-                <View style={styles.eventInfo}>
-                  <Text style={styles.eventTitle}>{event.title}</Text>
-                  <Text style={styles.eventDate}>{new Date(event.date).toLocaleDateString('es-ES')}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
-              </View>
-            ))}
+              ))
+            ) : (
+              <TouchableOpacity style={styles.emptyEvents} onPress={() => router.push('/historial-medico')}>
+                <Ionicons name="add-circle-outline" size={32} color={Colors.primary} />
+                <Text style={styles.emptyEventsText}>Añadir primer evento</Text>
+              </TouchableOpacity>
+            )}
           </Card>
         </View>
       </ScrollView>
