@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, Button, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 
