@@ -457,7 +457,7 @@ export default function LeccionScreen() {
             <Ionicons name="bulb" size={24} color={Colors.accent} />
           </View>
           <View style={styles.tipContent}>
-            <Text style={styles.tipLabel}>Consejo Pro</Text>
+            <Text style={styles.tipLabel}>{t('proTip')}</Text>
             <Text style={styles.tipTexto}>{pasoActualData.tip}</Text>
           </View>
         </View>
@@ -465,7 +465,7 @@ export default function LeccionScreen() {
         {/* Objetivos en el primer paso */}
         {pasoActual === 0 && (
           <View style={styles.objetivosSection}>
-            <Text style={styles.objetivosTitulo}>Lo que aprenderás:</Text>
+            <Text style={styles.objetivosTitulo}>{t('whatYouWillLearn')}</Text>
             {leccion.objetivos.map((objetivo, index) => (
               <View key={index} style={styles.objetivoItem}>
                 <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
@@ -478,7 +478,7 @@ export default function LeccionScreen() {
         {/* Errores comunes en el último paso */}
         {pasoActual === leccion.pasos.length - 1 && (
           <View style={styles.erroresSection}>
-            <Text style={styles.erroresTitulo}>Errores Comunes a Evitar:</Text>
+            <Text style={styles.erroresTitulo}>{t('commonMistakes')}</Text>
             {leccion.erroresComunes.map((error, index) => (
               <View key={index} style={styles.errorItem}>
                 <Ionicons name="close-circle" size={20} color={Colors.error} />
@@ -494,7 +494,7 @@ export default function LeccionScreen() {
         {pasoActual > 0 ? (
           <TouchableOpacity style={styles.anteriorButton} onPress={handleAnterior}>
             <Ionicons name="arrow-back" size={20} color={Colors.primary} />
-            <Text style={styles.anteriorButtonText}>Anterior</Text>
+            <Text style={styles.anteriorButtonText}>{t('previous')}</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.placeholder} />
@@ -502,7 +502,7 @@ export default function LeccionScreen() {
         
         <TouchableOpacity style={styles.siguienteButton} onPress={handleSiguiente}>
           <Text style={styles.siguienteButtonText}>
-            {pasoActual === leccion.pasos.length - 1 ? 'Completar' : 'Siguiente'}
+            {pasoActual === leccion.pasos.length - 1 ? t('complete') : t('next')}
           </Text>
           <Ionicons 
             name={pasoActual === leccion.pasos.length - 1 ? 'checkmark' : 'arrow-forward'} 
