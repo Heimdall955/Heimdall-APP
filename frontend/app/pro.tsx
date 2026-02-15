@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { PurchasesPackage } from 'react-native-purchases';
+import { useSubscription } from '../hooks/useSubscription';
 import { Card, Button } from '../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 
@@ -45,35 +47,92 @@ const proFeatures = [
   },
 ];
 
-const plans = [
-  {
-    id: 'monthly',
-    name: 'Mensual',
-    price: '1,99€',
-    period: '/mes',
-    popular: false,
-  },
-  {
-    id: 'yearly',
-    name: 'Anual',
-    price: '14,99€',
-    period: '/año',
-    savings: 'Ahorra 40%',
-    popular: true,
-  },
-];
-
 export default function ProScreen() {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState('yearly');
+  const { 
+    packages, 
+    loading, 
+    purchasePackage, 
+    restorePurchases, 
+    isProUser,
+    isSimulated 
+  } = useSubscription();
+  
+  const [selectedPlan, setSelectedPlan] = useState<string>('annual');
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
-  const handleSubscribe = () => {
-    Alert.alert(
-      'Próximamente',
-      'El sistema de suscripciones estará disponible pronto. \n\n¡Gracias por tu interés en Heimdall PRO!',
-      [{ text: 'Entendido' }]
+  // If already PRO, show success screen
+  if (isProUser) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.successContainer}>
+          <View style={styles.successIcon}>
+            <Ionicons name="checkmark-circle" size={80} color={Colors.success} />
+          </View>
+          <Text style={styles.successTitle}>¡Ya eres PRO!</Text>
+          <Text style={styles.successText}>
+            Disfruta de todas las funciones premium de Heimdall
+          </Text>
+          <Button
+            title="Volver al inicio"
+            onPress={() => router.back()}
+            style={styles.successButton}
+          />
+        </View>
+      </SafeAreaView>
     );
+  }
+
+  const handleSubscribe = async () => {
+    const selectedPackage = packages.find(
+      pkg => (selectedPlan === 'annual' ? pkg.packageType === 'ANNUAL' : pkg.packageType === 'MONTHLY')
+    );
+
+    if (!selectedPackage) {
+      Alert.alert('Error', 'No se encontró el plan seleccionado');
+      return;
+    }
+
+    setPurchasing(true);
+    try {
+      const result = await purchasePackage(selectedPackage);
+      
+      if (result.success) {
+        Alert.alert('¡Éxito!', result.message, [
+          { text: 'OK', onPress: () => router.back() }
+        ]);
+      } else {
+        Alert.alert('Info', result.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error al procesar la compra');
+    } finally {
+      setPurchasing(false);
+    }
   };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    try {
+      const result = await restorePurchases();
+      
+      if (result.hasActiveSubscription) {
+        Alert.alert('¡Éxito!', 'Tu suscripción ha sido restaurada', [
+          { text: 'OK', onPress: () => router.back() }
+        ]);
+      } else {
+        Alert.alert('Info', 'No se encontraron compras anteriores para restaurar');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudieron restaurar las compras');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  const monthlyPackage = packages.find(pkg => pkg.packageType === 'MONTHLY');
+  const annualPackage = packages.find(pkg => pkg.packageType === 'ANNUAL');
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -81,14 +140,24 @@ export default function ProScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-            <Ionicons name="close" size={28} color={Colors.text} />
+            <Ionicons name="close" size={28} color={Colors.white} />
           </TouchableOpacity>
         </View>
+
+        {/* Simulated Mode Banner */}
+        {isSimulated && (
+          <View style={styles.demoBanner}>
+            <Ionicons name="information-circle" size={20} color={Colors.accent} />
+            <Text style={styles.demoBannerText}>
+              Modo demo - Configura RevenueCat para compras reales
+            </Text>
+          </View>
+        )}
 
         {/* Hero Section */}
         <View style={styles.hero}>
           <View style={styles.proBadge}>
-            <Ionicons name="diamond" size={24} color={Colors.white} />
+            <Ionicons name="diamond" size={32} color={Colors.white} />
           </View>
           <Text style={styles.heroTitle}>Heimdall PRO</Text>
           <Text style={styles.heroSubtitle}>Desbloquea todo el potencial de Heimdall</Text>
@@ -117,56 +186,99 @@ export default function ProScreen() {
         <View style={styles.plansSection}>
           <Text style={styles.sectionTitle}>Elige tu plan</Text>
           
-          <View style={styles.plansRow}>
-            {plans.map((plan) => (
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+              <Text style={styles.loadingText}>Cargando planes...</Text>
+            </View>
+          ) : (
+            <View style={styles.plansRow}>
+              {/* Monthly Plan */}
               <TouchableOpacity
-                key={plan.id}
                 style={[
                   styles.planCard,
-                  selectedPlan === plan.id && styles.planCardSelected,
-                  plan.popular && styles.planCardPopular,
+                  selectedPlan === 'monthly' && styles.planCardSelected,
                 ]}
-                onPress={() => setSelectedPlan(plan.id)}
+                onPress={() => setSelectedPlan('monthly')}
               >
-                {plan.popular && (
-                  <View style={styles.popularBadge}>
-                    <Text style={styles.popularText}>MÁS POPULAR</Text>
-                  </View>
-                )}
-                
-                <Text style={styles.planName}>{plan.name}</Text>
+                <Text style={styles.planName}>Mensual</Text>
                 <View style={styles.priceRow}>
-                  <Text style={styles.planPrice}>{plan.price}</Text>
-                  <Text style={styles.planPeriod}>{plan.period}</Text>
+                  <Text style={styles.planPrice}>
+                    {monthlyPackage?.product.priceString || '1,99 €'}
+                  </Text>
+                  <Text style={styles.planPeriod}>/mes</Text>
                 </View>
-                
-                {plan.savings && (
-                  <View style={styles.savingsBadge}>
-                    <Text style={styles.savingsText}>{plan.savings}</Text>
-                  </View>
-                )}
                 
                 <View style={[
                   styles.radioCircle,
-                  selectedPlan === plan.id && styles.radioCircleSelected,
+                  selectedPlan === 'monthly' && styles.radioCircleSelected,
                 ]}>
-                  {selectedPlan === plan.id && (
+                  {selectedPlan === 'monthly' && (
                     <Ionicons name="checkmark" size={16} color={Colors.white} />
                   )}
                 </View>
               </TouchableOpacity>
-            ))}
-          </View>
+
+              {/* Annual Plan */}
+              <TouchableOpacity
+                style={[
+                  styles.planCard,
+                  selectedPlan === 'annual' && styles.planCardSelected,
+                  styles.planCardPopular,
+                ]}
+                onPress={() => setSelectedPlan('annual')}
+              >
+                <View style={styles.popularBadge}>
+                  <Text style={styles.popularText}>MÁS POPULAR</Text>
+                </View>
+                
+                <Text style={styles.planName}>Anual</Text>
+                <View style={styles.priceRow}>
+                  <Text style={styles.planPrice}>
+                    {annualPackage?.product.priceString || '14,99 €'}
+                  </Text>
+                  <Text style={styles.planPeriod}>/año</Text>
+                </View>
+                
+                <View style={styles.savingsBadge}>
+                  <Text style={styles.savingsText}>Ahorra 37%</Text>
+                </View>
+                
+                <View style={[
+                  styles.radioCircle,
+                  selectedPlan === 'annual' && styles.radioCircleSelected,
+                ]}>
+                  {selectedPlan === 'annual' && (
+                    <Ionicons name="checkmark" size={16} color={Colors.white} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* CTA */}
         <View style={styles.ctaSection}>
           <Button
-            title="Activar PRO Ahora"
+            title={purchasing ? 'Procesando...' : 'Activar PRO Ahora'}
             onPress={handleSubscribe}
             size="lg"
             style={styles.ctaButton}
+            loading={purchasing}
+            disabled={purchasing || loading}
           />
+          
+          <TouchableOpacity
+            style={styles.restoreButton}
+            onPress={handleRestore}
+            disabled={restoring}
+          >
+            {restoring ? (
+              <ActivityIndicator size="small" color={Colors.primary} />
+            ) : (
+              <Text style={styles.restoreButtonText}>Restaurar compras</Text>
+            )}
+          </TouchableOpacity>
           
           <Text style={styles.termsText}>
             Cancela cuando quieras. Al suscribirte aceptas los{' '}
@@ -175,7 +287,7 @@ export default function ProScreen() {
         </View>
 
         {/* Guarantee */}
-        <Card style={styles.guaranteeCard}>
+        <View style={styles.guaranteeCard}>
           <Ionicons name="shield-checkmark" size={32} color={Colors.success} />
           <View style={styles.guaranteeContent}>
             <Text style={styles.guaranteeTitle}>Garantía de 7 días</Text>
@@ -183,7 +295,18 @@ export default function ProScreen() {
               Si no estás satisfecho, te devolvemos el dinero sin preguntas.
             </Text>
           </View>
-        </Card>
+        </View>
+
+        {/* Payment Methods */}
+        <View style={styles.paymentMethods}>
+          <Text style={styles.paymentTitle}>Pago seguro con</Text>
+          <View style={styles.paymentIcons}>
+            <View style={styles.paymentIcon}>
+              <Ionicons name="logo-google" size={24} color={Colors.white} />
+            </View>
+            <Text style={styles.paymentText}>Google Play</Text>
+          </View>
+        </View>
 
         {/* Testimonials */}
         <View style={styles.testimonialSection}>
@@ -220,14 +343,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  demoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.accent + '20',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  demoBannerText: {
+    flex: 1,
+    fontSize: FontSizes.sm,
+    color: Colors.accent,
+  },
+  successContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  successIcon: {
+    marginBottom: Spacing.lg,
+  },
+  successTitle: {
+    fontSize: FontSizes.xxxl,
+    fontWeight: '800',
+    color: Colors.white,
+    marginBottom: Spacing.md,
+  },
+  successText: {
+    fontSize: FontSizes.lg,
+    color: 'rgba(255,255,255,0.7)',
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+  },
+  successButton: {
+    width: '100%',
+  },
   hero: {
     alignItems: 'center',
     marginBottom: Spacing.xl,
   },
   proBadge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: Colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
@@ -287,6 +448,15 @@ const styles = StyleSheet.create({
   },
   plansSection: {
     marginBottom: Spacing.xl,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: FontSizes.md,
   },
   plansRow: {
     flexDirection: 'row',
@@ -377,6 +547,16 @@ const styles = StyleSheet.create({
   ctaButton: {
     marginBottom: Spacing.md,
   },
+  restoreButton: {
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  restoreButtonText: {
+    color: Colors.primary,
+    fontSize: FontSizes.md,
+    fontWeight: '600',
+  },
   termsText: {
     fontSize: FontSizes.sm,
     color: 'rgba(255,255,255,0.5)',
@@ -391,6 +571,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.md,
     backgroundColor: 'rgba(255,255,255,0.05)',
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
     marginBottom: Spacing.xl,
   },
   guaranteeContent: {
@@ -404,6 +586,33 @@ const styles = StyleSheet.create({
   guaranteeText: {
     fontSize: FontSizes.sm,
     color: 'rgba(255,255,255,0.6)',
+  },
+  paymentMethods: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  paymentTitle: {
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.5)',
+    marginBottom: Spacing.sm,
+  },
+  paymentIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  paymentIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paymentText: {
+    fontSize: FontSizes.md,
+    color: Colors.white,
+    fontWeight: '500',
   },
   testimonialSection: {
     alignItems: 'center',
