@@ -273,16 +273,16 @@ export default function HomeScreen() {
         {/* Exercise Library Preview */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Biblioteca de Ejercicios</Text>
+            <Text style={styles.sectionTitle}>{t('exerciseLibrary')}</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/educacion')}>
-              <Text style={styles.viewAllLink}>Ver todo</Text>
+              <Text style={styles.viewAllLink}>{t('viewAll')}</Text>
             </TouchableOpacity>
           </View>
           
           {[
-            { id: 'senales-basicas', title: 'Señales Básicas', subtitle: 'Sentado, Tumbado, Quieto', icon: 'paw', color: Colors.primary, xp: 5 },
-            { id: 'control-impulsos', title: 'Control de Impulsos', subtitle: 'Espera, Deja, Suelta', icon: 'hand-left', color: Colors.accentPurple, xp: 10 },
-            { id: 'socializacion', title: 'Socialización', subtitle: 'Perros, Personas, Entornos', icon: 'search', color: Colors.accentMint, xp: 15 },
+            { id: 'senales-basicas', title: t('basicSignals'), subtitle: t('sitDownStay'), icon: 'paw', color: Colors.primary, xp: 5 },
+            { id: 'control-impulsos', title: t('impulseControl'), subtitle: t('waitLeaveRelease'), icon: 'hand-left', color: Colors.accentPurple, xp: 10 },
+            { id: 'socializacion', title: t('socialization'), subtitle: t('dogsPeopleEnvironments'), icon: 'search', color: Colors.accentMint, xp: 15 },
           ].map((exercise, index) => (
             <TouchableOpacity 
               key={index} 
