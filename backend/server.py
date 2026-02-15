@@ -554,6 +554,63 @@ async def delete_medical_event(event_id: str, user: User = Depends(require_auth)
     await db.medical_events.delete_one({"id": event_id})
     return {"message": "Evento eliminado"}
 
+# ==================== ROUTES/GPS ====================
+
+class RouteCreate(BaseModel):
+    dog_id: str
+    name: str
+    distance: float  # in meters
+    duration: int  # in seconds
+    points: List[dict]  # list of {lat, lng}
+
+class Route(BaseModel):
+    id: str
+    dog_id: str
+    name: str
+    distance: float
+    duration: int
+    points: List[dict]
+    date: str
+    created_at: datetime
+
+@api_router.post("/routes", response_model=Route)
+async def create_route(data: RouteCreate, user: User = Depends(require_auth)):
+    # Verify dog belongs to user
+    dog = await db.dogs.find_one({"id": data.dog_id, "user_id": user.user_id}, {"_id": 0})
+    if not dog:
+        raise HTTPException(status_code=404, detail="Perro no encontrado")
+    
+    route_id = f"route_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    
+    route_doc = {
+        "id": route_id,
+        "dog_id": data.dog_id,
+        "name": data.name,
+        "distance": data.distance,
+        "duration": data.duration,
+        "points": data.points,
+        "date": now.isoformat(),
+        "created_at": now,
+    }
+    
+    await db.routes.insert_one(route_doc)
+    return Route(**route_doc)
+
+@api_router.get("/routes/{dog_id}", response_model=List[Route])
+async def get_routes(dog_id: str, user: User = Depends(require_auth)):
+    # Verify dog belongs to user
+    dog = await db.dogs.find_one({"id": dog_id, "user_id": user.user_id}, {"_id": 0})
+    if not dog:
+        raise HTTPException(status_code=404, detail="Perro no encontrado")
+    
+    routes = await db.routes.find(
+        {"dog_id": dog_id},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(50).to_list(50)
+    
+    return [Route(**route) for route in routes]
+
 # ==================== GAMIFICATION ====================
 
 class AddBonesRequest(BaseModel):
