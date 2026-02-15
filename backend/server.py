@@ -539,6 +539,136 @@ async def get_medical_events(dog_id: str, user: User = Depends(require_auth)):
     
     return [MedicalEvent(**event) for event in events]
 
+@api_router.delete("/medical-events/{event_id}")
+async def delete_medical_event(event_id: str, user: User = Depends(require_auth)):
+    # Get event first to verify ownership through dog
+    event = await db.medical_events.find_one({"id": event_id}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    
+    # Verify dog belongs to user
+    dog = await db.dogs.find_one({"id": event["dog_id"], "user_id": user.user_id}, {"_id": 0})
+    if not dog:
+        raise HTTPException(status_code=404, detail="No tienes permiso para eliminar este evento")
+    
+    await db.medical_events.delete_one({"id": event_id})
+    return {"message": "Evento eliminado"}
+
+# ==================== GAMIFICATION ====================
+
+class AddBonesRequest(BaseModel):
+    amount: int
+    reason: str
+
+class GamificationStats(BaseModel):
+    user_id: str
+    bones: int
+    level: int
+    level_progress: int
+    level_target: int
+    habits_completed: int
+    streak_days: int
+
+@api_router.get("/gamification/stats", response_model=GamificationStats)
+async def get_gamification_stats(user: User = Depends(require_auth)):
+    stats = await db.gamification.find_one({"user_id": user.user_id}, {"_id": 0})
+    
+    if not stats:
+        # Initialize gamification for new user
+        stats = {
+            "user_id": user.user_id,
+            "bones": 340,  # Starting bones
+            "level": 1,
+            "level_progress": 340,
+            "level_target": 500,
+            "habits_completed": 0,
+            "streak_days": 0,
+            "created_at": datetime.now(timezone.utc),
+        }
+        await db.gamification.insert_one(stats)
+    
+    return GamificationStats(**stats)
+
+@api_router.post("/gamification/add-bones")
+async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
+    stats = await db.gamification.find_one({"user_id": user.user_id}, {"_id": 0})
+    
+    if not stats:
+        stats = {
+            "user_id": user.user_id,
+            "bones": 340,
+            "level": 1,
+            "level_progress": 340,
+            "level_target": 500,
+            "habits_completed": 0,
+            "streak_days": 0,
+        }
+    
+    new_bones = stats["bones"] + data.amount
+    new_progress = stats["level_progress"] + data.amount
+    new_level = stats["level"]
+    new_target = stats["level_target"]
+    
+    # Check for level up
+    while new_progress >= new_target:
+        new_progress -= new_target
+        new_level += 1
+        new_target = int(new_target * 1.5)  # Increase target for next level
+    
+    await db.gamification.update_one(
+        {"user_id": user.user_id},
+        {
+            "$set": {
+                "bones": new_bones,
+                "level": new_level,
+                "level_progress": new_progress,
+                "level_target": new_target,
+            }
+        },
+        upsert=True
+    )
+    
+    # Log the bones transaction
+    await db.bones_transactions.insert_one({
+        "id": f"tx_{uuid.uuid4().hex[:12]}",
+        "user_id": user.user_id,
+        "amount": data.amount,
+        "reason": data.reason,
+        "created_at": datetime.now(timezone.utc),
+    })
+    
+    return {
+        "bones": new_bones,
+        "added": data.amount,
+        "level": new_level,
+        "level_up": new_level > stats["level"],
+    }
+
+@api_router.post("/gamification/complete-habit")
+async def complete_habit(user: User = Depends(require_auth)):
+    stats = await db.gamification.find_one({"user_id": user.user_id}, {"_id": 0})
+    
+    bones_reward = 25  # Bones for completing a habit
+    
+    if stats:
+        new_habits = stats.get("habits_completed", 0) + 1
+        await db.gamification.update_one(
+            {"user_id": user.user_id},
+            {"$set": {"habits_completed": new_habits}}
+        )
+    
+    # Add bones
+    result = await add_bones(
+        AddBonesRequest(amount=bones_reward, reason="Hábito completado"),
+        user
+    )
+    
+    return {
+        "message": "¡Hábito completado!",
+        "bones_earned": bones_reward,
+        **result
+    }
+
 # ==================== STATUS ENDPOINTS ====================
 
 @api_router.get("/")
