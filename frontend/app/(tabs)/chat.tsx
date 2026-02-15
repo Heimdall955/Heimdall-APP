@@ -9,32 +9,77 @@ import {
   KeyboardAvoidingView, 
   Platform,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage, getLanguageName } from '../../contexts/LanguageContext';
 import { Card } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
-import { ChatMessage } from '../../types';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-const suggestedQuestions = [
-  '¿Por qué mi perro ladra tanto?',
-  'Juegos para días de lluvia',
-  '¿Cuánto debe comer mi perro?',
-];
+interface ChatMessage {
+  id: string;
+  user_id: string;
+  dog_id?: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+  rating?: 'up' | 'down';
+}
+
+const SUGGESTED_QUESTIONS = {
+  es: [
+    '¿Por qué mi perro ladra tanto?',
+    'Juegos para días de lluvia',
+    '¿Cuánto debe comer mi perro?',
+  ],
+  en: [
+    'Why does my dog bark so much?',
+    'Games for rainy days',
+    'How much should my dog eat?',
+  ],
+  it: [
+    'Perché il mio cane abbaia così tanto?',
+    'Giochi per i giorni di pioggia',
+    'Quanto dovrebbe mangiare il mio cane?',
+  ],
+};
+
+const WELCOME_MESSAGES = {
+  es: {
+    title: '¡Hola! Soy Hani 🐕',
+    text: 'Hoy vengo en modo cachorro curioso... pero si hablamos de salud animal, me pongo serio. ¿Qué necesitas?',
+    suggestions: 'Prueba preguntar:',
+  },
+  en: {
+    title: 'Hello! I\'m Hani 🐕',
+    text: 'Today I\'m in curious puppy mode... but when it comes to animal health, I get serious. What do you need?',
+    suggestions: 'Try asking:',
+  },
+  it: {
+    title: 'Ciao! Sono Hani 🐕',
+    text: 'Oggi sono in modalità cucciolo curioso... ma quando si parla di salute animale, divento serio. Di cosa hai bisogno?',
+    suggestions: 'Prova a chiedere:',
+  },
+};
 
 export default function ChatScreen() {
   const { currentDog, user } = useAuth();
+  const { language, t } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  const suggestedQuestions = SUGGESTED_QUESTIONS[language];
+  const welcomeMessage = WELCOME_MESSAGES[language];
 
   useEffect(() => {
     loadChatHistory();
@@ -80,11 +125,13 @@ export default function ChatScreen() {
 
     try {
       const token = await SecureStore.getItemAsync('session_token');
+      // Include language in the request so backend can respond in the right language
       const response = await axios.post(
         `${BACKEND_URL}/api/chat`,
         {
           content: text.trim(),
           dog_id: currentDog?.id,
+          language: getLanguageName(language), // Send language to backend
         },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -93,8 +140,7 @@ export default function ChatScreen() {
 
       setMessages(prev => [...prev, response.data]);
     } catch (error: any) {
-      Alert.alert('Error', 'No se pudo enviar el mensaje. Inténtalo de nuevo.');
-      // Remove the user message if failed
+      Alert.alert(t('error'), t('error'));
       setMessages(prev => prev.filter(m => m.id !== userMessage.id));
     } finally {
       setIsLoading(false);
@@ -131,7 +177,11 @@ export default function ChatScreen() {
       >
         {!isUser && (
           <View style={styles.avatarContainer}>
-            <Ionicons name="paw" size={20} color={Colors.white} />
+            <Image 
+              source={require('../../assets/images/heimdall-logo.png')}
+              style={styles.avatarImage}
+              resizeMode="cover"
+            />
           </View>
         )}
         <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
@@ -178,11 +228,15 @@ export default function ChatScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.haniAvatar}>
-              <Ionicons name="paw" size={24} color={Colors.white} />
+              <Image 
+                source={require('../../assets/images/heimdall-logo.png')}
+                style={styles.haniAvatarImage}
+                resizeMode="cover"
+              />
             </View>
             <View>
               <Text style={styles.headerTitle}>Hani</Text>
-              <Text style={styles.headerSubtitle}>Tu asistente Heimdall</Text>
+              <Text style={styles.headerSubtitle}>{t('askHani').split(',')[0]}</Text>
             </View>
           </View>
         </View>
@@ -202,14 +256,16 @@ export default function ChatScreen() {
           ) : messages.length === 0 ? (
             <View style={styles.welcomeContainer}>
               <View style={styles.welcomeAvatar}>
-                <Ionicons name="paw" size={48} color={Colors.white} />
+                <Image 
+                  source={require('../../assets/images/heimdall-logo.png')}
+                  style={styles.welcomeAvatarImage}
+                  resizeMode="cover"
+                />
               </View>
-              <Text style={styles.welcomeTitle}>¡Hola! Soy Hani 🐕</Text>
-              <Text style={styles.welcomeText}>
-                Hoy vengo en modo cachorro curioso... pero si hablamos de salud animal, me pongo serio. ¿Qué necesitas?
-              </Text>
+              <Text style={styles.welcomeTitle}>{welcomeMessage.title}</Text>
+              <Text style={styles.welcomeText}>{welcomeMessage.text}</Text>
               
-              <Text style={styles.suggestionsTitle}>Prueba preguntar:</Text>
+              <Text style={styles.suggestionsTitle}>{welcomeMessage.suggestions}</Text>
               <View style={styles.suggestionsContainer}>
                 {suggestedQuestions.map((question, index) => (
                   <TouchableOpacity 
@@ -229,11 +285,15 @@ export default function ChatScreen() {
           {isLoading && (
             <View style={[styles.messageContainer, styles.assistantMessage]}>
               <View style={styles.avatarContainer}>
-                <Ionicons name="paw" size={20} color={Colors.white} />
+                <Image 
+                  source={require('../../assets/images/heimdall-logo.png')}
+                  style={styles.avatarImage}
+                  resizeMode="cover"
+                />
               </View>
               <View style={[styles.messageBubble, styles.assistantBubble, styles.typingBubble]}>
                 <ActivityIndicator size="small" color={Colors.primary} />
-                <Text style={styles.typingText}>Hani está escribiendo...</Text>
+                <Text style={styles.typingText}>{t('thinking')}</Text>
               </View>
             </View>
           )}
@@ -244,7 +304,7 @@ export default function ChatScreen() {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.textInput}
-              placeholder="Escribe tu mensaje..."
+              placeholder={t('typeMessage')}
               placeholderTextColor={Colors.gray}
               value={inputText}
               onChangeText={setInputText}
@@ -298,6 +358,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  haniAvatarImage: {
+    width: 48,
+    height: 48,
   },
   headerTitle: {
     fontSize: FontSizes.lg,
@@ -334,6 +399,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
+    overflow: 'hidden',
+  },
+  welcomeAvatarImage: {
+    width: 80,
+    height: 80,
   },
   welcomeTitle: {
     fontSize: FontSizes.xl,
@@ -391,6 +461,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.sm,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 32,
+    height: 32,
   },
   messageBubble: {
     maxWidth: '75%',
