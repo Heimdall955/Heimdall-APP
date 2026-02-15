@@ -1,42 +1,51 @@
-// Heimdall Theme Constants - Updated Visual Style
+// Heimdall Theme Constants - Exact Visual Style from Design
 export const Colors = {
-  // Main palette - inspired by the reference design
+  // Main backgrounds
   background: '#F8F9FA',
   backgroundDark: '#1A1F2E',
-  primary: '#00BFA6',  // Turquoise/Cyan
-  primaryDark: '#00A896',
-  primaryLight: '#E0F7F4',
-  secondary: '#1A1F2E',
+  cardBg: '#FFFFFF',
   
-  // Accents
-  accent: '#F5A623',  // Golden/Orange for bones/rewards
-  accentLight: '#FFF3E0',
-  accentEducation: '#9B8CFF',
-  accentHealth: '#00BFA6',
-  accentWarning: '#FF6B6B',
+  // Primary colors - Teal/Mint
+  primary: '#20C997',
+  primaryDark: '#1BA87C',
+  primaryLight: '#E8F8F4',
+  
+  // Secondary - Dark
+  secondary: '#343A40',
+  
+  // Accent colors
+  accent: '#D4A60B',       // Golden yellow for bones/rewards
+  accentLight: '#FFF3CD',  // Light yellow/cream for badges
+  accentOrange: '#E67E22', // Orange for highlights
+  accentPurple: '#A060DD', // Purple for icons
+  accentMint: '#85E1CA',   // Light mint for icons
+  
+  // Reward badge colors
+  rewardBadge: '#FDBA74',  // Light orange for +XP badges
   
   // UI Colors
   white: '#FFFFFF',
   black: '#000000',
-  gray: '#9E9E9E',
-  grayLight: '#EEEEEE',
-  grayDark: '#616161',
+  gray: '#6C757D',
+  grayLight: '#E9ECEF',
+  grayDark: '#495057',
   
   // Status colors
-  success: '#4CAF50',
-  warning: '#FF9800',
-  error: '#F44336',
-  info: '#2196F3',
+  success: '#28A745',
+  warning: '#FFC107',
+  error: '#DC3545',
+  info: '#17A2B8',
   
   // Text colors
-  text: '#1A1F2E',
-  textSecondary: '#757575',
-  textLight: '#9E9E9E',
+  text: '#343A40',
+  textSecondary: '#6C757D',
+  textLight: '#ADB5BD',
   textInverse: '#FFFFFF',
   
-  // Card backgrounds
-  cardBg: '#FFFFFF',
-  cardHighlight: '#F0FDF9',
+  // Specific UI elements
+  notificationBg: '#E9ECEF',
+  bannerBg: '#FFF3CD',
+  levelBadgeBg: '#E9ECEF',
 };
 
 export const Spacing = {
@@ -49,6 +58,7 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
+  xs: 4,
   sm: 8,
   md: 12,
   lg: 16,
@@ -58,14 +68,16 @@ export const BorderRadius = {
 };
 
 export const FontSizes = {
-  xs: 11,
-  sm: 13,
-  md: 15,
-  lg: 17,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
-  hero: 40,
+  xs: 10,
+  sm: 12,
+  md: 14,
+  lg: 16,
+  xl: 18,
+  xxl: 20,
+  xxxl: 24,
+  title: 28,
+  hero: 36,
+  stat: 42,
 };
 
 export const Shadows = {
@@ -86,8 +98,45 @@ export const Shadows = {
   lg: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+};
+
+// Component specific styles
+export const CardStyles = {
+  default: {
+    backgroundColor: Colors.cardBg,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    ...Shadows.sm,
+  },
+  elevated: {
+    backgroundColor: Colors.cardBg,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    ...Shadows.md,
+  },
+};
+
+export const BadgeStyles = {
+  level: {
+    backgroundColor: Colors.levelBadgeBg,
+    paddingVertical: 4,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+  },
+  reward: {
+    backgroundColor: Colors.rewardBadge,
+    paddingVertical: 4,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+  },
+  accent: {
+    backgroundColor: Colors.accentLight,
+    paddingVertical: 4,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
   },
 };
