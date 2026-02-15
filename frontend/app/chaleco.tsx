@@ -1,0 +1,500 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useBluetooth } from '../contexts/BluetoothContext';
+import { Card, Button } from '../components/ui';
+import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+
+export default function ChalecoScreen() {
+  const router = useRouter();
+  const {
+    isScanning,
+    isConnected,
+    biometricData,
+    scannedDevices,
+    connectionState,
+    startScan,
+    stopScan,
+    connectToDevice,
+    disconnect,
+    startSimulation,
+    stopSimulation,
+  } = useBluetooth();
+
+  const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
+
+  const handleStartScan = async () => {
+    try {
+      await startScan();
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
+  const handleConnect = async (deviceId: string) => {
+    setConnectingDeviceId(deviceId);
+    const success = await connectToDevice(deviceId);
+    setConnectingDeviceId(null);
+    
+    if (success) {
+      Alert.alert('Conectado', 'Chaleco conectado correctamente');
+    } else {
+      Alert.alert('Error', 'No se pudo conectar al dispositivo');
+    }
+  };
+
+  const handleDisconnect = () => {
+    Alert.alert(
+      'Desconectar',
+      '¿Estás seguro de que quieres desconectar el chaleco?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Desconectar', style: 'destructive', onPress: disconnect },
+      ]
+    );
+  };
+
+  const getMovementLabel = (movement: string) => {
+    switch (movement) {
+      case 'low': return 'Bajo';
+      case 'medium': return 'Moderado';
+      case 'high': return 'Alto';
+      default: return 'Desconocido';
+    }
+  };
+
+  const getMovementColor = (movement: string) => {
+    switch (movement) {
+      case 'low': return Colors.info;
+      case 'medium': return Colors.accent;
+      case 'high': return Colors.error;
+      default: return Colors.gray;
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Chaleco Heimdall</Text>
+            <Text style={styles.subtitle}>Conexión Bluetooth</Text>
+          </View>
+        </View>
+
+        {/* Connection Status */}
+        <Card style={styles.statusCard} variant="elevated">
+          <View style={styles.statusHeader}>
+            <View style={[
+              styles.statusIndicator,
+              { backgroundColor: isConnected ? Colors.success : Colors.gray }
+            ]} />
+            <Text style={styles.statusText}>
+              {isConnected ? 'Conectado' : isScanning ? 'Buscando...' : 'Desconectado'}
+            </Text>
+          </View>
+          
+          {isConnected && biometricData.deviceName && (
+            <Text style={styles.deviceName}>{biometricData.deviceName}</Text>
+          )}
+
+          {isConnected ? (
+            <Button
+              title="Desconectar"
+              onPress={handleDisconnect}
+              variant="outline"
+              style={styles.actionButton}
+            />
+          ) : (
+            <View style={styles.buttonRow}>
+              <Button
+                title={isScanning ? 'Detener' : 'Buscar Dispositivos'}
+                onPress={isScanning ? stopScan : handleStartScan}
+                loading={isScanning}
+                style={styles.scanButton}
+                icon={<Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={20} color={Colors.white} />}
+              />
+              <Button
+                title="Simulador"
+                onPress={startSimulation}
+                variant="secondary"
+                style={styles.simButton}
+                icon={<Ionicons name="pulse" size={20} color={Colors.white} />}
+              />
+            </View>
+          )}
+        </Card>
+
+        {/* Scanned Devices */}
+        {!isConnected && scannedDevices.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Dispositivos encontrados</Text>
+            {scannedDevices.map((device) => (
+              <Card key={device.id} style={styles.deviceCard} variant="elevated">
+                <View style={styles.deviceRow}>
+                  <View style={styles.deviceIcon}>
+                    <Ionicons name="bluetooth" size={24} color={Colors.primary} />
+                  </View>
+                  <View style={styles.deviceInfo}>
+                    <Text style={styles.deviceCardName}>{device.name || 'Dispositivo'}</Text>
+                    <Text style={styles.deviceRssi}>Señal: {device.rssi} dBm</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.connectButton}
+                    onPress={() => handleConnect(device.id)}
+                    disabled={connectingDeviceId !== null}
+                  >
+                    {connectingDeviceId === device.id ? (
+                      <ActivityIndicator size="small" color={Colors.white} />
+                    ) : (
+                      <Ionicons name="link" size={20} color={Colors.white} />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            ))}
+          </View>
+        )}
+
+        {/* Biometric Data */}
+        {isConnected && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Datos Biométricos en Vivo</Text>
+            
+            {/* Heart Rate */}
+            <Card style={styles.biometricCard} variant="elevated">
+              <View style={styles.biometricRow}>
+                <View style={[styles.biometricIcon, { backgroundColor: Colors.error + '20' }]}>
+                  <Ionicons name="heart" size={28} color={Colors.error} />
+                </View>
+                <View style={styles.biometricInfo}>
+                  <Text style={styles.biometricLabel}>Ritmo Cardíaco</Text>
+                  <Text style={styles.biometricValue}>{biometricData.heartRate} BPM</Text>
+                </View>
+                <View style={styles.pulseIndicator}>
+                  <Ionicons name="pulse" size={24} color={Colors.error} />
+                </View>
+              </View>
+            </Card>
+
+            {/* Temperature */}
+            <Card style={styles.biometricCard} variant="elevated">
+              <View style={styles.biometricRow}>
+                <View style={[styles.biometricIcon, { backgroundColor: Colors.accent + '20' }]}>
+                  <Ionicons name="thermometer" size={28} color={Colors.accent} />
+                </View>
+                <View style={styles.biometricInfo}>
+                  <Text style={styles.biometricLabel}>Temperatura</Text>
+                  <Text style={styles.biometricValue}>{biometricData.temperature.toFixed(1)}°C</Text>
+                </View>
+                <Text style={styles.tempStatus}>
+                  {biometricData.temperature < 38 ? 'Baja' : 
+                   biometricData.temperature > 39.5 ? 'Alta' : 'Normal'}
+                </Text>
+              </View>
+            </Card>
+
+            {/* Movement */}
+            <Card style={styles.biometricCard} variant="elevated">
+              <View style={styles.biometricRow}>
+                <View style={[styles.biometricIcon, { backgroundColor: getMovementColor(biometricData.movement) + '20' }]}>
+                  <Ionicons name="walk" size={28} color={getMovementColor(biometricData.movement)} />
+                </View>
+                <View style={styles.biometricInfo}>
+                  <Text style={styles.biometricLabel}>Movimiento</Text>
+                  <Text style={styles.biometricValue}>{getMovementLabel(biometricData.movement)}</Text>
+                </View>
+                <View style={[styles.movementBadge, { backgroundColor: getMovementColor(biometricData.movement) + '20' }]}>
+                  <View style={[styles.movementDot, { backgroundColor: getMovementColor(biometricData.movement) }]} />
+                </View>
+              </View>
+            </Card>
+
+            {/* Battery */}
+            <Card style={styles.biometricCard} variant="elevated">
+              <View style={styles.biometricRow}>
+                <View style={[styles.biometricIcon, { backgroundColor: Colors.success + '20' }]}>
+                  <Ionicons 
+                    name={biometricData.battery > 50 ? 'battery-full' : 
+                          biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} 
+                    size={28} 
+                    color={biometricData.battery > 20 ? Colors.success : Colors.error} 
+                  />
+                </View>
+                <View style={styles.biometricInfo}>
+                  <Text style={styles.biometricLabel}>Batería del Chaleco</Text>
+                  <Text style={styles.biometricValue}>{biometricData.battery}%</Text>
+                </View>
+                <View style={styles.batteryBar}>
+                  <View style={[styles.batteryFill, { 
+                    width: `${biometricData.battery}%`,
+                    backgroundColor: biometricData.battery > 20 ? Colors.success : Colors.error
+                  }]} />
+                </View>
+              </View>
+            </Card>
+          </View>
+        )}
+
+        {/* Instructions */}
+        {!isConnected && !isScanning && scannedDevices.length === 0 && (
+          <Card style={styles.instructionsCard}>
+            <Text style={styles.instructionsTitle}>¿Cómo conectar?</Text>
+            <View style={styles.instruction}>
+              <View style={styles.instructionNumber}>
+                <Text style={styles.instructionNumberText}>1</Text>
+              </View>
+              <Text style={styles.instructionText}>Enciende el chaleco Heimdall</Text>
+            </View>
+            <View style={styles.instruction}>
+              <View style={styles.instructionNumber}>
+                <Text style={styles.instructionNumberText}>2</Text>
+              </View>
+              <Text style={styles.instructionText}>Activa Bluetooth en tu móvil</Text>
+            </View>
+            <View style={styles.instruction}>
+              <View style={styles.instructionNumber}>
+                <Text style={styles.instructionNumberText}>3</Text>
+              </View>
+              <Text style={styles.instructionText}>Pulsa "Buscar Dispositivos"</Text>
+            </View>
+            <View style={styles.instruction}>
+              <View style={styles.instructionNumber}>
+                <Text style={styles.instructionNumberText}>4</Text>
+              </View>
+              <Text style={styles.instructionText}>Selecciona tu chaleco de la lista</Text>
+            </View>
+            <Text style={styles.tipText}>
+              💡 Si no tienes un chaleco, usa el "Simulador" para probar las funciones.
+            </Text>
+          </Card>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: Spacing.md,
+    paddingBottom: Spacing.xxl,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+  },
+  headerText: {
+    flex: 1,
+  },
+  title: {
+    fontSize: FontSizes.xxl,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  subtitle: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+  },
+  statusCard: {
+    marginBottom: Spacing.lg,
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  statusIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: Spacing.sm,
+  },
+  statusText: {
+    fontSize: FontSizes.lg,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  deviceName: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.md,
+  },
+  actionButton: {
+    marginTop: Spacing.sm,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  scanButton: {
+    flex: 2,
+  },
+  simButton: {
+    flex: 1,
+  },
+  section: {
+    marginBottom: Spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: FontSizes.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: Spacing.md,
+  },
+  deviceCard: {
+    marginBottom: Spacing.sm,
+  },
+  deviceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deviceIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.primary + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deviceInfo: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  deviceCardName: {
+    fontSize: FontSizes.md,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  deviceRssi: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+  },
+  connectButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  biometricCard: {
+    marginBottom: Spacing.sm,
+  },
+  biometricRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  biometricIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  biometricInfo: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  biometricLabel: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+  },
+  biometricValue: {
+    fontSize: FontSizes.xl,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  pulseIndicator: {
+    opacity: 0.8,
+  },
+  tempStatus: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+    color: Colors.success,
+  },
+  movementBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  movementDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  batteryBar: {
+    width: 60,
+    height: 8,
+    backgroundColor: Colors.grayLight,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  batteryFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  instructionsCard: {
+    backgroundColor: Colors.primary + '10',
+    borderWidth: 1,
+    borderColor: Colors.primary + '30',
+  },
+  instructionsTitle: {
+    fontSize: FontSizes.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: Spacing.md,
+  },
+  instruction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  instructionNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  instructionNumberText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  instructionText: {
+    flex: 1,
+    fontSize: FontSizes.md,
+    color: Colors.text,
+  },
+  tipText: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    fontStyle: 'italic',
+    marginTop: Spacing.md,
+    textAlign: 'center',
+  },
+});
