@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { useLanguage } from '../contexts/LanguageContext';
 import axios from 'axios';
-import { SecureStore } from '../../utils/secureStore';
+import { SecureStore } from '../utils/secureStore';
 import Constants from 'expo-constants';
 
 const BACKEND_URL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL || '/api';
