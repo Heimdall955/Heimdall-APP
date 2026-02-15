@@ -1,152 +1,181 @@
+diff --git a/frontend/app/(tabs)/index.tsx b/frontend/app/(tabs)/index.tsx
+index 812cc0b..50a48e2 100644
+--- a/frontend/app/(tabs)/index.tsx
++++ b/frontend/app/(tabs)/index.tsx
+@@ -264,6 +264,19 @@ export default function HomeScreen() {
+           </View>
+         </View>
+ 
++        {/* HANI Passport - Google Wallet */}
++        {currentDog && (
++          <View style={styles.section}>
++            <Text style={styles.sectionTitle}>HANI Passport</Text>
++            <WalletCard
++              dogId={currentDog.id}
++              dogName={currentDog.name}
++              dogBreed={currentDog.breed}
++              dogPhoto={currentDog.avatar}
++            />
++          </View>
++        )}
++
+         {/* Exercise Library Preview */}
+         <View style={styles.section}>
+           <View style={styles.sectionHeader}>
 diff --git a/model.patch b/model.patch
-index 1de7771..e69de29 100644
+index adcea24..e69de29 100644
 --- a/model.patch
 +++ b/model.patch
-@@ -1,147 +0,0 @@
+@@ -1,152 +0,0 @@
 -diff --git a/model.patch b/model.patch
--index 512976d..e69de29 100644
+-index 1de7771..e69de29 100644
 ---- a/model.patch
 -+++ b/model.patch
--@@ -1,142 +0,0 @@
---diff --git a/frontend/app/(tabs)/index.tsx b/frontend/app/(tabs)/index.tsx
---index 6d6c9a2..c06617c 100644
------ a/frontend/app/(tabs)/index.tsx
---+++ b/frontend/app/(tabs)/index.tsx
---@@ -221,11 +221,11 @@ export default function HomeScreen() {
---               <View style={styles.streakBadges}>
---                 <View style={styles.streakBadge}>
---                   <Ionicons name="flash" size={14} color={Colors.accent} />
----                  <Text style={styles.streakBadgeText}>3 Días</Text>
---+                  <Text style={styles.streakBadgeText}>3 {t('days')}</Text>
---                 </View>
---                 <View style={styles.streakBadge}>
---                   <Ionicons name="trending-up" size={14} color={Colors.accentOrange} />
----                  <Text style={styles.streakBadgeText}>Siguiente: 50</Text>
---+                  <Text style={styles.streakBadgeText}>{t('nextGoal')}: 50</Text>
---                 </View>
---               </View>
---             </View>
+-@@ -1,147 +0,0 @@
 --diff --git a/model.patch b/model.patch
---index 0c43125..e69de29 100644
+--index 512976d..e69de29 100644
 ----- a/model.patch
 --+++ b/model.patch
---@@ -1,119 +0,0 @@
----diff --git a/test_result.md b/test_result.md
----index 187cba4..ddd7804 100644
------- a/test_result.md
----+++ b/test_result.md
----@@ -100,4 +100,111 @@
---- 
---- #====================================================================================================
---- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
-----#====================================================================================================
----\ No newline at end of file
----+#====================================================================================================
----+
----+user_problem_statement: "Test the Heimdall backend API endpoints"
----+
----+backend:
----+  - task: "Health Check API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "GET /api/ endpoint working correctly. Returns status 'running' with proper JSON response."
----+
----+  - task: "User Registration API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "POST /api/auth/register endpoint working correctly. Successfully creates user and returns session_token."
----+
----+  - task: "User Login API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "POST /api/auth/login endpoint working correctly. Validates credentials and returns session_token."
----+
----+  - task: "Get Current User API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "GET /api/auth/me endpoint working correctly. Properly validates Bearer token and returns user data."
----+
----+  - task: "Create Dog Profile API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "POST /api/dogs endpoint working correctly. Creates dog profile with proper authentication and returns dog data with UUID."
----+
----+  - task: "List User Dogs API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "GET /api/dogs endpoint working correctly. Returns list of user's dogs with proper authentication."
----+
----+  - task: "Chat Message API"
----+    implemented: true
----+    working: true
----+    file: "backend/server.py"
----+    stuck_count: 0
----+    priority: "high"
----+    needs_retesting: false
----+    status_history:
----+      - working: true
----+        agent: "testing"
----+        comment: "POST /api/chat endpoint working correctly. LLM integration functional, returns AI responses in Spanish as expected."
----+
----+frontend:
----+  # Frontend testing not performed as per testing agent guidelines
----+
----+metadata:
----+  created_by: "testing_agent"
----+  version: "1.0"
----+  test_sequence: 1
----+  run_ui: false
----+
----+test_plan:
----+  current_focus:
----+    - "All backend API endpoints tested successfully"
----+  stuck_tasks: []
----+  test_all: false
----+  test_priority: "high_first"
----+
----+agent_communication:
----+  - agent: "testing"
----+    message: "Completed comprehensive backend API testing. All 7 core endpoints (health, auth, dogs, chat) are working correctly. Authentication flow is functional, LLM integration is working, and all CRUD operations are successful. Backend is ready for production use."
----\ No newline at end of file
+--@@ -1,142 +0,0 @@
+---diff --git a/frontend/app/(tabs)/index.tsx b/frontend/app/(tabs)/index.tsx
+---index 6d6c9a2..c06617c 100644
+------ a/frontend/app/(tabs)/index.tsx
+---+++ b/frontend/app/(tabs)/index.tsx
+---@@ -221,11 +221,11 @@ export default function HomeScreen() {
+---               <View style={styles.streakBadges}>
+---                 <View style={styles.streakBadge}>
+---                   <Ionicons name="flash" size={14} color={Colors.accent} />
+----                  <Text style={styles.streakBadgeText}>3 Días</Text>
+---+                  <Text style={styles.streakBadgeText}>3 {t('days')}</Text>
+---                 </View>
+---                 <View style={styles.streakBadge}>
+---                   <Ionicons name="trending-up" size={14} color={Colors.accentOrange} />
+----                  <Text style={styles.streakBadgeText}>Siguiente: 50</Text>
+---+                  <Text style={styles.streakBadgeText}>{t('nextGoal')}: 50</Text>
+---                 </View>
+---               </View>
+---             </View>
+---diff --git a/model.patch b/model.patch
+---index 0c43125..e69de29 100644
+------ a/model.patch
+---+++ b/model.patch
+---@@ -1,119 +0,0 @@
+----diff --git a/test_result.md b/test_result.md
+----index 187cba4..ddd7804 100644
+------- a/test_result.md
+----+++ b/test_result.md
+----@@ -100,4 +100,111 @@
+---- 
+---- #====================================================================================================
+---- # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+-----#====================================================================================================
+----\ No newline at end of file
+----+#====================================================================================================
+----+
+----+user_problem_statement: "Test the Heimdall backend API endpoints"
+----+
+----+backend:
+----+  - task: "Health Check API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "GET /api/ endpoint working correctly. Returns status 'running' with proper JSON response."
+----+
+----+  - task: "User Registration API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "POST /api/auth/register endpoint working correctly. Successfully creates user and returns session_token."
+----+
+----+  - task: "User Login API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "POST /api/auth/login endpoint working correctly. Validates credentials and returns session_token."
+----+
+----+  - task: "Get Current User API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "GET /api/auth/me endpoint working correctly. Properly validates Bearer token and returns user data."
+----+
+----+  - task: "Create Dog Profile API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "POST /api/dogs endpoint working correctly. Creates dog profile with proper authentication and returns dog data with UUID."
+----+
+----+  - task: "List User Dogs API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "GET /api/dogs endpoint working correctly. Returns list of user's dogs with proper authentication."
+----+
+----+  - task: "Chat Message API"
+----+    implemented: true
+----+    working: true
+----+    file: "backend/server.py"
+----+    stuck_count: 0
+----+    priority: "high"
+----+    needs_retesting: false
+----+    status_history:
+----+      - working: true
+----+        agent: "testing"
+----+        comment: "POST /api/chat endpoint working correctly. LLM integration functional, returns AI responses in Spanish as expected."
+----+
+----+frontend:
+----+  # Frontend testing not performed as per testing agent guidelines
+----+
+----+metadata:
+----+  created_by: "testing_agent"
+----+  version: "1.0"
+----+  test_sequence: 1
+----+  run_ui: false
+----+
+----+test_plan:
+----+  current_focus:
+----+    - "All backend API endpoints tested successfully"
+----+  stuck_tasks: []
+----+  test_all: false
+----+  test_priority: "high_first"
+----+
+----+agent_communication:
+----+  - agent: "testing"
+----+    message: "Completed comprehensive backend API testing. All 7 core endpoints (health, auth, dogs, chat) are working correctly. Authentication flow is functional, LLM integration is working, and all CRUD operations are successful. Backend is ready for production use."
+----\ No newline at end of file
