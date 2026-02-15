@@ -136,7 +136,7 @@ export default function ChalecoScreen() {
         {/* Scanned Devices */}
         {!isConnected && scannedDevices.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Dispositivos encontrados</Text>
+            <Text style={styles.sectionTitle}>{t('availableDevices')}</Text>
             {scannedDevices.map((device) => (
               <Card key={device.id} style={styles.deviceCard} variant="elevated">
                 <View style={styles.deviceRow}>
@@ -144,8 +144,8 @@ export default function ChalecoScreen() {
                     <Ionicons name="bluetooth" size={24} color={Colors.primary} />
                   </View>
                   <View style={styles.deviceInfo}>
-                    <Text style={styles.deviceCardName}>{device.name || 'Dispositivo'}</Text>
-                    <Text style={styles.deviceRssi}>Señal: {device.rssi} dBm</Text>
+                    <Text style={styles.deviceCardName}>{device.name || t('esp32Device')}</Text>
+                    <Text style={styles.deviceRssi}>{t('signalStrength')}: {device.rssi} dBm</Text>
                   </View>
                   <TouchableOpacity
                     style={styles.connectButton}
