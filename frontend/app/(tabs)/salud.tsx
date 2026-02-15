@@ -502,4 +502,14 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
   },
+  emptyEvents: {
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  emptyEventsText: {
+    fontSize: FontSizes.md,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
 });
