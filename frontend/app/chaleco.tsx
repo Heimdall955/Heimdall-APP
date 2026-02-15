@@ -167,7 +167,7 @@ export default function ChalecoScreen() {
         {/* Biometric Data */}
         {isConnected && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Datos Biométricos en Vivo</Text>
+            <Text style={styles.sectionTitle}>{t('biometrics')}</Text>
             
             {/* Heart Rate */}
             <Card style={styles.biometricCard} variant="elevated">
@@ -176,8 +176,8 @@ export default function ChalecoScreen() {
                   <Ionicons name="heart" size={28} color={Colors.error} />
                 </View>
                 <View style={styles.biometricInfo}>
-                  <Text style={styles.biometricLabel}>Ritmo Cardíaco</Text>
-                  <Text style={styles.biometricValue}>{biometricData.heartRate} BPM</Text>
+                  <Text style={styles.biometricLabel}>{t('heartRate')}</Text>
+                  <Text style={styles.biometricValue}>{biometricData.heartRate} {t('bpm').toUpperCase()}</Text>
                 </View>
                 <View style={styles.pulseIndicator}>
                   <Ionicons name="pulse" size={24} color={Colors.error} />
@@ -192,12 +192,12 @@ export default function ChalecoScreen() {
                   <Ionicons name="thermometer" size={28} color={Colors.accent} />
                 </View>
                 <View style={styles.biometricInfo}>
-                  <Text style={styles.biometricLabel}>Temperatura</Text>
+                  <Text style={styles.biometricLabel}>{t('temperature')}</Text>
                   <Text style={styles.biometricValue}>{biometricData.temperature.toFixed(1)}°C</Text>
                 </View>
                 <Text style={styles.tempStatus}>
-                  {biometricData.temperature < 38 ? 'Baja' : 
-                   biometricData.temperature > 39.5 ? 'Alta' : 'Normal'}
+                  {biometricData.temperature < 38 ? t('low') : 
+                   biometricData.temperature > 39.5 ? t('high') : t('normal')}
                 </Text>
               </View>
             </Card>
@@ -209,7 +209,7 @@ export default function ChalecoScreen() {
                   <Ionicons name="walk" size={28} color={getMovementColor(biometricData.movement)} />
                 </View>
                 <View style={styles.biometricInfo}>
-                  <Text style={styles.biometricLabel}>Movimiento</Text>
+                  <Text style={styles.biometricLabel}>{t('activity')}</Text>
                   <Text style={styles.biometricValue}>{getMovementLabel(biometricData.movement)}</Text>
                 </View>
                 <View style={[styles.movementBadge, { backgroundColor: getMovementColor(biometricData.movement) + '20' }]}>
@@ -230,7 +230,7 @@ export default function ChalecoScreen() {
                   />
                 </View>
                 <View style={styles.biometricInfo}>
-                  <Text style={styles.biometricLabel}>Batería del Chaleco</Text>
+                  <Text style={styles.biometricLabel}>{t('batteryLevel')}</Text>
                   <Text style={styles.biometricValue}>{biometricData.battery}%</Text>
                 </View>
                 <View style={styles.batteryBar}>
