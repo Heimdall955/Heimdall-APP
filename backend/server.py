@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from supabase import create_client, Client
 import os
 import logging
 from pathlib import Path
@@ -16,10 +16,10 @@ import httpx
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Supabase connection
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_KEY')  # Use service key for full access
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
@@ -27,6 +27,10 @@ EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ==================== MODELS ====================
 
@@ -84,7 +88,7 @@ class Dog(BaseModel):
 class ChatMessageCreate(BaseModel):
     content: str
     dog_id: Optional[str] = None
-    language: Optional[str] = "Spanish"  # Language for AI response
+    language: Optional[str] = "Spanish"
 
 class ChatMessage(BaseModel):
     id: str
@@ -96,11 +100,11 @@ class ChatMessage(BaseModel):
     created_at: datetime
 
 class ChatRating(BaseModel):
-    rating: str  # 'up' or 'down'
+    rating: str
 
 class MedicalEventCreate(BaseModel):
     dog_id: str
-    type: str  # vaccine, checkup, deworming, note, medication
+    type: str
     title: str
     description: Optional[str] = None
     date: str
@@ -116,6 +120,21 @@ class MedicalEvent(BaseModel):
     next_date: Optional[str] = None
     created_at: datetime
 
+class RouteCreate(BaseModel):
+    dog_id: str
+    name: Optional[str] = None
+    distance_km: float
+    duration_minutes: int
+    coordinates: Optional[List[dict]] = None
+
+class GamificationStats(BaseModel):
+    bones: int = 0
+    xp: int = 0
+    level: int = 1
+    streak_days: int = 0
+    exercises_completed: int = 0
+    practice_minutes: int = 0
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
@@ -127,44 +146,47 @@ def verify_password(password: str, hashed: str) -> bool:
 def generate_session_token() -> str:
     return f"session_{uuid.uuid4().hex}"
 
+# In-memory session store (for simplicity, in production use Redis or DB)
+sessions = {}
+
 async def get_current_user(request: Request) -> Optional[User]:
-    # Try Authorization header first
     auth_header = request.headers.get("Authorization")
     session_token = None
     
     if auth_header and auth_header.startswith("Bearer "):
         session_token = auth_header.split(" ")[1]
     
-    # Try cookie as fallback
     if not session_token:
         session_token = request.cookies.get("session_token")
     
-    if not session_token:
+    if not session_token or session_token not in sessions:
         return None
     
-    session = await db.user_sessions.find_one(
-        {"session_token": session_token},
-        {"_id": 0}
-    )
-    
-    if not session:
-        return None
+    session = sessions[session_token]
     
     # Check expiry
-    expires_at = session.get("expires_at")
-    if expires_at:
-        if expires_at.tzinfo is None:
-            expires_at = expires_at.replace(tzinfo=timezone.utc)
-        if expires_at < datetime.now(timezone.utc):
-            return None
+    if session.get("expires_at") and session["expires_at"] < datetime.now(timezone.utc):
+        del sessions[session_token]
+        return None
     
-    user_doc = await db.users.find_one(
-        {"user_id": session["user_id"]},
-        {"_id": 0}
-    )
+    user_id = session["user_id"]
     
-    if user_doc:
-        return User(**user_doc)
+    # Get user from Supabase
+    try:
+        result = supabase.table("users").select("*").eq("id", user_id).execute()
+        if result.data and len(result.data) > 0:
+            user_data = result.data[0]
+            return User(
+                user_id=str(user_data["id"]),
+                email=user_data["email"],
+                name=user_data.get("name", ""),
+                picture=user_data.get("profile_image"),
+                language=user_data.get("language", "es"),
+                created_at=datetime.fromisoformat(user_data["created_at"].replace("Z", "+00:00")) if user_data.get("created_at") else datetime.now(timezone.utc)
+            )
+    except Exception as e:
+        logger.error(f"Error getting user: {e}")
+    
     return None
 
 async def require_auth(request: Request) -> User:
@@ -178,591 +200,668 @@ async def require_auth(request: Request) -> User:
 @api_router.post("/auth/register")
 async def register(data: UserCreate):
     # Check if user exists
-    existing = await db.users.find_one({"email": data.email}, {"_id": 0})
-    if existing:
-        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    try:
+        result = supabase.table("users").select("id").eq("email", data.email).execute()
+        if result.data and len(result.data) > 0:
+            raise HTTPException(status_code=400, detail="El email ya está registrado")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking user: {e}")
     
-    user_id = f"user_{uuid.uuid4().hex[:12]}"
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).isoformat()
     
     user_doc = {
-        "user_id": user_id,
         "email": data.email,
         "name": data.name,
         "password_hash": hash_password(data.password),
-        "picture": None,
-        "language": "es",
         "created_at": now,
+        "updated_at": now
     }
     
-    await db.users.insert_one(user_doc)
+    try:
+        result = supabase.table("users").insert(user_doc).execute()
+        user_id = result.data[0]["id"]
+    except Exception as e:
+        logger.error(f"Error creating user: {e}")
+        raise HTTPException(status_code=500, detail="Error al crear usuario")
     
     # Create session
     session_token = generate_session_token()
-    await db.user_sessions.insert_one({
+    sessions[session_token] = {
         "user_id": user_id,
-        "session_token": session_token,
-        "expires_at": now + timedelta(days=7),
-        "created_at": now,
-    })
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=30)
+    }
+    
+    # Initialize gamification
+    try:
+        supabase.table("gamification").insert({
+            "user_id": user_id,
+            "bones": 0,
+            "xp": 0,
+            "level": 1,
+            "streak_days": 0,
+            "exercises_completed": 0,
+            "practice_minutes": 0,
+            "created_at": now,
+            "updated_at": now
+        }).execute()
+    except Exception as e:
+        logger.error(f"Error creating gamification: {e}")
     
     return {
         "session_token": session_token,
         "user": {
-            "user_id": user_id,
+            "user_id": str(user_id),
             "email": data.email,
-            "name": data.name,
-            "picture": None,
-            "language": "es",
-            "created_at": now.isoformat(),
+            "name": data.name
         }
     }
 
 @api_router.post("/auth/login")
 async def login(data: UserLogin):
-    user_doc = await db.users.find_one({"email": data.email}, {"_id": 0})
-    if not user_doc:
-        raise HTTPException(status_code=401, detail="Credenciales inválidas")
-    
-    if not verify_password(data.password, user_doc.get("password_hash", "")):
-        raise HTTPException(status_code=401, detail="Credenciales inválidas")
-    
-    now = datetime.now(timezone.utc)
-    session_token = generate_session_token()
-    
-    await db.user_sessions.insert_one({
-        "user_id": user_doc["user_id"],
-        "session_token": session_token,
-        "expires_at": now + timedelta(days=7),
-        "created_at": now,
-    })
-    
-    return {
-        "session_token": session_token,
-        "user": {
-            "user_id": user_doc["user_id"],
-            "email": user_doc["email"],
-            "name": user_doc["name"],
-            "picture": user_doc.get("picture"),
-            "language": user_doc.get("language", "es"),
-            "created_at": user_doc["created_at"].isoformat() if isinstance(user_doc["created_at"], datetime) else user_doc["created_at"],
+    try:
+        result = supabase.table("users").select("*").eq("email", data.email).execute()
+        if not result.data or len(result.data) == 0:
+            raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+        
+        user_data = result.data[0]
+        
+        if not user_data.get("password_hash") or not verify_password(data.password, user_data["password_hash"]):
+            raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+        
+        session_token = generate_session_token()
+        sessions[session_token] = {
+            "user_id": user_data["id"],
+            "expires_at": datetime.now(timezone.utc) + timedelta(days=30)
         }
-    }
+        
+        return {
+            "session_token": session_token,
+            "user": {
+                "user_id": str(user_data["id"]),
+                "email": user_data["email"],
+                "name": user_data.get("name", "")
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Error de autenticación")
 
 @api_router.post("/auth/session")
 async def exchange_session(data: SessionExchange):
-    """Exchange Google OAuth session_id for our session_token"""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": data.session_id}
-        )
-        
-        if response.status_code != 200:
-            raise HTTPException(status_code=401, detail="Sesión inválida")
-        
-        user_data = response.json()
-    
-    now = datetime.now(timezone.utc)
-    
-    # Check if user exists
-    existing = await db.users.find_one({"email": user_data["email"]}, {"_id": 0})
-    
-    if existing:
-        user_id = existing["user_id"]
-    else:
-        user_id = f"user_{uuid.uuid4().hex[:12]}"
-        await db.users.insert_one({
-            "user_id": user_id,
-            "email": user_data["email"],
-            "name": user_data["name"],
-            "picture": user_data.get("picture"),
-            "language": "es",
-            "created_at": now,
-        })
-    
-    # Create our session
-    session_token = generate_session_token()
-    await db.user_sessions.insert_one({
-        "user_id": user_id,
-        "session_token": session_token,
-        "expires_at": now + timedelta(days=7),
-        "created_at": now,
-    })
-    
-    user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0})
-    
-    return {
-        "session_token": session_token,
-        "user": {
-            "user_id": user_doc["user_id"],
-            "email": user_doc["email"],
-            "name": user_doc["name"],
-            "picture": user_doc.get("picture"),
-            "language": user_doc.get("language", "es"),
-            "created_at": user_doc["created_at"].isoformat() if isinstance(user_doc["created_at"], datetime) else user_doc["created_at"],
-        }
-    }
+    """Exchange Emergent OAuth session for app session"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                params={"session_id": data.session_id}
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=401, detail="Sesión inválida")
+            
+            oauth_data = response.json()
+            email = oauth_data.get("email")
+            name = oauth_data.get("name", email.split("@")[0] if email else "Usuario")
+            picture = oauth_data.get("picture")
+            
+            if not email:
+                raise HTTPException(status_code=400, detail="No se pudo obtener el email")
+            
+            # Check if user exists
+            result = supabase.table("users").select("*").eq("email", email).execute()
+            
+            now = datetime.now(timezone.utc).isoformat()
+            
+            if result.data and len(result.data) > 0:
+                user_data = result.data[0]
+                user_id = user_data["id"]
+            else:
+                # Create new user
+                new_user = {
+                    "email": email,
+                    "name": name,
+                    "profile_image": picture,
+                    "google_id": oauth_data.get("sub"),
+                    "created_at": now,
+                    "updated_at": now
+                }
+                result = supabase.table("users").insert(new_user).execute()
+                user_id = result.data[0]["id"]
+                
+                # Initialize gamification
+                supabase.table("gamification").insert({
+                    "user_id": user_id,
+                    "bones": 0,
+                    "xp": 0,
+                    "level": 1,
+                    "created_at": now,
+                    "updated_at": now
+                }).execute()
+            
+            session_token = generate_session_token()
+            sessions[session_token] = {
+                "user_id": user_id,
+                "expires_at": datetime.now(timezone.utc) + timedelta(days=30)
+            }
+            
+            return {
+                "session_token": session_token,
+                "user": {
+                    "user_id": str(user_id),
+                    "email": email,
+                    "name": name,
+                    "picture": picture
+                }
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Session exchange error: {e}")
+        raise HTTPException(status_code=500, detail="Error de autenticación")
 
 @api_router.get("/auth/me")
 async def get_me(user: User = Depends(require_auth)):
-    return user
+    return {
+        "user_id": user.user_id,
+        "email": user.email,
+        "name": user.name,
+        "picture": user.picture,
+        "language": user.language
+    }
 
 @api_router.post("/auth/logout")
 async def logout(request: Request):
     auth_header = request.headers.get("Authorization")
-    session_token = None
-    
     if auth_header and auth_header.startswith("Bearer "):
         session_token = auth_header.split(" ")[1]
-    
-    if not session_token:
-        session_token = request.cookies.get("session_token")
-    
-    if session_token:
-        await db.user_sessions.delete_one({"session_token": session_token})
-    
+        if session_token in sessions:
+            del sessions[session_token]
     return {"message": "Sesión cerrada"}
 
 # ==================== DOGS ENDPOINTS ====================
 
-@api_router.post("/dogs", response_model=Dog)
+@api_router.post("/dogs")
 async def create_dog(data: DogCreate, user: User = Depends(require_auth)):
-    now = datetime.now(timezone.utc)
-    dog_id = f"dog_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc).isoformat()
     
     dog_doc = {
-        "id": dog_id,
         "user_id": user.user_id,
         "name": data.name,
-        "age": data.age,
+        "age_months": data.age,
         "weight": data.weight,
-        "sex": data.sex,
         "breed": data.breed,
         "chip_id": data.chip_id,
-        "avatar": data.avatar,
+        "photo_url": data.avatar,
         "created_at": now,
-        "updated_at": now,
+        "updated_at": now
     }
     
-    await db.dogs.insert_one(dog_doc)
-    return Dog(**dog_doc)
+    try:
+        result = supabase.table("dogs").insert(dog_doc).execute()
+        dog_id = result.data[0]["id"]
+        
+        return {
+            "id": str(dog_id),
+            "user_id": user.user_id,
+            "name": data.name,
+            "age": data.age,
+            "weight": data.weight,
+            "breed": data.breed,
+            "chip_id": data.chip_id,
+            "avatar": data.avatar
+        }
+    except Exception as e:
+        logger.error(f"Error creating dog: {e}")
+        raise HTTPException(status_code=500, detail="Error al crear perro")
 
-@api_router.get("/dogs", response_model=List[Dog])
+@api_router.get("/dogs")
 async def get_dogs(user: User = Depends(require_auth)):
-    dogs = await db.dogs.find(
-        {"user_id": user.user_id},
-        {"_id": 0}
-    ).to_list(100)
-    return [Dog(**dog) for dog in dogs]
+    try:
+        result = supabase.table("dogs").select("*").eq("user_id", user.user_id).execute()
+        
+        dogs = []
+        for dog in result.data:
+            dogs.append({
+                "id": str(dog["id"]),
+                "user_id": user.user_id,
+                "name": dog["name"],
+                "age": dog.get("age_months", 0),
+                "weight": float(dog.get("weight", 0)),
+                "breed": dog.get("breed"),
+                "chip_id": dog.get("chip_id"),
+                "avatar": dog.get("photo_url"),
+                "created_at": dog.get("created_at"),
+                "updated_at": dog.get("updated_at")
+            })
+        
+        return dogs
+    except Exception as e:
+        logger.error(f"Error getting dogs: {e}")
+        raise HTTPException(status_code=500, detail="Error al obtener perros")
 
-@api_router.get("/dogs/{dog_id}", response_model=Dog)
+@api_router.get("/dogs/{dog_id}")
 async def get_dog(dog_id: str, user: User = Depends(require_auth)):
-    dog = await db.dogs.find_one(
-        {"id": dog_id, "user_id": user.user_id},
-        {"_id": 0}
-    )
-    if not dog:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
-    return Dog(**dog)
+    try:
+        result = supabase.table("dogs").select("*").eq("id", dog_id).eq("user_id", user.user_id).execute()
+        
+        if not result.data or len(result.data) == 0:
+            raise HTTPException(status_code=404, detail="Perro no encontrado")
+        
+        dog = result.data[0]
+        return {
+            "id": str(dog["id"]),
+            "user_id": user.user_id,
+            "name": dog["name"],
+            "age": dog.get("age_months", 0),
+            "weight": float(dog.get("weight", 0)),
+            "breed": dog.get("breed"),
+            "chip_id": dog.get("chip_id"),
+            "avatar": dog.get("photo_url")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting dog: {e}")
+        raise HTTPException(status_code=500, detail="Error al obtener perro")
 
-@api_router.put("/dogs/{dog_id}", response_model=Dog)
+@api_router.put("/dogs/{dog_id}")
 async def update_dog(dog_id: str, data: DogUpdate, user: User = Depends(require_auth)):
-    dog = await db.dogs.find_one(
-        {"id": dog_id, "user_id": user.user_id},
-        {"_id": 0}
-    )
-    if not dog:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
     
-    update_data = {k: v for k, v in data.dict().items() if v is not None}
-    update_data["updated_at"] = datetime.now(timezone.utc)
+    if data.name is not None:
+        update_data["name"] = data.name
+    if data.age is not None:
+        update_data["age_months"] = data.age
+    if data.weight is not None:
+        update_data["weight"] = data.weight
+    if data.breed is not None:
+        update_data["breed"] = data.breed
+    if data.chip_id is not None:
+        update_data["chip_id"] = data.chip_id
+    if data.avatar is not None:
+        update_data["photo_url"] = data.avatar
     
-    await db.dogs.update_one(
-        {"id": dog_id},
-        {"$set": update_data}
-    )
-    
-    updated_dog = await db.dogs.find_one({"id": dog_id}, {"_id": 0})
-    return Dog(**updated_dog)
+    try:
+        result = supabase.table("dogs").update(update_data).eq("id", dog_id).eq("user_id", user.user_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Perro no encontrado")
+        
+        return {"message": "Perro actualizado"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating dog: {e}")
+        raise HTTPException(status_code=500, detail="Error al actualizar perro")
 
 @api_router.delete("/dogs/{dog_id}")
 async def delete_dog(dog_id: str, user: User = Depends(require_auth)):
-    result = await db.dogs.delete_one({"id": dog_id, "user_id": user.user_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
-    return {"message": "Perro eliminado"}
+    try:
+        supabase.table("dogs").delete().eq("id", dog_id).eq("user_id", user.user_id).execute()
+        return {"message": "Perro eliminado"}
+    except Exception as e:
+        logger.error(f"Error deleting dog: {e}")
+        raise HTTPException(status_code=500, detail="Error al eliminar perro")
 
 # ==================== CHAT ENDPOINTS ====================
 
-@api_router.post("/chat", response_model=ChatMessage)
-async def send_chat_message(data: ChatMessageCreate, user: User = Depends(require_auth)):
-    from emergentintegrations.llm.chat import LlmChat, UserMessage
-    
-    now = datetime.now(timezone.utc)
+@api_router.post("/chat")
+async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
+    now = datetime.now(timezone.utc).isoformat()
     
     # Save user message
-    user_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
-    user_msg = {
-        "id": user_msg_id,
+    user_message = {
         "user_id": user.user_id,
         "dog_id": data.dog_id,
         "role": "user",
         "content": data.content,
-        "rating": None,
-        "created_at": now,
+        "created_at": now
     }
-    await db.chat_messages.insert_one(user_msg)
-    
-    # Get dog info for context
-    dog_context = ""
-    if data.dog_id:
-        dog = await db.dogs.find_one({"id": data.dog_id}, {"_id": 0})
-        if dog:
-            dog_context = f"El perro del usuario se llama {dog['name']}, tiene {dog['age']} meses de edad y pesa {dog['weight']} kg."
-            if dog.get('breed'):
-                dog_context += f" Es de raza {dog['breed']}."
-    
-    # Get language instruction
-    language = data.language or "Spanish"
-    language_instructions = {
-        "Spanish": "Habla siempre en español",
-        "English": "Always speak in English",
-        "Italian": "Parla sempre in italiano"
-    }
-    language_instruction = language_instructions.get(language, "Habla siempre en español")
-    
-    # Get recent chat history
-    recent_msgs = await db.chat_messages.find(
-        {"user_id": user.user_id},
-        {"_id": 0}
-    ).sort("created_at", -1).limit(10).to_list(10)
-    recent_msgs.reverse()
-    
-    system_message = f"""Eres Hani, el asistente virtual de Heimdall, una app de bienestar canino. 
-Tu personalidad es como la de un cachorro curioso y juguetón: amigable, entusiasta y con buen humor.
-Sin embargo, cuando se trata de temas de salud animal, te pones serio y profesional.
-
-{dog_context}
-
-Reglas importantes:
-- Solo promueves adiestramiento positivo, nunca métodos de castigo
-- Si detectas una emergencia de salud, recomienda ir al veterinario inmediatamente
-- {language_instruction}
-- Usa emojis de perros 🐕 y patitas 🐾 ocasionalmente
-- Sé conciso pero útil"""
     
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=f"heimdall_{user.user_id}",
-            system_message=system_message
-        ).with_model("gemini", "gemini-3-flash-preview")
-        
-        user_message = UserMessage(text=data.content)
-        response_text = await chat.send_message(user_message)
-        
+        supabase.table("chat_messages").insert(user_message).execute()
     except Exception as e:
-        logging.error(f"LLM Error: {e}")
-        response_text = "¡Guau! Parece que mi conexión está un poco lenta 🐕. ¿Podrías intentarlo de nuevo?"
+        logger.error(f"Error saving user message: {e}")
+    
+    # Get dog info for context
+    dog_info = ""
+    if data.dog_id:
+        try:
+            result = supabase.table("dogs").select("*").eq("id", data.dog_id).execute()
+            if result.data:
+                dog = result.data[0]
+                dog_info = f"El perro se llama {dog['name']}, tiene {dog.get('age_months', 0)} meses, pesa {dog.get('weight', 0)} kg"
+                if dog.get('breed'):
+                    dog_info += f" y es de raza {dog['breed']}"
+        except Exception as e:
+            logger.error(f"Error getting dog info: {e}")
+    
+    # Get chat history
+    history = []
+    try:
+        result = supabase.table("chat_messages").select("*").eq("user_id", user.user_id).order("created_at", desc=True).limit(10).execute()
+        for msg in reversed(result.data):
+            history.append({"role": msg["role"], "content": msg["content"]})
+    except Exception as e:
+        logger.error(f"Error getting chat history: {e}")
+    
+    # Language mapping
+    lang_map = {
+        "Spanish": "español",
+        "English": "inglés", 
+        "Italian": "italiano",
+        "es": "español",
+        "en": "inglés",
+        "it": "italiano"
+    }
+    response_language = lang_map.get(data.language, "español")
+    
+    # Call AI
+    system_prompt = f"""Eres HANI (Heimdall AI Natural Intelligence), un asistente experto en salud y bienestar canino.
+Tu personalidad es cálida, empática y profesional.
+{f'Información del perro del usuario: {dog_info}' if dog_info else ''}
+
+IMPORTANTE: SIEMPRE responde en {response_language}.
+
+Directrices:
+- Proporciona consejos basados en evidencia sobre salud canina
+- Si detectas síntomas graves, recomienda visitar al veterinario
+- Usa un tono amigable pero profesional
+- Adapta tus respuestas al contexto del perro si se proporciona información"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.emergentagent.com/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {EMERGENT_LLM_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        *history[-8:],
+                        {"role": "user", "content": data.content}
+                    ],
+                    "max_tokens": 1000
+                },
+                timeout=30.0
+            )
+            
+            if response.status_code == 200:
+                ai_response = response.json()["choices"][0]["message"]["content"]
+            else:
+                ai_response = "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo."
+    except Exception as e:
+        logger.error(f"AI error: {e}")
+        ai_response = "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo."
     
     # Save assistant message
-    assistant_msg_id = f"msg_{uuid.uuid4().hex[:12]}"
-    assistant_msg = {
-        "id": assistant_msg_id,
+    assistant_message = {
         "user_id": user.user_id,
         "dog_id": data.dog_id,
         "role": "assistant",
-        "content": response_text,
-        "rating": None,
-        "created_at": datetime.now(timezone.utc),
+        "content": ai_response,
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
-    await db.chat_messages.insert_one(assistant_msg)
     
-    return ChatMessage(**assistant_msg)
-
-@api_router.get("/chat/history", response_model=List[ChatMessage])
-async def get_chat_history(
-    dog_id: Optional[str] = None,
-    limit: int = 50,
-    user: User = Depends(require_auth)
-):
-    query = {"user_id": user.user_id}
-    if dog_id:
-        query["dog_id"] = dog_id
+    message_id = None
+    try:
+        result = supabase.table("chat_messages").insert(assistant_message).execute()
+        message_id = str(result.data[0]["id"])
+    except Exception as e:
+        logger.error(f"Error saving assistant message: {e}")
     
-    messages = await db.chat_messages.find(
-        query,
-        {"_id": 0}
-    ).sort("created_at", -1).limit(limit).to_list(limit)
-    
-    messages.reverse()
-    return [ChatMessage(**msg) for msg in messages]
+    return {
+        "id": message_id or str(uuid.uuid4()),
+        "role": "assistant",
+        "content": ai_response,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
 
-@api_router.post("/chat/{message_id}/rate")
-async def rate_message(message_id: str, data: ChatRating, user: User = Depends(require_auth)):
-    result = await db.chat_messages.update_one(
-        {"id": message_id, "user_id": user.user_id},
-        {"$set": {"rating": data.rating}}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Mensaje no encontrado")
-    return {"message": "Rating guardado"}
+@api_router.get("/chat/history")
+async def get_chat_history(dog_id: Optional[str] = None, limit: int = 50, user: User = Depends(require_auth)):
+    try:
+        query = supabase.table("chat_messages").select("*").eq("user_id", user.user_id)
+        
+        if dog_id:
+            query = query.eq("dog_id", dog_id)
+        
+        result = query.order("created_at", desc=True).limit(limit).execute()
+        
+        messages = []
+        for msg in reversed(result.data):
+            messages.append({
+                "id": str(msg["id"]),
+                "role": msg["role"],
+                "content": msg["content"],
+                "created_at": msg["created_at"]
+            })
+        
+        return messages
+    except Exception as e:
+        logger.error(f"Error getting chat history: {e}")
+        return []
 
-# ==================== MEDICAL EVENTS ====================
+# ==================== MEDICAL EVENTS ENDPOINTS ====================
 
-@api_router.post("/medical-events", response_model=MedicalEvent)
+@api_router.post("/medical-events")
 async def create_medical_event(data: MedicalEventCreate, user: User = Depends(require_auth)):
-    # Verify dog belongs to user
-    dog = await db.dogs.find_one({"id": data.dog_id, "user_id": user.user_id}, {"_id": 0})
-    if not dog:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
+    now = datetime.now(timezone.utc).isoformat()
     
-    event_id = f"event_{uuid.uuid4().hex[:12]}"
-    now = datetime.now(timezone.utc)
-    
-    event_doc = {
-        "id": event_id,
+    event = {
         "dog_id": data.dog_id,
-        "type": data.type,
+        "event_type": data.type,
         "title": data.title,
         "description": data.description,
-        "date": data.date,
-        "next_date": data.next_date,
-        "created_at": now,
+        "event_date": data.date,
+        "created_at": now
     }
     
-    await db.medical_events.insert_one(event_doc)
-    return MedicalEvent(**event_doc)
+    try:
+        result = supabase.table("medical_events").insert(event).execute()
+        return {
+            "id": str(result.data[0]["id"]),
+            "dog_id": data.dog_id,
+            "type": data.type,
+            "title": data.title,
+            "date": data.date
+        }
+    except Exception as e:
+        logger.error(f"Error creating medical event: {e}")
+        raise HTTPException(status_code=500, detail="Error al crear evento médico")
 
-@api_router.get("/medical-events/{dog_id}", response_model=List[MedicalEvent])
+@api_router.get("/medical-events/{dog_id}")
 async def get_medical_events(dog_id: str, user: User = Depends(require_auth)):
-    # Verify dog belongs to user
-    dog = await db.dogs.find_one({"id": dog_id, "user_id": user.user_id}, {"_id": 0})
-    if not dog:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
-    
-    events = await db.medical_events.find(
-        {"dog_id": dog_id},
-        {"_id": 0}
-    ).sort("date", -1).to_list(100)
-    
-    return [MedicalEvent(**event) for event in events]
+    try:
+        result = supabase.table("medical_events").select("*").eq("dog_id", dog_id).order("event_date", desc=True).execute()
+        
+        events = []
+        for event in result.data:
+            events.append({
+                "id": str(event["id"]),
+                "dog_id": event["dog_id"],
+                "type": event["event_type"],
+                "title": event["title"],
+                "description": event.get("description"),
+                "date": event["event_date"],
+                "created_at": event["created_at"]
+            })
+        
+        return events
+    except Exception as e:
+        logger.error(f"Error getting medical events: {e}")
+        return []
 
 @api_router.delete("/medical-events/{event_id}")
 async def delete_medical_event(event_id: str, user: User = Depends(require_auth)):
-    # Get event first to verify ownership through dog
-    event = await db.medical_events.find_one({"id": event_id}, {"_id": 0})
-    if not event:
-        raise HTTPException(status_code=404, detail="Evento no encontrado")
-    
-    # Verify dog belongs to user
-    dog = await db.dogs.find_one({"id": event["dog_id"], "user_id": user.user_id}, {"_id": 0})
-    if not dog:
-        raise HTTPException(status_code=404, detail="No tienes permiso para eliminar este evento")
-    
-    await db.medical_events.delete_one({"id": event_id})
-    return {"message": "Evento eliminado"}
+    try:
+        supabase.table("medical_events").delete().eq("id", event_id).execute()
+        return {"message": "Evento eliminado"}
+    except Exception as e:
+        logger.error(f"Error deleting medical event: {e}")
+        raise HTTPException(status_code=500, detail="Error al eliminar evento")
 
-# ==================== ROUTES/GPS ====================
+# ==================== GAMIFICATION ENDPOINTS ====================
 
-class RouteCreate(BaseModel):
-    dog_id: str
-    name: str
-    distance: float  # in meters
-    duration: int  # in seconds
-    points: List[dict]  # list of {lat, lng}
-
-class Route(BaseModel):
-    id: str
-    dog_id: str
-    name: str
-    distance: float
-    duration: int
-    points: List[dict]
-    date: str
-    created_at: datetime
-
-@api_router.post("/routes", response_model=Route)
-async def create_route(data: RouteCreate, user: User = Depends(require_auth)):
-    # Verify dog belongs to user
-    dog = await db.dogs.find_one({"id": data.dog_id, "user_id": user.user_id}, {"_id": 0})
-    if not dog:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
-    
-    route_id = f"route_{uuid.uuid4().hex[:12]}"
-    now = datetime.now(timezone.utc)
-    
-    route_doc = {
-        "id": route_id,
-        "dog_id": data.dog_id,
-        "name": data.name,
-        "distance": data.distance,
-        "duration": data.duration,
-        "points": data.points,
-        "date": now.isoformat(),
-        "created_at": now,
-    }
-    
-    await db.routes.insert_one(route_doc)
-    return Route(**route_doc)
-
-@api_router.get("/routes/{dog_id}", response_model=List[Route])
-async def get_routes(dog_id: str, user: User = Depends(require_auth)):
-    # Verify dog belongs to user
-    dog = await db.dogs.find_one({"id": dog_id, "user_id": user.user_id}, {"_id": 0})
-    if not dog:
-        raise HTTPException(status_code=404, detail="Perro no encontrado")
-    
-    routes = await db.routes.find(
-        {"dog_id": dog_id},
-        {"_id": 0}
-    ).sort("created_at", -1).limit(50).to_list(50)
-    
-    return [Route(**route) for route in routes]
-
-# ==================== GAMIFICATION ====================
-
-class AddBonesRequest(BaseModel):
-    amount: int
-    reason: str
-
-class GamificationStats(BaseModel):
-    user_id: str
-    bones: int
-    level: int
-    level_progress: int
-    level_target: int
-    habits_completed: int
-    streak_days: int
-
-@api_router.get("/gamification/stats", response_model=GamificationStats)
+@api_router.get("/gamification/stats")
 async def get_gamification_stats(user: User = Depends(require_auth)):
-    stats = await db.gamification.find_one({"user_id": user.user_id}, {"_id": 0})
-    
-    if not stats:
-        # Initialize gamification for new user
-        stats = {
+    try:
+        result = supabase.table("gamification").select("*").eq("user_id", user.user_id).execute()
+        
+        if result.data and len(result.data) > 0:
+            stats = result.data[0]
+            return {
+                "bones": stats.get("bones", 0),
+                "xp": stats.get("xp", 0),
+                "level": stats.get("level", 1),
+                "level_progress": stats.get("xp", 0) % 500,
+                "level_target": 500,
+                "streak_days": stats.get("streak_days", 0),
+                "exercises_completed": stats.get("exercises_completed", 0),
+                "practice_minutes": stats.get("practice_minutes", 0)
+            }
+        
+        # Create default stats
+        now = datetime.now(timezone.utc).isoformat()
+        supabase.table("gamification").insert({
             "user_id": user.user_id,
-            "bones": 340,  # Starting bones
+            "bones": 0,
+            "xp": 0,
             "level": 1,
-            "level_progress": 340,
+            "created_at": now,
+            "updated_at": now
+        }).execute()
+        
+        return {
+            "bones": 0,
+            "xp": 0,
+            "level": 1,
+            "level_progress": 0,
             "level_target": 500,
-            "habits_completed": 0,
             "streak_days": 0,
-            "created_at": datetime.now(timezone.utc),
+            "exercises_completed": 0,
+            "practice_minutes": 0
         }
-        await db.gamification.insert_one(stats)
-    
-    return GamificationStats(**stats)
+    except Exception as e:
+        logger.error(f"Error getting gamification stats: {e}")
+        return {
+            "bones": 0,
+            "xp": 0,
+            "level": 1,
+            "level_progress": 0,
+            "level_target": 500,
+            "streak_days": 0,
+            "exercises_completed": 0,
+            "practice_minutes": 0
+        }
 
 @api_router.post("/gamification/add-bones")
-async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
-    stats = await db.gamification.find_one({"user_id": user.user_id}, {"_id": 0})
-    
-    if not stats:
-        stats = {
-            "user_id": user.user_id,
-            "bones": 340,
-            "level": 1,
-            "level_progress": 340,
-            "level_target": 500,
-            "habits_completed": 0,
-            "streak_days": 0,
-        }
-    
-    new_bones = stats["bones"] + data.amount
-    new_progress = stats["level_progress"] + data.amount
-    new_level = stats["level"]
-    new_target = stats["level_target"]
-    
-    # Check for level up
-    while new_progress >= new_target:
-        new_progress -= new_target
-        new_level += 1
-        new_target = int(new_target * 1.5)  # Increase target for next level
-    
-    await db.gamification.update_one(
-        {"user_id": user.user_id},
-        {
-            "$set": {
+async def add_bones(amount: int = 5, user: User = Depends(require_auth)):
+    try:
+        # Get current stats
+        result = supabase.table("gamification").select("*").eq("user_id", user.user_id).execute()
+        
+        now = datetime.now(timezone.utc).isoformat()
+        
+        if result.data and len(result.data) > 0:
+            current = result.data[0]
+            new_bones = current.get("bones", 0) + amount
+            new_xp = current.get("xp", 0) + (amount * 2)
+            new_level = 1 + (new_xp // 500)
+            
+            supabase.table("gamification").update({
                 "bones": new_bones,
+                "xp": new_xp,
                 "level": new_level,
-                "level_progress": new_progress,
-                "level_target": new_target,
-            }
-        },
-        upsert=True
-    )
+                "exercises_completed": current.get("exercises_completed", 0) + 1,
+                "updated_at": now
+            }).eq("user_id", user.user_id).execute()
+            
+            return {"bones": new_bones, "xp": new_xp, "level": new_level}
+        else:
+            supabase.table("gamification").insert({
+                "user_id": user.user_id,
+                "bones": amount,
+                "xp": amount * 2,
+                "level": 1,
+                "exercises_completed": 1,
+                "created_at": now,
+                "updated_at": now
+            }).execute()
+            
+            return {"bones": amount, "xp": amount * 2, "level": 1}
+    except Exception as e:
+        logger.error(f"Error adding bones: {e}")
+        return {"bones": 0, "xp": 0, "level": 1}
+
+# ==================== ROUTES ENDPOINTS ====================
+
+@api_router.post("/routes")
+async def create_route(data: RouteCreate, user: User = Depends(require_auth)):
+    now = datetime.now(timezone.utc).isoformat()
     
-    # Log the bones transaction
-    await db.bones_transactions.insert_one({
-        "id": f"tx_{uuid.uuid4().hex[:12]}",
+    route = {
         "user_id": user.user_id,
-        "amount": data.amount,
-        "reason": data.reason,
-        "created_at": datetime.now(timezone.utc),
-    })
-    
-    return {
-        "bones": new_bones,
-        "added": data.amount,
-        "level": new_level,
-        "level_up": new_level > stats["level"],
+        "dog_id": data.dog_id,
+        "name": data.name or f"Paseo {datetime.now().strftime('%d/%m/%Y')}",
+        "distance_km": data.distance_km,
+        "duration_minutes": data.duration_minutes,
+        "coordinates": data.coordinates,
+        "start_time": now,
+        "created_at": now
     }
+    
+    try:
+        result = supabase.table("routes").insert(route).execute()
+        return {"id": str(result.data[0]["id"]), "message": "Ruta guardada"}
+    except Exception as e:
+        logger.error(f"Error creating route: {e}")
+        raise HTTPException(status_code=500, detail="Error al guardar ruta")
 
-@api_router.post("/gamification/complete-habit")
-async def complete_habit(user: User = Depends(require_auth)):
-    stats = await db.gamification.find_one({"user_id": user.user_id}, {"_id": 0})
-    
-    bones_reward = 25  # Bones for completing a habit
-    
-    if stats:
-        new_habits = stats.get("habits_completed", 0) + 1
-        await db.gamification.update_one(
-            {"user_id": user.user_id},
-            {"$set": {"habits_completed": new_habits}}
-        )
-    
-    # Add bones
-    result = await add_bones(
-        AddBonesRequest(amount=bones_reward, reason="Hábito completado"),
-        user
-    )
-    
-    return {
-        "message": "¡Hábito completado!",
-        "bones_earned": bones_reward,
-        **result
-    }
+@api_router.get("/routes/{dog_id}")
+async def get_routes(dog_id: str, user: User = Depends(require_auth)):
+    try:
+        result = supabase.table("routes").select("*").eq("dog_id", dog_id).order("created_at", desc=True).limit(20).execute()
+        
+        routes = []
+        for route in result.data:
+            routes.append({
+                "id": str(route["id"]),
+                "name": route.get("name", "Paseo"),
+                "distance_km": float(route.get("distance_km", 0)),
+                "duration_minutes": route.get("duration_minutes", 0),
+                "created_at": route.get("created_at")
+            })
+        
+        return routes
+    except Exception as e:
+        logger.error(f"Error getting routes: {e}")
+        return []
 
-# ==================== STATUS ENDPOINTS ====================
-
-@api_router.get("/")
-async def root():
-    return {"message": "Heimdall API v1.0", "status": "running"}
+# ==================== HEALTH CHECK ====================
 
 @api_router.get("/health")
-async def health():
-    return {"status": "healthy"}
+async def health_check():
+    return {"status": "healthy", "database": "supabase"}
 
-# Include router
-app.include_router(api_router)
+# ==================== CORS & APP SETUP ====================
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+app.include_router(api_router)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
