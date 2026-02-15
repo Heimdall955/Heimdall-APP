@@ -34,6 +34,23 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
   const { isConnected, biometricData } = useBluetooth();
+  const { t } = useLanguage();
+  const [refreshing, setRefreshing] = useState(false);
+  const [dogStatus, setDogStatus] = useState<DogStatus>({
+    status: 'calm',
+    bones: 240,
+    level_progress: 340,
+    level_target: 500,
+  });
+
+  const quickAccessItems = [
+    { id: 'chaleco', icon: 'bluetooth', label: t('vest'), color: Colors.primary, route: '/chaleco' },
+    { id: 'rutas', icon: 'navigate', label: t('gpsRoutes'), color: Colors.accentPurple, route: '/rutas' },
+    { id: 'historial', icon: 'medical', label: t('history'), color: Colors.accentOrange, route: '/historial-medico' },
+    { id: 'educacion', icon: 'school', label: t('academy'), color: Colors.accentMint, route: '/(tabs)/educacion' },
+    { id: 'salud', icon: 'heart', label: t('health'), color: Colors.error, route: '/(tabs)/salud' },
+    { id: 'pro', icon: 'diamond', label: t('pro'), color: Colors.accent, route: '/pro' },
+  ];
   const [refreshing, setRefreshing] = useState(false);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
     status: 'calm',
