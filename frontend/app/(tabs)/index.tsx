@@ -198,7 +198,7 @@ export default function HomeScreen() {
 
         {/* Your Progress */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tu Progreso</Text>
+          <Text style={styles.sectionTitle}>{t('yourProgress')}</Text>
           <Card style={styles.progressCard}>
             <View style={styles.progressHeader}>
               <View>
