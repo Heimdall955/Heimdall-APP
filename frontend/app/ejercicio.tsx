@@ -226,7 +226,7 @@ export default function EjercicioScreen() {
         {/* Progress */}
         <View style={styles.progressSection}>
           <Text style={styles.progressText}>
-            {completados.length} de {ejercicio.ejercicios.length} completados
+            {completados.length} {t('of')} {ejercicio.ejercicios.length} {t('completed')}
           </Text>
           <View style={styles.progressDots}>
             {ejercicio.ejercicios.map((_, index) => (
@@ -276,7 +276,7 @@ export default function EjercicioScreen() {
 
             {ejercicioActual === index && (
               <View style={styles.ejercicioContent}>
-                <Text style={styles.instruccionesLabel}>Instrucciones:</Text>
+                <Text style={styles.instruccionesLabel}>{t('instructions')}</Text>
                 <Text style={styles.instruccionesText}>{ej.instrucciones}</Text>
                 
                 <View style={styles.repeticionesRow}>
@@ -301,7 +301,7 @@ export default function EjercicioScreen() {
           >
             <Ionicons name="checkmark-circle" size={24} color={Colors.white} />
             <Text style={styles.completarButtonText}>
-              ¡Ejercicios Completados! +{ejercicio.huesos} 🦴
+              {t('exercisesCompleted')} +{ejercicio.huesos} 🦴
             </Text>
           </TouchableOpacity>
         )}
