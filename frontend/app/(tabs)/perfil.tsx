@@ -479,7 +479,7 @@ export default function PerfilScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t("chip")Id}</Text>
+                <Text style={styles.inputLabel}>{t("chipId")}</Text>
                 <TextInput
                   style={styles.input}
                   value={editChip}
