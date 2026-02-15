@@ -423,6 +423,15 @@ async def send_chat_message(data: ChatMessageCreate, user: User = Depends(requir
             if dog.get('breed'):
                 dog_context += f" Es de raza {dog['breed']}."
     
+    # Get language instruction
+    language = data.language or "Spanish"
+    language_instructions = {
+        "Spanish": "Habla siempre en español",
+        "English": "Always speak in English",
+        "Italian": "Parla sempre in italiano"
+    }
+    language_instruction = language_instructions.get(language, "Habla siempre en español")
+    
     # Get recent chat history
     recent_msgs = await db.chat_messages.find(
         {"user_id": user.user_id},
@@ -439,7 +448,7 @@ Sin embargo, cuando se trata de temas de salud animal, te pones serio y profesio
 Reglas importantes:
 - Solo promueves adiestramiento positivo, nunca métodos de castigo
 - Si detectas una emergencia de salud, recomienda ir al veterinario inmediatamente
-- Habla siempre en español
+- {language_instruction}
 - Usa emojis de perros 🐕 y patitas 🐾 ocasionalmente
 - Sé conciso pero útil"""
     
