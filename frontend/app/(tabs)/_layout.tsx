@@ -8,9 +8,10 @@ import { Colors, FontSizes, Shadows } from '../../constants/theme';
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   
-  // Calculate proper bottom padding based on device
-  const bottomPadding = Platform.OS === 'ios' ? Math.max(insets.bottom, 20) : 12;
-  const tabBarHeight = 60 + bottomPadding;
+  // Calculate proper bottom padding based on device safe area
+  // This ensures the tab bar sits above the system navigation controls
+  const bottomInset = Math.max(insets.bottom, 0);
+  const tabBarHeight = 65 + bottomInset;
 
   return (
     <Tabs
@@ -19,12 +20,11 @@ export default function TabsLayout() {
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.gray,
         tabBarStyle: {
-          position: 'absolute',
           backgroundColor: Colors.white,
           borderTopWidth: 0,
           height: tabBarHeight,
-          paddingBottom: bottomPadding,
-          paddingTop: 10,
+          paddingBottom: bottomInset + 8,
+          paddingTop: 8,
           paddingHorizontal: 10,
           ...Shadows.lg,
         },
