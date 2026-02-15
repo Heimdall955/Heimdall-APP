@@ -134,7 +134,7 @@ export default function HomeScreen() {
             </View>
             <View>
               <Text style={styles.appName}>Heimdall</Text>
-              <Text style={styles.subtitle}>Educación en Positivo</Text>
+              <Text style={styles.subtitle}>{t('positiveEducation')}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
