@@ -372,7 +372,7 @@ export default function LeccionScreen() {
           <View style={styles.completadoIcon}>
             <Ionicons name="checkmark-circle" size={80} color={Colors.primary} />
           </View>
-          <Text style={styles.completadoTitulo}>¡Lección Completada!</Text>
+          <Text style={styles.completadoTitulo}>{t('lessonCompleted')}</Text>
           <Text style={styles.completadoSubtitulo}>{leccion.titulo}</Text>
           
           <View style={styles.recompensasRow}>
@@ -389,13 +389,13 @@ export default function LeccionScreen() {
           <Card style={styles.ejercicioCard}>
             <View style={styles.ejercicioHeader}>
               <Ionicons name="fitness" size={24} color={Colors.primary} />
-              <Text style={styles.ejercicioTitulo}>Tu Ejercicio Práctico</Text>
+              <Text style={styles.ejercicioTitulo}>{t('practicalExercise')}</Text>
             </View>
             <Text style={styles.ejercicioTexto}>{leccion.ejercicioPractico}</Text>
           </Card>
 
           <TouchableOpacity style={styles.volverButton} onPress={() => router.back()}>
-            <Text style={styles.volverButtonText}>Volver a Educación</Text>
+            <Text style={styles.volverButtonText}>{t('backToEducation')}</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
