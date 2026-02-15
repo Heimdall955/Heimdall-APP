@@ -177,6 +177,7 @@ interface Ejercicio {
 export default function EjercicioScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useLanguage();
   const [ejercicioActual, setEjercicioActual] = useState(0);
   const [completados, setCompletados] = useState<number[]>([]);
 
@@ -185,7 +186,7 @@ export default function EjercicioScreen() {
   if (!ejercicio) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Ejercicio no encontrado</Text>
+        <Text>{t('error')}</Text>
       </SafeAreaView>
     );
   }
