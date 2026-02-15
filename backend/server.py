@@ -854,6 +854,157 @@ async def get_routes(dog_id: str, user: User = Depends(require_auth)):
         logger.error(f"Error getting routes: {e}")
         return []
 
+# ==================== GOOGLE WALLET ====================
+
+def create_wallet_pass_jwt(dog_data: dict, user_data: dict) -> str:
+    """Generate a signed JWT for Google Wallet pass"""
+    
+    # Load credentials
+    with open(GOOGLE_WALLET_CREDENTIALS_PATH, 'r') as f:
+        credentials_info = json.load(f)
+    
+    # Create unique object ID
+    object_id = f"{GOOGLE_WALLET_ISSUER_ID}.{dog_data['id'].replace('-', '')}"
+    
+    # Calculate age display
+    age_months = dog_data.get('age', 0)
+    if age_months >= 12:
+        age_display = f"{age_months // 12} años"
+        if age_months % 12 > 0:
+            age_display += f" {age_months % 12} meses"
+    else:
+        age_display = f"{age_months} meses"
+    
+    # Create the pass object
+    generic_object = {
+        "id": object_id,
+        "classId": GOOGLE_WALLET_CLASS_ID,
+        "genericType": "GENERIC_TYPE_UNSPECIFIED",
+        "hexBackgroundColor": "#1B4D3E",
+        "logo": {
+            "sourceUri": {
+                "uri": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop"
+            }
+        },
+        "cardTitle": {
+            "defaultValue": {
+                "language": "es",
+                "value": "HANI Passport"
+            }
+        },
+        "subheader": {
+            "defaultValue": {
+                "language": "es",
+                "value": "Pasaporte Canino"
+            }
+        },
+        "header": {
+            "defaultValue": {
+                "language": "es",
+                "value": dog_data.get('name', 'Mi Perro')
+            }
+        },
+        "barcode": {
+            "type": "QR_CODE",
+            "value": f"HANI-{dog_data['id'][:8].upper()}",
+            "alternateText": f"ID: {dog_data['id'][:8].upper()}"
+        },
+        "heroImage": {
+            "sourceUri": {
+                "uri": dog_data.get('avatar') or "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600"
+            }
+        },
+        "textModulesData": [
+            {
+                "id": "breed",
+                "header": "RAZA",
+                "body": dog_data.get('breed') or "Sin especificar"
+            },
+            {
+                "id": "age",
+                "header": "EDAD",
+                "body": age_display
+            },
+            {
+                "id": "weight",
+                "header": "PESO",
+                "body": f"{dog_data.get('weight', 0)} kg"
+            },
+            {
+                "id": "chip",
+                "header": "Nº CHIP",
+                "body": dog_data.get('chip_id') or "No registrado"
+            },
+            {
+                "id": "owner",
+                "header": "TUTOR",
+                "body": user_data.get('name', user_data.get('email', 'Usuario'))
+            }
+        ]
+    }
+    
+    # Create JWT payload
+    claims = {
+        "iss": credentials_info["client_email"],
+        "aud": "google",
+        "origins": ["https://caninehealth-hub.preview.emergentagent.com"],
+        "typ": "savetowallet",
+        "payload": {
+            "genericObjects": [generic_object]
+        }
+    }
+    
+    # Sign the JWT
+    token = jwt.encode(
+        claims,
+        credentials_info["private_key"],
+        algorithm="RS256"
+    )
+    
+    return token
+
+@api_router.get("/wallet/pass/{dog_id}")
+async def get_wallet_pass(dog_id: str, user: User = Depends(require_auth)):
+    """Generate Google Wallet pass URL for a dog"""
+    try:
+        # Get dog data
+        result = supabase.table("dogs").select("*").eq("id", dog_id).eq("user_id", user.user_id).execute()
+        
+        if not result.data or len(result.data) == 0:
+            raise HTTPException(status_code=404, detail="Perro no encontrado")
+        
+        dog_data = result.data[0]
+        dog_formatted = {
+            "id": str(dog_data["id"]),
+            "name": dog_data["name"],
+            "breed": dog_data.get("breed"),
+            "age": dog_data.get("age_months", 0),
+            "weight": float(dog_data.get("weight", 0)),
+            "chip_id": dog_data.get("chip_id"),
+            "avatar": dog_data.get("photo_url")
+        }
+        
+        user_data = {
+            "name": user.name,
+            "email": user.email
+        }
+        
+        # Generate JWT
+        jwt_token = create_wallet_pass_jwt(dog_formatted, user_data)
+        
+        # Create save URL
+        save_url = f"https://pay.google.com/gp/v/save/{jwt_token}"
+        
+        return {
+            "save_url": save_url,
+            "dog_name": dog_data["name"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating wallet pass: {e}")
+        raise HTTPException(status_code=500, detail=f"Error al generar pase: {str(e)}")
+
 # ==================== HEALTH CHECK ====================
 
 @api_router.get("/health")
