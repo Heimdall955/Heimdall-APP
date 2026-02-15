@@ -34,6 +34,7 @@ export default function SaludScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
   const { isConnected, biometricData, startSimulation, stopSimulation } = useBluetooth();
+  const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'24h' | '7d'>('24h');
   const [medicalEvents, setMedicalEvents] = useState<MedicalEvent[]>([]);
@@ -116,8 +117,8 @@ export default function SaludScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>Salud 360°</Text>
-            <Text style={styles.subtitle}>Monitorización biométrica</Text>
+            <Text style={styles.title}>{t('health360')}</Text>
+            <Text style={styles.subtitle}>{t('realTimeMonitoring')}</Text>
           </View>
           <TouchableOpacity style={styles.addButton} onPress={() => router.push('/historial-medico')}>
             <Ionicons name="add" size={24} color={Colors.white} />
@@ -130,7 +131,7 @@ export default function SaludScreen() {
             <View style={styles.sensorsInfo}>
               <View style={[styles.sensorIndicator, isConnected && styles.sensorActive]} />
               <Text style={styles.sensorsTitle}>
-                Sensores {isConnected ? 'activos' : 'pausados'}
+                {isConnected ? t('vestConnected') : t('vestDisconnected')}
               </Text>
             </View>
             <View style={styles.batteryContainer}>
@@ -152,14 +153,14 @@ export default function SaludScreen() {
               color={isConnected ? Colors.text : Colors.white} 
             />
             <Text style={[styles.sensorsButtonText, !isConnected && styles.sensorsButtonTextActive]}>
-              {isConnected ? 'Pausar' : 'Conectar'}
+              {isConnected ? t('stop') : t('connectVest')}
             </Text>
           </TouchableOpacity>
         </Card>
 
         {/* Health Status */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Estado General</Text>
+          <Text style={styles.sectionTitle}>{t('vitalSigns')}</Text>
           <Card variant="elevated">
             <View style={styles.healthGrid}>
               <View style={styles.healthItem}>
@@ -167,7 +168,7 @@ export default function SaludScreen() {
                   percentage={healthMetrics.physical} 
                   size={80} 
                   color={Colors.primary}
-                  label="Físico"
+                  label={t('activity')}
                 />
               </View>
               <View style={styles.healthItem}>
@@ -175,7 +176,7 @@ export default function SaludScreen() {
                   percentage={healthMetrics.sleep} 
                   size={80} 
                   color={Colors.info}
-                  label="Sueño"
+                  label={t('sleeping')}
                 />
               </View>
               <View style={styles.healthItem}>
@@ -183,7 +184,7 @@ export default function SaludScreen() {
                   percentage={healthMetrics.mental} 
                   size={80} 
                   color={Colors.accentEducation}
-                  label="Mental"
+                  label={t('stress')}
                 />
               </View>
               <View style={styles.healthItem}>
@@ -191,7 +192,7 @@ export default function SaludScreen() {
                   percentage={healthMetrics.nutrition} 
                   size={80} 
                   color={Colors.success}
-                  label="Nutrición"
+                  label={t('normal')}
                 />
               </View>
             </View>
@@ -201,7 +202,7 @@ export default function SaludScreen() {
         {/* Cardio Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Cardio</Text>
+            <Text style={styles.sectionTitle}>{t('heartRate')}</Text>
             <View style={styles.periodSelector}>
               <TouchableOpacity 
                 style={[styles.periodButton, chartPeriod === '24h' && styles.periodButtonActive]}
@@ -222,9 +223,9 @@ export default function SaludScreen() {
               <Ionicons name="heart" size={24} color={Colors.error} />
               <View style={styles.cardioInfo}>
                 <Text style={styles.cardioValue}>
-                  {heartRateData[heartRateData.length - 1]} BPM
+                  {heartRateData[heartRateData.length - 1]} {t('bpm').toUpperCase()}
                 </Text>
-                <Text style={styles.cardioLabel}>Ritmo cardíaco actual</Text>
+                <Text style={styles.cardioLabel}>{t('heartRate')}</Text>
               </View>
             </View>
             {/* Simple bar chart */}
@@ -251,9 +252,9 @@ export default function SaludScreen() {
         {/* Medical History */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Historial Médico</Text>
+            <Text style={styles.sectionTitle}>{t('medicalHistory')}</Text>
             <TouchableOpacity onPress={() => router.push('/historial-medico')}>
-              <Text style={styles.viewAllText}>Ver todo</Text>
+              <Text style={styles.viewAllText}>{t('viewAll')}</Text>
             </TouchableOpacity>
           </View>
           <Card variant="elevated">
@@ -273,7 +274,7 @@ export default function SaludScreen() {
             ) : (
               <TouchableOpacity style={styles.emptyEvents} onPress={() => router.push('/historial-medico')}>
                 <Ionicons name="add-circle-outline" size={32} color={Colors.primary} />
-                <Text style={styles.emptyEventsText}>Añadir primer evento</Text>
+                <Text style={styles.emptyEventsText}>{t('addEvent')}</Text>
               </TouchableOpacity>
             )}
           </Card>
