@@ -279,7 +279,7 @@ export default function EducacionScreen() {
               <TouchableOpacity 
                 key={exercise.id} 
                 style={[styles.exerciseItem, index < exercises.length - 1 && styles.exerciseItemBorder]}
-                onPress={() => handleCompleteExercise(exercise.xpReward)}
+                onPress={() => router.push(`/ejercicio?id=${exercise.id}`)}
               >
                 <View style={[styles.exerciseIcon, { backgroundColor: exercise.iconColor + '20' }]}>
                   <Ionicons name={exercise.icon as any} size={24} color={exercise.iconColor} />
