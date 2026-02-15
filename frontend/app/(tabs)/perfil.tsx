@@ -218,7 +218,7 @@ export default function PerfilScreen() {
       [
         { text: t('cancel'), style: 'cancel' },
         { 
-          text: t.logout, 
+          text: t("logout"), 
           style: 'destructive',
           onPress: async () => {
             await logout();
@@ -245,7 +245,7 @@ export default function PerfilScreen() {
       base64: true,
     });
 
-    if (!result.canceled && result.assets[0].base64) {
+    if (!result("cancel")ed && result.assets[0].base64) {
       const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
       setDogImage(base64Image);
       if (currentDog?.id) {
@@ -290,20 +290,20 @@ export default function PerfilScreen() {
   };
 
   const menuItems = [
-    { id: 'settings', icon: 'settings-outline', label: t.settings, onPress: () => {} },
-    { id: 'notifications', icon: 'notifications-outline', label: t.notifications, onPress: () => {} },
-    { id: 'privacy', icon: 'shield-outline', label: t.privacy, onPress: () => {} },
-    { id: 'help', icon: 'help-circle-outline', label: t.help, onPress: () => {} },
-    { id: 'language', icon: 'language-outline', label: t.language, onPress: () => setShowLanguageModal(true), showValue: language.toUpperCase() },
-    { id: 'logout', icon: 'log-out-outline', label: t.logout, onPress: handleLogout, danger: true },
+    { id: 'settings', icon: 'settings-outline', label: t("settings"), onPress: () => {} },
+    { id: 'notifications', icon: 'notifications-outline', label: t("notifications"), onPress: () => {} },
+    { id: 'privacy', icon: 'shield-outline', label: t("privacy"), onPress: () => {} },
+    { id: 'help', icon: 'help-circle-outline', label: t("help"), onPress: () => {} },
+    { id: 'language', icon: 'language-outline', label: t("language"), onPress: () => setShowLanguageModal(true), showValue: language.toUpperCase() },
+    { id: 'logout', icon: 'log-out-outline', label: t("logout"), onPress: handleLogout, danger: true },
   ];
 
   const formatAge = (months: number) => {
     const years = Math.floor(months / 12);
     const remainingMonths = months % 12;
-    if (years === 0) return `${remainingMonths} ${t.months}`;
-    if (remainingMonths === 0) return `${years} ${t.years}`;
-    return `${years} ${t.years} ${t.and} ${remainingMonths} ${t.months}`;
+    if (years === 0) return `${remainingMonths} ${t("months")}`;
+    if (remainingMonths === 0) return `${years} ${t("years")}`;
+    return `${years} ${t("years")} ${t("and")} ${remainingMonths} ${t("months")}`;
   };
 
   const getLanguageFlag = (lang: Language) => {
@@ -326,7 +326,7 @@ export default function PerfilScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{t.profile}</Text>
+          <Text style={styles.title}>{t("profile")}</Text>
         </View>
 
         {/* Dog Profile Card */}
@@ -358,24 +358,24 @@ export default function PerfilScreen() {
               <Text style={styles.statValue}>
                 {currentDog?.age ? formatAge(currentDog.age) : '--'}
               </Text>
-              <Text style={styles.statLabel}>{t.age}</Text>
+              <Text style={styles.statLabel}>{t("age")}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{currentDog?.weight || '--'} kg</Text>
-              <Text style={styles.statLabel}>{t.weight}</Text>
+              <Text style={styles.statLabel}>{t("weight")}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{currentDog?.breed || 'Mixto'}</Text>
-              <Text style={styles.statLabel}>{t.breed}</Text>
+              <Text style={styles.statLabel}>{t("breed")}</Text>
             </View>
           </View>
 
           {currentDog?.chip_id && (
             <View style={styles.chipContainer}>
               <Ionicons name="hardware-chip" size={18} color={Colors.primary} />
-              <Text style={styles.chipText}>{t.chip}: {currentDog.chip_id}</Text>
+              <Text style={styles.chipText}>{t("chip")}: {currentDog.chip_id}</Text>
             </View>
           )}
         </Card>
@@ -383,10 +383,10 @@ export default function PerfilScreen() {
         {/* Pack Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t.myPack}</Text>
+            <Text style={styles.sectionTitle}>{t("myPack")}</Text>
             <TouchableOpacity style={styles.inviteButton}>
               <Ionicons name="person-add-outline" size={18} color={Colors.primary} />
-              <Text style={styles.inviteText}>{t.invite}</Text>
+              <Text style={styles.inviteText}>{t("invite")}</Text>
             </TouchableOpacity>
           </View>
           <Card variant="elevated">
@@ -396,7 +396,7 @@ export default function PerfilScreen() {
               </View>
               <View style={styles.memberInfo}>
                 <Text style={styles.memberName}>{user?.name}</Text>
-                <Text style={styles.memberRole}>{t.mainOwner}</Text>
+                <Text style={styles.memberRole}>{t("mainOwner")}</Text>
               </View>
               <View style={styles.ownerBadge}>
                 <Ionicons name="star" size={14} color={Colors.accent} />
@@ -407,25 +407,25 @@ export default function PerfilScreen() {
 
         {/* Clinical File */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.clinicalFile}</Text>
+          <Text style={styles.sectionTitle}>{t("clinicalFile")}</Text>
           <Card variant="elevated">
             <View style={styles.clinicalRow}>
               <Ionicons name="location-outline" size={20} color={Colors.textSecondary} />
-              <Text style={styles.clinicalLabel}>{t.country}</Text>
+              <Text style={styles.clinicalLabel}>{t("country")}</Text>
               <Text style={styles.clinicalValue}>España</Text>
             </View>
             <View style={styles.clinicalRow}>
               <Ionicons name="medkit-outline" size={20} color={Colors.textSecondary} />
-              <Text style={styles.clinicalLabel}>{t.vet}</Text>
-              <Text style={styles.clinicalValue}>{t.notAssigned}</Text>
+              <Text style={styles.clinicalLabel}>{t("vet")}</Text>
+              <Text style={styles.clinicalValue}>{t("notAssigned")}</Text>
             </View>
             <View style={styles.clinicalRow}>
               <Ionicons name="alert-circle-outline" size={20} color={Colors.textSecondary} />
-              <Text style={styles.clinicalLabel}>{t.allergies}</Text>
-              <Text style={styles.clinicalValue}>{t.noneRegistered}</Text>
+              <Text style={styles.clinicalLabel}>{t("allergies")}</Text>
+              <Text style={styles.clinicalValue}>{t("noneRegistered")}</Text>
             </View>
             <TouchableOpacity style={styles.clinicalEdit}>
-              <Text style={styles.clinicalEditText}>{t.editClinicalFile}</Text>
+              <Text style={styles.clinicalEditText}>{t("editClinicalFile")}</Text>
               <Ionicons name="chevron-forward" size={18} color={Colors.primary} />
             </TouchableOpacity>
           </Card>
@@ -438,26 +438,26 @@ export default function PerfilScreen() {
               <Ionicons name="diamond" size={28} color={Colors.white} />
             </View>
             <View style={styles.proInfo}>
-              <Text style={styles.proTitle}>{t.goToPro}</Text>
+              <Text style={styles.proTitle}>{t("goToPro")}</Text>
               <Text style={styles.proPrice}>1,99€/mes</Text>
             </View>
           </View>
           <View style={styles.proBenefits}>
             <View style={styles.proBenefit}>
               <Ionicons name="checkmark" size={18} color={Colors.success} />
-              <Text style={styles.proBenefitText}>{t.videoAnalysis}</Text>
+              <Text style={styles.proBenefitText}>{t("videoAnalysis")}</Text>
             </View>
             <View style={styles.proBenefit}>
               <Ionicons name="checkmark" size={18} color={Colors.success} />
-              <Text style={styles.proBenefitText}>{t.vetReports}</Text>
+              <Text style={styles.proBenefitText}>{t("vet")Reports}</Text>
             </View>
             <View style={styles.proBenefit}>
               <Ionicons name="checkmark" size={18} color={Colors.success} />
-              <Text style={styles.proBenefitText}>{t.unlimitedChat}</Text>
+              <Text style={styles.proBenefitText}>{t("unlimitedChat")}</Text>
             </View>
           </View>
           <Button
-            title={t.activatePro}
+            title={t("activatePro")}
             onPress={() => router.push('/pro')}
             style={styles.proButton}
           />
@@ -505,7 +505,7 @@ export default function PerfilScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t.selectLanguage}</Text>
+              <Text style={styles.modalTitle}>{t("selectLanguage")}</Text>
               <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
                 <Ionicons name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
@@ -516,7 +516,7 @@ export default function PerfilScreen() {
               onPress={() => changeLanguage('es')}
             >
               <Text style={styles.languageFlag}>🇪🇸</Text>
-              <Text style={styles.languageText}>{t.spanish}</Text>
+              <Text style={styles.languageText}>{t("spanish")}</Text>
               {language === 'es' && <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />}
             </TouchableOpacity>
 
@@ -525,7 +525,7 @@ export default function PerfilScreen() {
               onPress={() => changeLanguage('en')}
             >
               <Text style={styles.languageFlag}>🇬🇧</Text>
-              <Text style={styles.languageText}>{t.english}</Text>
+              <Text style={styles.languageText}>{t("english")}</Text>
               {language === 'en' && <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />}
             </TouchableOpacity>
 
@@ -534,7 +534,7 @@ export default function PerfilScreen() {
               onPress={() => changeLanguage('it')}
             >
               <Text style={styles.languageFlag}>🇮🇹</Text>
-              <Text style={styles.languageText}>{t.italian}</Text>
+              <Text style={styles.languageText}>{t("italian")}</Text>
               {language === 'it' && <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />}
             </TouchableOpacity>
           </View>
@@ -551,7 +551,7 @@ export default function PerfilScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, styles.editModalContent]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t.editDogProfile}</Text>
+              <Text style={styles.modalTitle}>{t("editDogProfile")}</Text>
               <TouchableOpacity onPress={() => setShowEditModal(false)}>
                 <Ionicons name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
@@ -571,23 +571,23 @@ export default function PerfilScreen() {
                   <Ionicons name="camera" size={20} color={Colors.white} />
                 </View>
               </TouchableOpacity>
-              <Text style={styles.editPhotoText}>{t.changePhoto}</Text>
+              <Text style={styles.editPhotoText}>{t("changePhoto")}</Text>
 
               {/* Form Fields */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t.dogName}</Text>
+                <Text style={styles.inputLabel}>{t("dogName")}</Text>
                 <TextInput
                   style={styles.input}
                   value={editName}
                   onChangeText={setEditName}
-                  placeholder={t.dogName}
+                  placeholder={t("dogName")}
                   placeholderTextColor={Colors.gray}
                 />
               </View>
 
               <View style={styles.inputRow}>
                 <View style={[styles.inputGroup, { flex: 1 }]}>
-                  <Text style={styles.inputLabel}>{t.dogAge}</Text>
+                  <Text style={styles.inputLabel}>{t("dogAge")}</Text>
                   <TextInput
                     style={styles.input}
                     value={editAge}
@@ -599,7 +599,7 @@ export default function PerfilScreen() {
                 </View>
                 <View style={{ width: Spacing.md }} />
                 <View style={[styles.inputGroup, { flex: 1 }]}>
-                  <Text style={styles.inputLabel}>{t.dogWeight}</Text>
+                  <Text style={styles.inputLabel}>{t("dogWeight")}</Text>
                   <TextInput
                     style={styles.input}
                     value={editWeight}
@@ -612,7 +612,7 @@ export default function PerfilScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t.dogBreed}</Text>
+                <Text style={styles.inputLabel}>{t("dogBreed")}</Text>
                 <TextInput
                   style={styles.input}
                   value={editBreed}
@@ -623,7 +623,7 @@ export default function PerfilScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{t.chipId}</Text>
+                <Text style={styles.inputLabel}>{t("chip")Id}</Text>
                 <TextInput
                   style={styles.input}
                   value={editChip}
@@ -635,7 +635,7 @@ export default function PerfilScreen() {
             </ScrollView>
 
             <Button
-              title={saving ? 'Guardando...' : t.save}
+              title={saving ? 'Guardando...' : t("save")}
               onPress={handleSaveProfile}
               loading={saving}
               disabled={saving}
