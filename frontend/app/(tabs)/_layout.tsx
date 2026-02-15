@@ -3,10 +3,12 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Colors, FontSizes, Shadows, BorderRadius } from '../../constants/theme';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   
   // Calculate proper bottom padding based on device safe area
   const bottomInset = Math.max(insets.bottom, 0);
@@ -40,7 +42,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
+          title: t('home'),
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconBg : undefined}>
               <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
@@ -51,7 +53,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="salud"
         options={{
-          title: 'Salud',
+          title: t('health'),
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconBg : undefined}>
               <Ionicons name={focused ? 'heart' : 'heart-outline'} size={24} color={color} />
@@ -62,7 +64,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="educacion"
         options={{
-          title: 'Educación',
+          title: t('education'),
           tabBarIcon: ({ color, focused }) => (
             <View style={[styles.centerTab, focused && styles.centerTabActive]}>
               <Image 
@@ -77,7 +79,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Chat',
+          title: t('chat'),
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconBg : undefined}>
               <Ionicons name={focused ? 'chatbubbles' : 'chatbubbles-outline'} size={24} color={color} />
@@ -88,7 +90,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="perfil"
         options={{
-          title: 'Perfil',
+          title: t('profile'),
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconBg : undefined}>
               <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
