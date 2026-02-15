@@ -1,25 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBluetooth } from '../../contexts/BluetoothContext';
 import { Card, StatusBadge, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 import { DogStatus } from '../../types';
 
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+
 const quickAccessItems = [
   { id: 'ficha', icon: 'paw', label: 'Ficha', color: Colors.primary, route: '/(tabs)/perfil' },
-  { id: 'rutas', icon: 'map', label: 'Rutas GPS', color: Colors.accent, route: null },
-  { id: 'juegos', icon: 'game-controller', label: 'Juegos', color: Colors.accentEducation, route: null },
+  { id: 'chaleco', icon: 'bluetooth', label: 'Chaleco', color: Colors.info, route: '/chaleco' },
+  { id: 'historial', icon: 'medical', label: 'Historial', color: Colors.success, route: '/historial-medico' },
   { id: 'educacion', icon: 'school', label: 'Educación', color: '#FF6B6B', route: '/(tabs)/educacion' },
-  { id: 'salud', icon: 'heart', label: 'Salud', color: Colors.success, route: '/(tabs)/salud' },
-  { id: 'historial', icon: 'time', label: 'Historial', color: Colors.info, route: '/(tabs)/salud' },
+  { id: 'salud', icon: 'heart', label: 'Salud', color: Colors.accentEducation, route: '/(tabs)/salud' },
+  { id: 'chat', icon: 'chatbubbles', label: 'Chat IA', color: Colors.accent, route: '/(tabs)/chat' },
 ];
 
 export default function HomeScreen() {
   const router = useRouter();
   const { currentDog, user } = useAuth();
+  const { isConnected, biometricData } = useBluetooth();
   const [refreshing, setRefreshing] = useState(false);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
     status: 'calm',
@@ -28,10 +34,51 @@ export default function HomeScreen() {
     level_target: 500,
   });
 
+  const loadGamificationStats = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      
+      const response = await axios.get(
+        `${BACKEND_URL}/api/gamification/stats`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setDogStatus(prev => ({
+        ...prev,
+        bones: response.data.bones,
+        level_progress: response.data.level_progress,
+        level_target: response.data.level_target,
+      }));
+    } catch (error) {
+      console.log('Error loading gamification stats');
+    }
+  }, []);
+
+  useEffect(() => {
+    loadGamificationStats();
+  }, [loadGamificationStats]);
+
+  // Update status based on biometric data
+  useEffect(() => {
+    if (isConnected && biometricData.connected) {
+      let status: 'calm' | 'active' | 'anxious' | 'sleeping' | 'playing' = 'calm';
+      
+      if (biometricData.movement === 'high') {
+        status = biometricData.heartRate > 100 ? 'playing' : 'active';
+      } else if (biometricData.movement === 'low' && biometricData.heartRate < 60) {
+        status = 'sleeping';
+      } else if (biometricData.heartRate > 120) {
+        status = 'anxious';
+      }
+      
+      setDogStatus(prev => ({ ...prev, status }));
+    }
+  }, [isConnected, biometricData]);
+
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate refresh
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadGamificationStats();
     setRefreshing(false);
   };
 
