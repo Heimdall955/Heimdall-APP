@@ -20,15 +20,6 @@ interface DogStatus {
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-const quickAccessItems = [
-  { id: 'chaleco', icon: 'bluetooth', label: 'Chaleco', color: Colors.primary, route: '/chaleco' },
-  { id: 'rutas', icon: 'navigate', label: 'Rutas GPS', color: Colors.accentPurple, route: '/rutas' },
-  { id: 'historial', icon: 'medical', label: 'Historial', color: Colors.accentOrange, route: '/historial-medico' },
-  { id: 'educacion', icon: 'school', label: 'Academia', color: Colors.accentMint, route: '/(tabs)/educacion' },
-  { id: 'salud', icon: 'heart', label: 'Salud', color: Colors.error, route: '/(tabs)/salud' },
-  { id: 'pro', icon: 'diamond', label: 'PRO', color: Colors.accent, route: '/pro' },
-];
-
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
