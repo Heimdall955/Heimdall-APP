@@ -65,7 +65,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
         <View style={styles.cardHeader}>
           <View style={styles.logoContainer}>
             <Image 
-              source={require('../../assets/images/heimdall-logo.png')}
+              source={require('../assets/images/heimdall-logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
