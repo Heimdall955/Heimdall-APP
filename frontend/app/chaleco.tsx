@@ -41,29 +41,29 @@ export default function ChalecoScreen() {
     setConnectingDeviceId(null);
     
     if (success) {
-      Alert.alert('Conectado', 'Chaleco conectado correctamente');
+      Alert.alert(t('connected'), t('vestConnected'));
     } else {
-      Alert.alert('Error', 'No se pudo conectar al dispositivo');
+      Alert.alert(t('error'), t('deviceNotFound'));
     }
   };
 
   const handleDisconnect = () => {
     Alert.alert(
-      'Desconectar',
-      '¿Estás seguro de que quieres desconectar el chaleco?',
+      t('disconnectDevice'),
+      t('disconnectConfirm'),
       [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Desconectar', style: 'destructive', onPress: disconnect },
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('disconnectDevice'), style: 'destructive', onPress: disconnect },
       ]
     );
   };
 
   const getMovementLabel = (movement: string) => {
     switch (movement) {
-      case 'low': return 'Bajo';
-      case 'medium': return 'Moderado';
-      case 'high': return 'Alto';
-      default: return 'Desconocido';
+      case 'low': return t('low');
+      case 'medium': return t('medium');
+      case 'high': return t('high');
+      default: return t('error');
     }
   };
 
