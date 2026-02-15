@@ -149,8 +149,8 @@ export default function ProgramaScreen() {
   const xpTotal = programa.lecciones.reduce((acc, l) => acc + l.xp, 0);
 
   const handleLeccionPress = (leccionId: string) => {
-    // Navegar a la lección específica
-    router.push(`/leccion?id=${programa.id}-leccion-${leccionId}`);
+    // Navegar a la lección específica usando el ID directo
+    router.push(`/leccion?id=${leccionId}`);
   };
 
   const toggleLeccionCompletada = (leccionId: string) => {
