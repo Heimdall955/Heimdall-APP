@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { Card } from '../components/ui';
+import { useLanguage, Language } from '../contexts/LanguageContext';
 
 // Base de datos de lecciones de educación canina en positivo
 const LECCIONES_DB: Record<string, Leccion> = {
