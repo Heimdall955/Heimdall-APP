@@ -84,6 +84,7 @@ class Dog(BaseModel):
 class ChatMessageCreate(BaseModel):
     content: str
     dog_id: Optional[str] = None
+    language: Optional[str] = "Spanish"  # Language for AI response
 
 class ChatMessage(BaseModel):
     id: str
