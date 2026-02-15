@@ -268,6 +268,25 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     enableBluetooth: 'Activa Bluetooth para continuar',
     simulatorMode: 'Modo Simulador',
     simulatorDescription: 'Usando datos simulados para demostración',
+    
+    // Onboarding
+    nowWatching: 'Ahora Heimdall vigila a',
+    yourDog: 'tu perro',
+    configuredDescription: 'Hemos configurado todo para que puedas monitorear la salud y bienestar de tu compañero peludo.',
+    personalizedAI: 'Asistente IA personalizado',
+    goToHome: 'Ir al inicio',
+    
+    // Bluetooth/ESP32
+    scanForDevices: 'Buscar dispositivos',
+    stopScanning: 'Detener búsqueda',
+    noDevicesFound: 'No se encontraron dispositivos',
+    connectingTo: 'Conectando a',
+    esp32Device: 'Dispositivo ESP32',
+    heimdallVest: 'Chaleco Heimdall',
+    signalStrength: 'Intensidad de señal',
+    availableDevices: 'Dispositivos disponibles',
+    useSimulator: 'Usar simulador',
+    realDevice: 'Dispositivo real',
   },
   en: {
     // General
