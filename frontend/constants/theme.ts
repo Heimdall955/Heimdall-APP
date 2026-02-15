@@ -19,9 +19,11 @@ export const Colors = {
   accentOrange: '#E67E22', // Orange for highlights
   accentPurple: '#A060DD', // Purple for icons
   accentMint: '#85E1CA',   // Light mint for icons
+  accentEducation: '#6366F1', // Indigo for education/learning
   
   // Reward badge colors
   rewardBadge: '#FDBA74',  // Light orange for +XP badges
+  cardHighlight: '#F0FDF4', // Light green for highlighted cards
   
   // UI Colors
   white: '#FFFFFF',
