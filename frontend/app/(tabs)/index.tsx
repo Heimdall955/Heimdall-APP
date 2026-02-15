@@ -151,7 +151,7 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Sesión de Hoy</Text>
           <TouchableOpacity 
             style={styles.sessionCard}
-            onPress={() => router.push('/(tabs)/educacion')}
+            onPress={() => router.push('/leccion?id=llamada-perfecta')}
           >
             <Image 
               source={{ uri: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400' }}
