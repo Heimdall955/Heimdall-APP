@@ -1,22 +1,44 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Heimdall",
+    "slug": "heimdall",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
-    "userInterfaceStyle": "automatic",
+    "scheme": "heimdall",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.heimdall.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Track your dog's walks and routes",
+        "NSLocationAlwaysUsageDescription": "Track your dog's location in background",
+        "NSCameraUsageDescription": "Take photos of your dog",
+        "NSPhotoLibraryUsageDescription": "Upload photos of your dog",
+        "NSBluetoothAlwaysUsageDescription": "Connect to Heimdall vest",
+        "NSBluetoothPeripheralUsageDescription": "Connect to Heimdall vest"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#4ABDAC"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.heimdall.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -25,13 +47,20 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
       [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "backgroundColor": "#4ABDAC"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Heimdall to track your dog's walks."
         }
       ]
     ],
