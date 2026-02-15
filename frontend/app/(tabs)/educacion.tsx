@@ -33,21 +33,21 @@ interface Exercise {
 }
 
 const trainingPrograms: TrainingProgram[] = [
-  { id: '1', title: 'Educación Básica', subtitle: 'Fundamentos sólidos', category: 'Básico', categoryColor: '#4CAF50', xpReward: 100, image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400' },
-  { id: '2', title: 'Calma y Control', subtitle: 'Gestión del estrés', category: 'Emocional', categoryColor: '#FF9800', xpReward: 120, image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400' },
-  { id: '3', title: 'Socialización', subtitle: 'Amigos caninos', category: 'Social', categoryColor: '#2196F3', xpReward: 150, image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400' },
-  { id: '4', title: 'Mundo Cachorro', subtitle: 'Primeros pasos', category: 'Cachorros', categoryColor: '#E91E63', xpReward: 80, image: 'https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=400' },
+  { id: 'educacion-basica', title: 'Educación Básica', subtitle: 'Fundamentos sólidos', category: 'Básico', categoryColor: '#4CAF50', xpReward: 100, image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400' },
+  { id: 'calma-control', title: 'Calma y Control', subtitle: 'Gestión del estrés', category: 'Emocional', categoryColor: '#FF9800', xpReward: 120, image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400' },
+  { id: 'socializacion', title: 'Socialización', subtitle: 'Amigos caninos', category: 'Social', categoryColor: '#2196F3', xpReward: 150, image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400' },
+  { id: 'mundo-cachorro', title: 'Mundo Cachorro', subtitle: 'Primeros pasos', category: 'Cachorros', categoryColor: '#E91E63', xpReward: 80, image: 'https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=400' },
 ];
 
 const exercises: Exercise[] = [
-  { id: '1', title: 'Señales Básicas', subtitle: 'Sentado, Tumbado, Quieto', icon: 'paw', iconColor: '#2196F3', xpReward: 5 },
-  { id: '2', title: 'Entrenamiento con Clicker', subtitle: 'Precisión y timing', icon: 'radio-button-on', iconColor: '#9C27B0', xpReward: 10 },
-  { id: '3', title: 'Juegos de Olfato', subtitle: 'Estimulación mental natural', icon: 'search', iconColor: '#00BCD4', xpReward: 15 },
+  { id: 'senales-basicas', title: 'Señales Básicas', subtitle: 'Sentado, Tumbado, Quieto', icon: 'paw', iconColor: '#2196F3', xpReward: 5 },
+  { id: 'clicker', title: 'Entrenamiento con Clicker', subtitle: 'Precisión y timing', icon: 'radio-button-on', iconColor: '#9C27B0', xpReward: 10 },
+  { id: 'olfato', title: 'Juegos de Olfato', subtitle: 'Estimulación mental natural', icon: 'search', iconColor: '#00BCD4', xpReward: 15 },
 ];
 
 const games = [
-  { id: '1', title: 'Puzzle Mental', difficulty: 'Media', xpReward: 5, image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200' },
-  { id: '2', title: 'Tira y Afloja', difficulty: 'Fácil', xpReward: 3, image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=200' },
+  { id: 'puzzle-mental', title: 'Puzzle Mental', difficulty: 'Media', xpReward: 5, image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200' },
+  { id: 'tira-afloja', title: 'Tira y Afloja', difficulty: 'Fácil', xpReward: 3, image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=200' },
 ];
 
 export default function EducacionScreen() {
