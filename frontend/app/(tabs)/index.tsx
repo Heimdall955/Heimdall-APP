@@ -234,18 +234,18 @@ export default function HomeScreen() {
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
                 <Text style={styles.statNumber}>12</Text>
-                <Text style={styles.statLabel}>Ejercicios</Text>
+                <Text style={styles.statLabel}>{t('exercises')}</Text>
               </View>
               <View style={styles.statBox}>
                 <Text style={styles.statNumber}>45m</Text>
-                <Text style={styles.statLabel}>Práctica</Text>
+                <Text style={styles.statLabel}>{t('practice')}</Text>
               </View>
               <View style={styles.statBox}>
                 <View style={styles.bonesStatRow}>
                   <Text style={styles.statNumber}>{dogStatus.bones}</Text>
                   <Text style={styles.boneIcon}>🦴</Text>
                 </View>
-                <Text style={styles.statLabel}>Huesos</Text>
+                <Text style={styles.statLabel}>{t('bones')}</Text>
               </View>
             </View>
           </Card>
