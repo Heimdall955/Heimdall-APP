@@ -147,17 +147,17 @@ export default function HomeScreen() {
           <View style={styles.boneIconContainer}>
             <Text style={styles.boneEmoji}>🦴</Text>
           </View>
-          <Text style={styles.rewardText}>¡Gran trabajo! Has ganado </Text>
-          <Text style={styles.rewardHighlight}>+15 huesos</Text>
-          <Text style={styles.rewardText}> hoy</Text>
+          <Text style={styles.rewardText}>{t('greatJob')} </Text>
+          <Text style={styles.rewardHighlight}>+15 {t('bones').toLowerCase()}</Text>
+          <Text style={styles.rewardText}> {t('bonesToday').split(' ')[0]}</Text>
           <TouchableOpacity>
-            <Text style={styles.viewRewardsLink}>Ver premios</Text>
+            <Text style={styles.viewRewardsLink}>{t('viewRewards')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Today's Session Card */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sesión de Hoy</Text>
+          <Text style={styles.sectionTitle}>{t('todaySession')}</Text>
           <TouchableOpacity 
             style={styles.sessionCard}
             onPress={() => router.push('/leccion?id=llamada-perfecta')}
