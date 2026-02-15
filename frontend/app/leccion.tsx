@@ -337,6 +337,7 @@ interface Leccion {
 export default function LeccionScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t, language } = useLanguage();
   const [pasoActual, setPasoActual] = useState(0);
   const [completado, setCompletado] = useState(false);
 
@@ -345,7 +346,7 @@ export default function LeccionScreen() {
   if (!leccion) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Lección no encontrada</Text>
+        <Text>{t('error')}</Text>
       </SafeAreaView>
     );
   }
