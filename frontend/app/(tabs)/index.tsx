@@ -42,13 +42,6 @@ export default function HomeScreen() {
     { id: 'salud', icon: 'heart', label: t('health'), color: Colors.error, route: '/(tabs)/salud' },
     { id: 'pro', icon: 'diamond', label: t('pro'), color: Colors.accent, route: '/pro' },
   ];
-  const [refreshing, setRefreshing] = useState(false);
-  const [dogStatus, setDogStatus] = useState<DogStatus>({
-    status: 'calm',
-    bones: 240,
-    level_progress: 340,
-    level_target: 500,
-  });
 
   const loadGamificationStats = useCallback(async () => {
     try {
