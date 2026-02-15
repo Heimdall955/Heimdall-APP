@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 import os
 import logging
+import json
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -12,17 +13,26 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import httpx
+import jwt
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request as GoogleRequest
+from google.auth import jwt as google_jwt
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Supabase connection
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
-SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_KEY')  # Use service key for full access
+SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_KEY')
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+
+# Google Wallet Configuration
+GOOGLE_WALLET_ISSUER_ID = "3388000000023044726"
+GOOGLE_WALLET_CLASS_ID = "3388000000023044726.HANI_PASSPORT"
+GOOGLE_WALLET_CREDENTIALS_PATH = ROOT_DIR / "google_wallet_credentials.json"
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
