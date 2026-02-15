@@ -216,7 +216,7 @@ export default function HomeScreen() {
                     {dogStatus.level_progress}/{dogStatus.level_target} XP
                   </Text>
                 </View>
-                <Text style={styles.progressHint}>¡Casi llegas al Nivel 4!</Text>
+                <Text style={styles.progressHint}>{t('almostLevel')} 4!</Text>
               </View>
               <View style={styles.streakBadges}>
                 <View style={styles.streakBadge}>
