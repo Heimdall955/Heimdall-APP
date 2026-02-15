@@ -243,7 +243,11 @@ export default function EducacionScreen() {
           <Text style={styles.sectionTitle}>{t('guidedPrograms')}</Text>
           <View style={styles.programsGrid}>
             {trainingPrograms.map((program) => (
-              <TouchableOpacity key={program.id} style={styles.programCard}>
+              <TouchableOpacity 
+                key={program.id} 
+                style={styles.programCard}
+                onPress={() => router.push(`/programa?id=${program.id}`)}
+              >
                 <Image source={{ uri: program.image }} style={styles.programImage} />
                 <View style={[styles.categoryBadge, { backgroundColor: program.categoryColor }]}>
                   <Text style={styles.categoryText}>{program.category}</Text>
