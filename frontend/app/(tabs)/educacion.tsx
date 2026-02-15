@@ -54,6 +54,7 @@ export default function EducacionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
+  const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     bones: 240,
@@ -131,7 +132,7 @@ export default function EducacionScreen() {
             </View>
             <View>
               <Text style={styles.headerTitle}>Heimdall</Text>
-              <Text style={styles.headerSubtitle}>Educación en Positivo</Text>
+              <Text style={styles.headerSubtitle}>{t('positiveEducation')}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.bonesButton}>
@@ -145,19 +146,19 @@ export default function EducacionScreen() {
           <TouchableOpacity style={styles.rewardCard} onPress={() => setShowReward(false)}>
             <Text style={styles.rewardIcon}>🎉</Text>
             <View style={styles.rewardContent}>
-              <Text style={styles.rewardTitle}>¡Gran trabajo!</Text>
-              <Text style={styles.rewardSubtitle}>Has ganado +15 Huesos Heimdall</Text>
+              <Text style={styles.rewardTitle}>{t('greatJob')}</Text>
+              <Text style={styles.rewardSubtitle}>+15 {t('heimdallBones')}</Text>
             </View>
-            <Text style={styles.rewardLink}>Ver premios</Text>
+            <Text style={styles.rewardLink}>{t('viewRewards')}</Text>
           </TouchableOpacity>
         )}
 
         {/* Today's Session */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Sesión de Hoy</Text>
+            <Text style={styles.sectionTitle}>{t('todaySession')}</Text>
             <View style={styles.priorityBadge}>
-              <Text style={styles.priorityText}>PRIORIDAD ALTA</Text>
+              <Text style={styles.priorityText}>{t('highPriority')}</Text>
             </View>
           </View>
           
@@ -168,7 +169,7 @@ export default function EducacionScreen() {
             />
             <View style={styles.sessionOverlay}>
               <View style={styles.sessionBadge}>
-                <Text style={styles.sessionBadgeText}>Nivel Intermedio</Text>
+                <Text style={styles.sessionBadgeText}>{t('intermediate')}</Text>
               </View>
               <View style={styles.sessionXpBadge}>
                 <Text style={styles.sessionXpIcon}>🦴</Text>
@@ -176,11 +177,11 @@ export default function EducacionScreen() {
               </View>
             </View>
             <View style={styles.sessionContent}>
-              <Text style={styles.sessionTitle}>La Llamada Perfecta</Text>
+              <Text style={styles.sessionTitle}>{t('thePerfectCall')}</Text>
               <View style={styles.sessionMeta}>
                 <View style={styles.sessionMetaItem}>
                   <Ionicons name="time-outline" size={14} color={Colors.white} />
-                  <Text style={styles.sessionMetaText}>10 min</Text>
+                  <Text style={styles.sessionMetaText}>10 {t('min')}</Text>
                 </View>
                 <View style={styles.sessionMetaItem}>
                   <Ionicons name="paw" size={14} color={Colors.white} />
@@ -198,13 +199,13 @@ export default function EducacionScreen() {
         <Card style={styles.progressCard} variant="elevated">
           <View style={styles.progressHeader}>
             <View>
-              <Text style={styles.progressTitle}>Tu Progreso</Text>
-              <Text style={styles.progressLevel}>Nivel {stats.level}: {stats.levelName}</Text>
+              <Text style={styles.progressTitle}>{t('yourProgress')}</Text>
+              <Text style={styles.progressLevel}>{t('level')} {stats.level}: {t('explorerLevel')}</Text>
               <Text style={styles.progressXp}>{stats.xp} XP</Text>
             </View>
             <View style={styles.streakBadge}>
               <Ionicons name="flash" size={16} color={Colors.accent} />
-              <Text style={styles.streakText}>{stats.streak} Días</Text>
+              <Text style={styles.streakText}>{stats.streak} {t('days')}</Text>
             </View>
           </View>
           
@@ -215,31 +216,31 @@ export default function EducacionScreen() {
             <Text style={styles.progressTarget}>{stats.xpTarget} XP</Text>
           </View>
           
-          <Text style={styles.progressHint}>¡Casi llegas al Nivel {stats.level + 1}!</Text>
+          <Text style={styles.progressHint}>{t('almostLevel')} {stats.level + 1}!</Text>
           
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{stats.exercisesCompleted}</Text>
-              <Text style={styles.statLabel}>Ejercicios</Text>
+              <Text style={styles.statLabel}>{t('exercises')}</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{stats.practiceMinutes}m</Text>
-              <Text style={styles.statLabel}>Práctica</Text>
+              <Text style={styles.statLabel}>{t('practice')}</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{stats.bones}</Text>
-              <Text style={styles.statLabel}>Huesos 🦴</Text>
+              <Text style={styles.statLabel}>{t('bones')} 🦴</Text>
             </View>
           </View>
           
           <TouchableOpacity style={styles.nextButton}>
-            <Text style={styles.nextButtonText}>Siguiente: 50 🦴</Text>
+            <Text style={styles.nextButtonText}>{t('nextGoal')}: 50 🦴</Text>
           </TouchableOpacity>
         </Card>
 
         {/* Training Programs */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Programas Guiados</Text>
+          <Text style={styles.sectionTitle}>{t('guidedPrograms')}</Text>
           <View style={styles.programsGrid}>
             {trainingPrograms.map((program) => (
               <TouchableOpacity key={program.id} style={styles.programCard}>
@@ -263,9 +264,9 @@ export default function EducacionScreen() {
         {/* Exercise Library */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Biblioteca de Ejercicios</Text>
+            <Text style={styles.sectionTitle}>{t('exerciseLibrary')}</Text>
             <TouchableOpacity>
-              <Text style={styles.seeAllText}>Ver todo</Text>
+              <Text style={styles.seeAllText}>{t('viewAll')}</Text>
             </TouchableOpacity>
           </View>
           
@@ -297,7 +298,7 @@ export default function EducacionScreen() {
 
         {/* Recommended Games */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Juegos Recomendados</Text>
+          <Text style={styles.sectionTitle}>{t('recommendedGames')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.gamesRow}>
               {games.map((game) => (
