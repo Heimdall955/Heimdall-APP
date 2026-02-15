@@ -156,17 +156,27 @@ class BluetoothService {
             return;
           }
 
-          if (device && device.name) {
-            const isHeimdallDevice = 
-              device.name.toLowerCase().includes('heimdall') ||
-              device.name.toLowerCase().includes('vest') ||
-              device.name.toLowerCase().includes('hr') ||
-              device.name.toLowerCase().includes('heart');
+          if (device) {
+            const deviceName = device.name || device.localName || '';
+            const deviceNameLower = deviceName.toLowerCase();
+            
+            // Detect ESP32, Heimdall, HANI, or any BLE device with a name
+            const isCompatibleDevice = 
+              deviceNameLower.includes('esp32') ||
+              deviceNameLower.includes('heimdall') ||
+              deviceNameLower.includes('hani') ||
+              deviceNameLower.includes('vest') ||
+              deviceNameLower.includes('chaleco') ||
+              deviceNameLower.includes('hr') ||
+              deviceNameLower.includes('heart') ||
+              deviceNameLower.includes('ble') ||
+              // Also accept any device with a name (for broader ESP32 detection)
+              (deviceName.length > 0 && device.rssi && device.rssi > -80);
 
-            if (isHeimdallDevice) {
+            if (isCompatibleDevice) {
               onDeviceFound({
                 id: device.id,
-                name: device.name,
+                name: deviceName || `Dispositivo (${device.id.substring(0, 8)})`,
                 rssi: device.rssi,
               });
             }
