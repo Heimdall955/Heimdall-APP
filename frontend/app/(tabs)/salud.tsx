@@ -118,7 +118,7 @@ export default function SaludScreen() {
             <Text style={styles.title}>Salud 360°</Text>
             <Text style={styles.subtitle}>Monitorización biométrica</Text>
           </View>
-          <TouchableOpacity style={styles.addButton}>
+          <TouchableOpacity style={styles.addButton} onPress={() => router.push('/historial-medico')}>
             <Ionicons name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -127,31 +127,31 @@ export default function SaludScreen() {
         <Card style={styles.sensorsCard} variant="elevated">
           <View style={styles.sensorsHeader}>
             <View style={styles.sensorsInfo}>
-              <View style={[styles.sensorIndicator, sensorsActive && styles.sensorActive]} />
+              <View style={[styles.sensorIndicator, isConnected && styles.sensorActive]} />
               <Text style={styles.sensorsTitle}>
-                Sensores {sensorsActive ? 'activos' : 'pausados'}
+                Sensores {isConnected ? 'activos' : 'pausados'}
               </Text>
             </View>
             <View style={styles.batteryContainer}>
               <Ionicons 
-                name={batteryLevel > 20 ? 'battery-half' : 'battery-dead'} 
+                name={biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} 
                 size={20} 
-                color={batteryLevel > 20 ? Colors.success : Colors.error} 
+                color={biometricData.battery > 20 ? Colors.success : Colors.error} 
               />
-              <Text style={styles.batteryText}>{batteryLevel}%</Text>
+              <Text style={styles.batteryText}>{isConnected ? biometricData.battery : '--'}%</Text>
             </View>
           </View>
           <TouchableOpacity 
-            style={[styles.sensorsButton, !sensorsActive && styles.sensorsButtonActive]} 
+            style={[styles.sensorsButton, !isConnected && styles.sensorsButtonActive]} 
             onPress={toggleSensors}
           >
             <Ionicons 
-              name={sensorsActive ? 'pause' : 'play'} 
+              name={isConnected ? 'pause' : 'play'} 
               size={20} 
-              color={sensorsActive ? Colors.text : Colors.white} 
+              color={isConnected ? Colors.text : Colors.white} 
             />
-            <Text style={[styles.sensorsButtonText, !sensorsActive && styles.sensorsButtonTextActive]}>
-              {sensorsActive ? 'Pausar' : 'Reanudar'}
+            <Text style={[styles.sensorsButtonText, !isConnected && styles.sensorsButtonTextActive]}>
+              {isConnected ? 'Pausar' : 'Conectar'}
             </Text>
           </TouchableOpacity>
         </Card>
