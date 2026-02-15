@@ -15,9 +15,14 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     confirm: 'Confirmar',
     back: 'Volver',
     next: 'Siguiente',
+    previous: 'Anterior',
     done: 'Hecho',
     error: 'Error',
     success: 'Éxito',
+    close: 'Cerrar',
+    start: 'Iniciar',
+    stop: 'Detener',
+    retry: 'Reintentar',
     
     // Navigation
     home: 'Inicio',
@@ -48,6 +53,17 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     nextGoal: 'Siguiente',
     haveQuestions: '¿Tienes dudas?',
     askHani: 'Pregúntale a Hani, tu asistente IA',
+    thePerfectCall: 'La Llamada Perfecta',
+    intermediate: 'Intermedio',
+    highPriority: 'PRIORIDAD ALTA',
+    min: 'min',
+    explorerLevel: 'Explorador Canino',
+    basicSignals: 'Señales Básicas',
+    sitDownStay: 'Sentado, Tumbado, Quieto',
+    impulseControl: 'Control de Impulsos',
+    waitLeaveRelease: 'Espera, Deja, Suelta',
+    socialization: 'Socialización',
+    dogsPeopleEnvironments: 'Perros, Personas, Entornos',
     
     // Quick Access
     vest: 'Chaleco',
@@ -76,6 +92,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lastVaccine: 'Última vacuna',
     lastDeworming: 'Última desparasitación',
     lastVetVisit: 'Última visita veterinaria',
+    biometrics: 'Biométricos',
+    vitalSigns: 'Signos Vitales',
+    activityLevel: 'Nivel de Actividad',
+    stressLevel: 'Nivel de Estrés',
+    sleeping: 'Durmiendo',
+    resting: 'Descansando',
+    active: 'Activo',
+    veryActive: 'Muy Activo',
+    calm: 'Tranquilo',
+    relaxed: 'Relajado',
+    alert: 'Alerta',
+    anxious: 'Ansioso',
     
     // Education Screen
     heimdallAcademy: 'Academia Heimdall',
@@ -99,6 +127,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tugOfWar: 'Tira y Afloja',
     difficulty: 'Dificultad',
     bond: 'Vínculo',
+    lessons: 'Lecciones',
     
     // Chat Screen
     chatWithHani: 'Chat con Hani',
@@ -107,6 +136,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     send: 'Enviar',
     haniGreeting: '¡Hola! Soy Hani, tu asistente de educación canina. ¿En qué puedo ayudarte hoy?',
     thinking: 'Pensando...',
+    whyDogBarks: '¿Por qué mi perro ladra tanto?',
+    rainyDayGames: 'Juegos para días de lluvia',
+    howMuchToEat: '¿Cuánto debe comer mi perro?',
+    trySaying: 'Prueba preguntar:',
     
     // Profile Screen
     myPack: 'Mi manada',
@@ -162,7 +195,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     proTip: 'Consejo Pro',
     whatYouWillLearn: 'Lo que aprenderás:',
     commonMistakes: 'Errores Comunes a Evitar:',
-    previous: 'Anterior',
     
     // Exercises
     completed: 'completados',
@@ -180,6 +212,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     routeSaved: 'Ruta guardada',
     distance: 'Distancia',
     duration: 'Duración',
+    tracking: 'Rastreando',
+    walkWithDog: 'Pasea con tu perro',
+    startWalk: 'Iniciar paseo',
+    endWalk: 'Terminar paseo',
+    walkCompleted: '¡Paseo completado!',
+    bonesEarned: 'huesos ganados',
     
     // PRO
     proBenefits: 'Beneficios PRO',
@@ -193,6 +231,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     guaranteeText: 'Si no estás satisfecho, te devolvemos el dinero sin preguntas.',
     alreadyPro: '¡Ya eres PRO!',
     enjoyPremium: 'Disfruta de todas las funciones premium de Heimdall',
+    unlockPotential: 'Desbloquea todo el potencial de Heimdall',
+    everythingIncluded: 'Todo lo que incluye PRO',
+    choosePlan: 'Elige tu plan',
+    securePayment: 'Pago seguro con',
+    month: 'mes',
+    year: 'año',
     
     // Medical History
     addEvent: 'Añadir evento',
@@ -205,6 +249,25 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     noEvents: 'No hay eventos registrados',
     eventAdded: 'Evento añadido',
     eventDeleted: 'Evento eliminado',
+    eventType: 'Tipo de evento',
+    eventDate: 'Fecha',
+    eventDescription: 'Descripción',
+    
+    // Vest/Bluetooth
+    smartVest: 'Chaleco Inteligente',
+    connectDevice: 'Conectar dispositivo',
+    disconnectDevice: 'Desconectar',
+    searching: 'Buscando...',
+    connected: 'Conectado',
+    disconnected: 'Desconectado',
+    batteryLevel: 'Nivel de batería',
+    lastSync: 'Última sincronización',
+    syncNow: 'Sincronizar ahora',
+    deviceNotFound: 'Dispositivo no encontrado',
+    bluetoothOff: 'Bluetooth desactivado',
+    enableBluetooth: 'Activa Bluetooth para continuar',
+    simulatorMode: 'Modo Simulador',
+    simulatorDescription: 'Usando datos simulados para demostración',
   },
   en: {
     // General
@@ -216,9 +279,14 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     confirm: 'Confirm',
     back: 'Back',
     next: 'Next',
+    previous: 'Previous',
     done: 'Done',
     error: 'Error',
     success: 'Success',
+    close: 'Close',
+    start: 'Start',
+    stop: 'Stop',
+    retry: 'Retry',
     
     // Navigation
     home: 'Home',
@@ -249,6 +317,17 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     nextGoal: 'Next',
     haveQuestions: 'Have questions?',
     askHani: 'Ask Hani, your AI assistant',
+    thePerfectCall: 'The Perfect Recall',
+    intermediate: 'Intermediate',
+    highPriority: 'HIGH PRIORITY',
+    min: 'min',
+    explorerLevel: 'Canine Explorer',
+    basicSignals: 'Basic Commands',
+    sitDownStay: 'Sit, Down, Stay',
+    impulseControl: 'Impulse Control',
+    waitLeaveRelease: 'Wait, Leave, Drop',
+    socialization: 'Socialization',
+    dogsPeopleEnvironments: 'Dogs, People, Environments',
     
     // Quick Access
     vest: 'Vest',
@@ -277,6 +356,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lastVaccine: 'Last vaccine',
     lastDeworming: 'Last deworming',
     lastVetVisit: 'Last vet visit',
+    biometrics: 'Biometrics',
+    vitalSigns: 'Vital Signs',
+    activityLevel: 'Activity Level',
+    stressLevel: 'Stress Level',
+    sleeping: 'Sleeping',
+    resting: 'Resting',
+    active: 'Active',
+    veryActive: 'Very Active',
+    calm: 'Calm',
+    relaxed: 'Relaxed',
+    alert: 'Alert',
+    anxious: 'Anxious',
     
     // Education Screen
     heimdallAcademy: 'Heimdall Academy',
@@ -300,6 +391,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tugOfWar: 'Tug of War',
     difficulty: 'Difficulty',
     bond: 'Bond',
+    lessons: 'Lessons',
     
     // Chat Screen
     chatWithHani: 'Chat with Hani',
@@ -308,6 +400,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     send: 'Send',
     haniGreeting: "Hi! I'm Hani, your canine education assistant. How can I help you today?",
     thinking: 'Thinking...',
+    whyDogBarks: 'Why does my dog bark so much?',
+    rainyDayGames: 'Games for rainy days',
+    howMuchToEat: 'How much should my dog eat?',
+    trySaying: 'Try asking:',
     
     // Profile Screen
     myPack: 'My pack',
@@ -363,7 +459,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     proTip: 'Pro Tip',
     whatYouWillLearn: 'What you will learn:',
     commonMistakes: 'Common Mistakes to Avoid:',
-    previous: 'Previous',
     
     // Exercises
     completed: 'completed',
@@ -381,6 +476,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     routeSaved: 'Route saved',
     distance: 'Distance',
     duration: 'Duration',
+    tracking: 'Tracking',
+    walkWithDog: 'Walk with your dog',
+    startWalk: 'Start walk',
+    endWalk: 'End walk',
+    walkCompleted: 'Walk completed!',
+    bonesEarned: 'bones earned',
     
     // PRO
     proBenefits: 'PRO Benefits',
@@ -394,6 +495,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     guaranteeText: "If you're not satisfied, we'll refund your money, no questions asked.",
     alreadyPro: "You're already PRO!",
     enjoyPremium: 'Enjoy all premium features of Heimdall',
+    unlockPotential: 'Unlock the full potential of Heimdall',
+    everythingIncluded: 'Everything included in PRO',
+    choosePlan: 'Choose your plan',
+    securePayment: 'Secure payment with',
+    month: 'month',
+    year: 'year',
     
     // Medical History
     addEvent: 'Add event',
@@ -406,6 +513,25 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     noEvents: 'No events registered',
     eventAdded: 'Event added',
     eventDeleted: 'Event deleted',
+    eventType: 'Event type',
+    eventDate: 'Date',
+    eventDescription: 'Description',
+    
+    // Vest/Bluetooth
+    smartVest: 'Smart Vest',
+    connectDevice: 'Connect device',
+    disconnectDevice: 'Disconnect',
+    searching: 'Searching...',
+    connected: 'Connected',
+    disconnected: 'Disconnected',
+    batteryLevel: 'Battery level',
+    lastSync: 'Last sync',
+    syncNow: 'Sync now',
+    deviceNotFound: 'Device not found',
+    bluetoothOff: 'Bluetooth is off',
+    enableBluetooth: 'Enable Bluetooth to continue',
+    simulatorMode: 'Simulator Mode',
+    simulatorDescription: 'Using simulated data for demonstration',
   },
   it: {
     // General
@@ -417,9 +543,14 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     confirm: 'Conferma',
     back: 'Indietro',
     next: 'Avanti',
+    previous: 'Precedente',
     done: 'Fatto',
     error: 'Errore',
     success: 'Successo',
+    close: 'Chiudi',
+    start: 'Inizia',
+    stop: 'Ferma',
+    retry: 'Riprova',
     
     // Navigation
     home: 'Home',
@@ -450,6 +581,17 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     nextGoal: 'Prossimo',
     haveQuestions: 'Hai domande?',
     askHani: 'Chiedi a Hani, il tuo assistente IA',
+    thePerfectCall: 'Il Richiamo Perfetto',
+    intermediate: 'Intermedio',
+    highPriority: 'PRIORITÀ ALTA',
+    min: 'min',
+    explorerLevel: 'Esploratore Canino',
+    basicSignals: 'Comandi Base',
+    sitDownStay: 'Seduto, Terra, Fermo',
+    impulseControl: 'Controllo degli Impulsi',
+    waitLeaveRelease: 'Aspetta, Lascia, Molla',
+    socialization: 'Socializzazione',
+    dogsPeopleEnvironments: 'Cani, Persone, Ambienti',
     
     // Quick Access
     vest: 'Gilet',
@@ -478,6 +620,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lastVaccine: 'Ultimo vaccino',
     lastDeworming: 'Ultima sverminazione',
     lastVetVisit: 'Ultima visita veterinaria',
+    biometrics: 'Biometrici',
+    vitalSigns: 'Segni Vitali',
+    activityLevel: 'Livello di Attività',
+    stressLevel: 'Livello di Stress',
+    sleeping: 'Dormendo',
+    resting: 'Riposando',
+    active: 'Attivo',
+    veryActive: 'Molto Attivo',
+    calm: 'Calmo',
+    relaxed: 'Rilassato',
+    alert: 'Allerta',
+    anxious: 'Ansioso',
     
     // Education Screen
     heimdallAcademy: 'Accademia Heimdall',
@@ -501,6 +655,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tugOfWar: 'Tiro alla Fune',
     difficulty: 'Difficoltà',
     bond: 'Legame',
+    lessons: 'Lezioni',
     
     // Chat Screen
     chatWithHani: 'Chat con Hani',
@@ -509,6 +664,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     send: 'Invia',
     haniGreeting: 'Ciao! Sono Hani, il tuo assistente per l\'educazione canina. Come posso aiutarti oggi?',
     thinking: 'Sto pensando...',
+    whyDogBarks: 'Perché il mio cane abbaia così tanto?',
+    rainyDayGames: 'Giochi per i giorni di pioggia',
+    howMuchToEat: 'Quanto dovrebbe mangiare il mio cane?',
+    trySaying: 'Prova a chiedere:',
     
     // Profile Screen
     myPack: 'Il mio branco',
@@ -564,7 +723,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     proTip: 'Consiglio Pro',
     whatYouWillLearn: 'Cosa imparerai:',
     commonMistakes: 'Errori Comuni da Evitare:',
-    previous: 'Precedente',
     
     // Exercises
     completed: 'completati',
@@ -582,6 +740,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     routeSaved: 'Percorso salvato',
     distance: 'Distanza',
     duration: 'Durata',
+    tracking: 'Tracciamento',
+    walkWithDog: 'Passeggia con il tuo cane',
+    startWalk: 'Inizia passeggiata',
+    endWalk: 'Termina passeggiata',
+    walkCompleted: 'Passeggiata completata!',
+    bonesEarned: 'ossa guadagnate',
     
     // PRO
     proBenefits: 'Benefici PRO',
@@ -595,6 +759,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     guaranteeText: 'Se non sei soddisfatto, ti rimborsiamo senza domande.',
     alreadyPro: 'Sei già PRO!',
     enjoyPremium: 'Goditi tutte le funzioni premium di Heimdall',
+    unlockPotential: 'Sblocca tutto il potenziale di Heimdall',
+    everythingIncluded: 'Tutto incluso in PRO',
+    choosePlan: 'Scegli il tuo piano',
+    securePayment: 'Pagamento sicuro con',
+    month: 'mese',
+    year: 'anno',
     
     // Medical History
     addEvent: 'Aggiungi evento',
@@ -607,6 +777,25 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     noEvents: 'Nessun evento registrato',
     eventAdded: 'Evento aggiunto',
     eventDeleted: 'Evento eliminato',
+    eventType: 'Tipo di evento',
+    eventDate: 'Data',
+    eventDescription: 'Descrizione',
+    
+    // Vest/Bluetooth
+    smartVest: 'Gilet Intelligente',
+    connectDevice: 'Connetti dispositivo',
+    disconnectDevice: 'Disconnetti',
+    searching: 'Ricerca...',
+    connected: 'Connesso',
+    disconnected: 'Disconnesso',
+    batteryLevel: 'Livello batteria',
+    lastSync: 'Ultima sincronizzazione',
+    syncNow: 'Sincronizza ora',
+    deviceNotFound: 'Dispositivo non trovato',
+    bluetoothOff: 'Bluetooth disattivato',
+    enableBluetooth: 'Attiva Bluetooth per continuare',
+    simulatorMode: 'Modalità Simulatore',
+    simulatorDescription: 'Utilizzo dati simulati per la dimostrazione',
   },
 };
 
