@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
@@ -14,16 +14,17 @@ import { DogStatus } from '../../types';
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 const quickAccessItems = [
-  { id: 'ficha', icon: 'paw', label: 'Ficha', color: Colors.primary, route: '/(tabs)/perfil' },
   { id: 'chaleco', icon: 'bluetooth', label: 'Chaleco', color: Colors.info, route: '/chaleco' },
-  { id: 'historial', icon: 'medical', label: 'Historial', color: Colors.success, route: '/historial-medico' },
-  { id: 'educacion', icon: 'school', label: 'Educación', color: '#FF6B6B', route: '/(tabs)/educacion' },
-  { id: 'salud', icon: 'heart', label: 'Salud', color: Colors.accentEducation, route: '/(tabs)/salud' },
-  { id: 'chat', icon: 'chatbubbles', label: 'Chat IA', color: Colors.accent, route: '/(tabs)/chat' },
+  { id: 'rutas', icon: 'navigate', label: 'Rutas GPS', color: Colors.success, route: '/rutas' },
+  { id: 'historial', icon: 'medical', label: 'Historial', color: Colors.accentEducation, route: '/historial-medico' },
+  { id: 'educacion', icon: 'school', label: 'Academia', color: '#FF6B6B', route: '/(tabs)/educacion' },
+  { id: 'salud', icon: 'heart', label: 'Salud', color: Colors.primary, route: '/(tabs)/salud' },
+  { id: 'pro', icon: 'diamond', label: 'PRO', color: Colors.accent, route: '/pro' },
 ];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
   const { isConnected, biometricData } = useBluetooth();
   const [refreshing, setRefreshing] = useState(false);
