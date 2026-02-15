@@ -306,7 +306,11 @@ export default function EducacionScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.gamesRow}>
               {games.map((game) => (
-                <TouchableOpacity key={game.id} style={styles.gameCard}>
+                <TouchableOpacity 
+                  key={game.id} 
+                  style={styles.gameCard}
+                  onPress={() => router.push(`/juego?id=${game.id}`)}
+                >
                   <Image source={{ uri: game.image }} style={styles.gameImage} />
                   <View style={styles.gameContent}>
                     <Text style={styles.gameTitle}>{game.title}</Text>
