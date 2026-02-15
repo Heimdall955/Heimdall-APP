@@ -1,5 +1,20 @@
 import { Platform, PermissionsAndroid } from 'react-native';
-import { BleManager, Device, State, Characteristic } from 'react-native-ble-plx';
+
+// Conditional import for BLE
+let BleManager: any = null;
+let BleDevice: any = null;
+let BleState: any = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    const ble = require('react-native-ble-plx');
+    BleManager = ble.BleManager;
+    BleDevice = ble.Device;
+    BleState = ble.State;
+  } catch (e) {
+    console.log('BLE not available');
+  }
+}
 
 // Heimdall Vest Service UUIDs (standard Heart Rate and custom services)
 const HEART_RATE_SERVICE = '0000180d-0000-1000-8000-00805f9b34fb';
