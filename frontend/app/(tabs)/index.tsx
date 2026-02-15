@@ -202,7 +202,7 @@ export default function HomeScreen() {
           <Card style={styles.progressCard}>
             <View style={styles.progressHeader}>
               <View>
-                <Text style={styles.levelTitle}>Nivel 3: Explorador Canino</Text>
+                <Text style={styles.levelTitle}>{t('level')} 3: {t('explorerLevel')}</Text>
                 <View style={styles.progressBarContainer}>
                   <View style={styles.progressBarTrack}>
                     <View 
