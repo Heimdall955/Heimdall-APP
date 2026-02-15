@@ -7,6 +7,7 @@ import axios from 'axios';
 import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 
