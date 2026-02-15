@@ -221,11 +221,11 @@ export default function HomeScreen() {
               <View style={styles.streakBadges}>
                 <View style={styles.streakBadge}>
                   <Ionicons name="flash" size={14} color={Colors.accent} />
-                  <Text style={styles.streakBadgeText}>3 Días</Text>
+                  <Text style={styles.streakBadgeText}>3 {t('days')}</Text>
                 </View>
                 <View style={styles.streakBadge}>
                   <Ionicons name="trending-up" size={14} color={Colors.accentOrange} />
-                  <Text style={styles.streakBadgeText}>Siguiente: 50</Text>
+                  <Text style={styles.streakBadgeText}>{t('nextGoal')}: 50</Text>
                 </View>
               </View>
             </View>
