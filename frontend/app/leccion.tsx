@@ -308,6 +308,252 @@ const LECCIONES_DB: Record<string, Leccion> = {
       'Exponer a demasiadas cosas demasiado rápido'
     ],
     ejercicioPractico: 'Haz una salida de socialización: 10 min observando el mundo desde distancia segura, premiando calma.'
+  },
+  // Nuevas lecciones para los programas
+  'refuerzo-positivo': {
+    id: 'refuerzo-positivo',
+    titulo: 'Introducción al Refuerzo Positivo',
+    subtitulo: 'Los fundamentos del entrenamiento moderno',
+    nivel: 'Básico',
+    duracion: '15 min',
+    xp: 20,
+    huesos: 8,
+    imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    descripcion: 'El refuerzo positivo es la base de todo entrenamiento moderno. Aprende por qué funciona y cómo aplicarlo correctamente.',
+    objetivos: [
+      'Entender qué es el refuerzo positivo',
+      'Conocer los tipos de premios',
+      'Aprender el timing correcto',
+      'Evitar errores comunes'
+    ],
+    pasos: [
+      { titulo: 'Qué es el Refuerzo Positivo', contenido: 'Es añadir algo que tu perro quiere (premio, juego, caricias) inmediatamente después de un comportamiento para que lo repita.', tip: 'El comportamiento que se premia se repite. El que se ignora se extingue.', duracion: '3 min' },
+      { titulo: 'Tipos de Premios', contenido: 'Comida (más efectiva), juguetes, caricias, libertad. Usa premios de alto valor (pollo, queso) para comportamientos difíciles.', tip: 'Varía los premios para mantener la motivación alta.', duracion: '4 min' },
+      { titulo: 'El Timing Perfecto', contenido: 'El premio debe llegar en menos de 1-2 segundos después del comportamiento. Usa una palabra marcador ("Sí", "Bien") o clicker.', tip: 'Practica tu timing sin el perro: marca cuando la TV muestre algo específico.', duracion: '4 min' },
+      { titulo: 'Errores a Evitar', contenido: 'No premies tarde, no repitas comandos, no uses castigos físicos, no entrenes cuando estés frustrado.', tip: 'Sesiones cortas (5-10 min) son más efectivas que largas.', duracion: '4 min' }
+    ],
+    erroresComunes: ['Premiar demasiado tarde', 'Sesiones muy largas', 'Expectativas irreales', 'Inconsistencia entre miembros de la familia'],
+    ejercicioPractico: 'Practica el timing: di "Sí" cada vez que tu perro te mire, y dale un premio.'
+  },
+  'paseo-correa': {
+    id: 'paseo-correa',
+    titulo: 'Paseo con Correa',
+    subtitulo: 'Caminar sin tirones de forma relajada',
+    nivel: 'Intermedio',
+    duracion: '30 min',
+    xp: 35,
+    huesos: 12,
+    imagen: 'https://images.unsplash.com/photo-1558929996-da64ba858215?w=800',
+    descripcion: 'Un paseo agradable es posible. Aprende técnicas para que tu perro camine a tu lado sin tirar de la correa.',
+    objetivos: ['Entender por qué tira', 'Enseñar la posición correcta', 'Manejar distracciones', 'Disfrutar de paseos relajados'],
+    pasos: [
+      { titulo: 'Por Qué Tira', contenido: 'Tu perro tira porque funciona: le lleva a donde quiere ir. Cada vez que caminas cuando tira, refuerzas el tirón.', tip: 'Nunca avances cuando la correa esté tensa.', duracion: '5 min' },
+      { titulo: 'El Árbol', contenido: 'Cuando tire, para completamente como un árbol. Espera a que afloje la correa y te mire. Entonces avanza.', tip: 'Sé paciente. Los primeros paseos serán MUY lentos.', duracion: '8 min' },
+      { titulo: 'Premia la Posición', contenido: 'Cada vez que camine a tu lado con correa floja, di "Sí" y dale un premio. Premia frecuentemente al principio.', tip: 'Usa premios de alto valor en el paseo.', duracion: '10 min' },
+      { titulo: 'Distracciones', contenido: 'Cuando vea algo interesante, llámalo antes de que tire. Prémialo por mirarte y luego déjale investigar como recompensa.', tip: 'El acceso al olor es un premio muy valioso.', duracion: '7 min' }
+    ],
+    erroresComunes: ['Tirar de la correa hacia atrás', 'Usar correa extensible', 'No ser consistente', 'Paseos demasiado largos al principio'],
+    ejercicioPractico: 'Haz un paseo de 10 minutos usando la técnica del árbol. Cuenta cuántas veces paras.'
+  },
+  'estres-canino': {
+    id: 'estres-canino',
+    titulo: 'Entender el Estrés Canino',
+    subtitulo: 'Señales, causas y soluciones',
+    nivel: 'Todos',
+    duracion: '15 min',
+    xp: 20,
+    huesos: 8,
+    imagen: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=800',
+    descripcion: 'Aprende a reconocer cuando tu perro está estresado y qué puedes hacer al respecto.',
+    objetivos: ['Identificar señales de estrés', 'Conocer causas comunes', 'Aplicar técnicas calmantes', 'Prevenir estrés crónico'],
+    pasos: [
+      { titulo: 'Señales de Estrés', contenido: 'Lamerse los labios, bostezar, sacudirse, rascarse, jadear (sin calor), cola baja, orejas hacia atrás, evitar mirada.', tip: 'Una señal sola puede ser normal. Varias juntas indican estrés.', duracion: '4 min' },
+      { titulo: 'Causas Comunes', contenido: 'Falta de ejercicio, sobreestimulación, cambios en rutina, ruidos fuertes, estar solo mucho tiempo, visitas al veterinario.', tip: 'Lleva un diario para identificar patrones de estrés.', duracion: '4 min' },
+      { titulo: 'Qué Hacer', contenido: 'Aleja a tu perro del estresor, dale espacio, no le fuerces, usa premios para crear asociaciones positivas.', tip: 'Tu calma se contagia. Si estás tenso, él lo notará.', duracion: '4 min' },
+      { titulo: 'Prevención', contenido: 'Rutinas predecibles, ejercicio diario, estimulación mental, lugar seguro en casa, descanso adecuado.', tip: 'Un perro descansado maneja mejor el estrés.', duracion: '3 min' }
+    ],
+    erroresComunes: ['Ignorar señales sutiles', 'Forzar al perro a enfrentar sus miedos', 'Castigar comportamientos de estrés', 'No dar suficiente descanso'],
+    ejercicioPractico: 'Observa a tu perro durante 10 minutos. Anota cualquier señal de estrés que veas.'
+  },
+  'relajacion': {
+    id: 'relajacion',
+    titulo: 'Técnicas de Relajación',
+    subtitulo: 'Calma y paz para tu perro',
+    nivel: 'Todos',
+    duracion: '25 min',
+    xp: 30,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800',
+    descripcion: 'Ejercicios específicos para ayudar a tu perro a relajarse y encontrar la calma.',
+    objetivos: ['Enseñar a relajarse a la orden', 'Crear rutinas calmantes', 'Usar el tacto para calmar', 'Establecer un lugar tranquilo'],
+    pasos: [
+      { titulo: 'El Tapete de Calma', contenido: 'Elige un tapete específico. Cada vez que tu perro se tumbe en él y esté tranquilo, dale premios suavemente.', tip: 'Este tapete viajará contigo y será su "zona de calma" en cualquier lugar.', duracion: '7 min' },
+      { titulo: 'Masaje Relajante', contenido: 'Con movimientos lentos y suaves, masajea desde la cabeza hacia la cola. Usa presión ligera y constante.', tip: 'Hazlo cuando ya esté tranquilo para asociar el tacto con la calma.', duracion: '6 min' },
+      { titulo: 'Respiración Sincronizada', contenido: 'Túmbate junto a tu perro y respira profunda y lentamente. Los perros sincronizan su respiración con la nuestra.', tip: 'Esto también te relajará a ti.', duracion: '6 min' },
+      { titulo: 'Música Calmante', contenido: 'Pon música clásica o diseñada para perros a volumen bajo. Úsala consistentemente en momentos de calma.', tip: 'Spotify tiene playlists específicas para relajación canina.', duracion: '6 min' }
+    ],
+    erroresComunes: ['Practicar solo cuando está estresado', 'Movimientos demasiado rápidos', 'Esperar resultados inmediatos', 'No ser consistente'],
+    ejercicioPractico: 'Haz una sesión de 5 minutos de tapete de calma con tu perro hoy.'
+  },
+  'lugar-seguro': {
+    id: 'lugar-seguro',
+    titulo: 'El Lugar Seguro',
+    subtitulo: 'Crear un refugio para tu perro',
+    nivel: 'Básico',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
+    descripcion: 'Todo perro necesita un lugar donde sentirse completamente seguro y tranquilo.',
+    objetivos: ['Elegir el lugar ideal', 'Hacer el espacio atractivo', 'Enseñar a usarlo', 'Respetar su refugio'],
+    pasos: [
+      { titulo: 'Elegir el Lugar', contenido: 'Busca un rincón tranquilo, alejado del tráfico de la casa, pero donde pueda verte. Puede ser un transportín abierto o una cama en esquina.', tip: 'No lo pongas en zonas de paso o cerca de ventanas ruidosas.', duracion: '5 min' },
+      { titulo: 'Hacerlo Atractivo', contenido: 'Añade su cama favorita, una manta con tu olor, y deja ahí sus juguetes de morder seguros.', tip: 'Rocía con feromonas calmantes (Adaptil) si es necesario.', duracion: '5 min' },
+      { titulo: 'Asociación Positiva', contenido: 'Esconde premios en su lugar seguro. Dale kongs rellenos ahí. Nunca lo llames desde ahí para algo negativo.', tip: 'Que descubra que cosas buenas aparecen en ese lugar.', duracion: '5 min' },
+      { titulo: 'Regla de Oro', contenido: 'Cuando esté en su lugar seguro, NADIE le molesta. Ni niños, ni visitas, ni tú para abrazarle. Es SU espacio sagrado.', tip: 'Enseña esta regla a toda la familia.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Usar el lugar como castigo', 'Molestarle cuando está ahí', 'Ubicación en zona de mucho tráfico', 'No respetar su espacio'],
+    ejercicioPractico: 'Prepara el lugar seguro de tu perro y esconde 5 premios para que los descubra.'
+  },
+  'desensibilizacion': {
+    id: 'desensibilizacion',
+    titulo: 'Desensibilización',
+    subtitulo: 'Reducir miedos y reactividad',
+    nivel: 'Avanzado',
+    duracion: '30 min',
+    xp: 35,
+    huesos: 15,
+    imagen: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=800',
+    descripcion: 'Técnica científica para reducir gradualmente la respuesta de miedo o reactividad.',
+    objetivos: ['Entender la técnica', 'Identificar umbrales', 'Aplicar correctamente', 'Medir progreso'],
+    pasos: [
+      { titulo: 'El Concepto', contenido: 'Exponer gradualmente al perro al estímulo temido a una intensidad tan baja que no provoque miedo, mientras se asocia con cosas positivas.', tip: 'La clave es que NUNCA llegue a asustarse durante el proceso.', duracion: '7 min' },
+      { titulo: 'Encontrar el Umbral', contenido: 'El umbral es la distancia o intensidad donde tu perro nota el estímulo pero aún puede comer premios y responder a ti.', tip: 'Si no come, estás demasiado cerca. Aléjate.', duracion: '8 min' },
+      { titulo: 'Sesiones de Trabajo', contenido: 'En el umbral, presenta el estímulo y da premios continuamente. Retira el estímulo y para los premios. Repite.', tip: 'Estímulo = premios. Sin estímulo = nada. Esto crea asociación positiva.', duracion: '8 min' },
+      { titulo: 'Progreso Gradual', contenido: 'Solo reduce la distancia o aumenta la intensidad cuando veas que tu perro está relajado en el nivel actual.', tip: 'Es mejor ir demasiado lento que demasiado rápido.', duracion: '7 min' }
+    ],
+    erroresComunes: ['Ir demasiado rápido', 'Exponer a intensidad que causa miedo', 'No premiar suficiente', 'Sesiones demasiado largas'],
+    ejercicioPractico: 'Identifica un miedo de tu perro y encuentra su umbral (la distancia donde puede comer premios).'
+  },
+  'rutinas-calmantes': {
+    id: 'rutinas-calmantes',
+    titulo: 'Rutinas Calmantes',
+    subtitulo: 'Paz y estructura diaria',
+    nivel: 'Todos',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800',
+    descripcion: 'Establecer rutinas predecibles ayuda a tu perro a sentirse seguro y reduce la ansiedad.',
+    objetivos: ['Crear horarios consistentes', 'Incluir tiempo de calma', 'Equilibrar actividad y descanso', 'Señales de transición'],
+    pasos: [
+      { titulo: 'Horarios Predecibles', contenido: 'Comidas, paseos y tiempo de juego a las mismas horas cada día. La predictibilidad reduce la ansiedad.', tip: 'Usa alarmas en tu teléfono para mantener consistencia.', duracion: '5 min' },
+      { titulo: 'Tiempo de Calma Obligatorio', contenido: 'Después de actividad, guía a tu perro a su lugar tranquilo. Dale algo para morder (kong, hueso) y déjalo descansar.', tip: 'Muchos problemas de conducta son por falta de descanso.', duracion: '5 min' },
+      { titulo: 'La Regla 1-1-1', contenido: 'Por cada hora de actividad intensa, necesita al menos 1 hora de calma activa (morder) y 1 hora de sueño.', tip: 'Los cachorros necesitan hasta 18-20 horas de sueño al día.', duracion: '5 min' },
+      { titulo: 'Transiciones Suaves', contenido: 'Usa palabras consistentes para transiciones: "Hora de descansar", "Vamos a pasear", "Hora de comer".', tip: 'Las palabras predecibles reducen la incertidumbre.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Horarios caóticos', 'No incluir tiempo de descanso', 'Sobreestimular al perro', 'Actividad justo antes de dormir'],
+    ejercicioPractico: 'Escribe la rutina ideal para tu perro incluyendo horas de comida, paseo, juego y descanso.'
+  },
+  'bienvenido-casa': {
+    id: 'bienvenido-casa',
+    titulo: 'Bienvenido a Casa',
+    subtitulo: 'El primer día con tu cachorro',
+    nivel: 'Cachorros',
+    duracion: '15 min',
+    xp: 20,
+    huesos: 8,
+    imagen: 'https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=800',
+    descripcion: 'Cómo hacer que el primer día de tu cachorro en casa sea positivo y sin estrés.',
+    objetivos: ['Preparar la casa', 'Primera noche tranquila', 'Establecer rutinas desde el inicio', 'Crear vínculo seguro'],
+    pasos: [
+      { titulo: 'Preparación', contenido: 'Ten listo: cama, comedero, bebedero, juguetes seguros, empapadores, transportín. Retira cables y objetos peligrosos.', tip: 'Limita el espacio inicial a 1-2 habitaciones.', duracion: '4 min' },
+      { titulo: 'Llegada a Casa', contenido: 'Llévalo directamente al área donde hará sus necesidades. Cuando haga, ¡fiesta de premios! Luego explora la casa tranquilamente.', tip: 'Mantén la calma. Tu energía se contagia.', duracion: '4 min' },
+      { titulo: 'Primera Noche', contenido: 'Pon su cama cerca de ti las primeras noches. Un reloj con tictac y una botella de agua tibia simulan a su madre.', tip: 'Si llora, no le ignores completamente. Tranquilízalo brevemente.', duracion: '4 min' },
+      { titulo: 'Primeras 48 horas', contenido: 'Minimiza visitas, ruidos fuertes y cambios. Deja que se adapte gradualmente. Muchas siestas son normales y necesarias.', tip: 'No lo presentes a todos tus amigos el primer día.', duracion: '3 min' }
+    ],
+    erroresComunes: ['Demasiada estimulación el primer día', 'Dejarlo solo la primera noche', 'Presentarlo a muchas personas', 'No supervisar constantemente'],
+    ejercicioPractico: 'Haz una lista de verificación de todo lo que necesitas antes de traer al cachorro a casa.'
+  },
+  'inhibicion-mordisco': {
+    id: 'inhibicion-mordisco',
+    titulo: 'Inhibición del Mordisco',
+    subtitulo: 'Boca suave y control',
+    nivel: 'Cachorros',
+    duracion: '25 min',
+    xp: 30,
+    huesos: 12,
+    imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    descripcion: 'Enseña a tu cachorro a tener una boca suave. Esto es crucial para su seguridad y la de otros.',
+    objetivos: ['Entender por qué muerden', 'Reducir la fuerza del mordisco', 'Redirigir a objetos apropiados', 'Prevenir mordiscos adultos'],
+    pasos: [
+      { titulo: 'Por Qué Muerden', contenido: 'Los cachorros exploran el mundo con la boca. También les duelen las encías por los dientes nuevos. Es normal, pero hay que enseñar límites.', tip: 'NUNCA castigues físicamente. Empeora el problema.', duracion: '5 min' },
+      { titulo: 'El Grito', contenido: 'Cuando muerda fuerte, di "¡AY!" agudo y retira la mano. Espera 5 segundos y continúa jugando. Repite.', tip: 'El grito imita lo que haría otro cachorro.', duracion: '7 min' },
+      { titulo: 'Redirigir', contenido: 'Ten siempre un juguete de morder a mano. Cuando vaya a morderte, mete el juguete en su boca y felicítalo por morderlo.', tip: 'Juguetes fríos alivian el dolor de encías.', duracion: '7 min' },
+      { titulo: 'Time-Out', contenido: 'Si sigue mordiendo después del grito, levántate y sal de la habitación 30 segundos. Aprende que morder = fin del juego.', tip: 'Sé consistente. Toda la familia debe hacer lo mismo.', duracion: '6 min' }
+    ],
+    erroresComunes: ['Jugar con las manos directamente', 'Gritar enfadado en vez de agudo', 'No redirigir a juguetes', 'Inconsistencia entre personas'],
+    ejercicioPractico: 'Practica el "¡AY!" y redirige 5 veces durante el juego con tu cachorro hoy.'
+  },
+  'necesidades': {
+    id: 'necesidades',
+    titulo: 'Entrenamiento de Baño',
+    subtitulo: 'Enseñar dónde hacer sus necesidades',
+    nivel: 'Cachorros',
+    duracion: '25 min',
+    xp: 30,
+    huesos: 12,
+    imagen: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
+    descripcion: 'Guía completa para enseñar a tu cachorro a hacer sus necesidades en el lugar correcto.',
+    objetivos: ['Establecer rutina de baño', 'Reconocer señales', 'Prevenir accidentes', 'Manejar errores correctamente'],
+    pasos: [
+      { titulo: 'La Rutina', contenido: 'Llévalo al mismo sitio: al despertar, después de comer, después de jugar, antes de dormir, y cada 2 horas entre medio.', tip: 'Los cachorros pueden aguantar 1 hora por mes de edad + 1.', duracion: '6 min' },
+      { titulo: 'Celebra el Éxito', contenido: 'Cuando haga en el lugar correcto, ¡fiesta! Premios, caricias, voz alegre. Hazlo INMEDIATAMENTE después.', tip: 'No esperes a entrar en casa para premiar.', duracion: '6 min' },
+      { titulo: 'Señales de Aviso', contenido: 'Olfatear el suelo, dar vueltas, inquietud, ir hacia la puerta. Cuando veas esto, ¡corre al lugar de baño!', tip: 'Conocer las señales previene accidentes.', duracion: '6 min' },
+      { titulo: 'Accidentes', contenido: 'Si lo pillas haciéndolo dentro, interrumpe con "¡Eh!" y llévalo fuera. Si ya terminó, NO le riñas. Limpia con enzimático.', tip: 'Castigar después del hecho solo crea miedo y confusión.', duracion: '7 min' }
+    ],
+    erroresComunes: ['Castigar accidentes descubiertos después', 'No limpiar con limpiador enzimático', 'Horarios inconsistentes', 'No supervisar suficiente'],
+    ejercicioPractico: 'Crea un horario de baño para tu cachorro y síguelo estrictamente por 3 días.'
+  },
+  'quedarse-solo': {
+    id: 'quedarse-solo',
+    titulo: 'Quedarse Solo',
+    subtitulo: 'Prevenir la ansiedad por separación',
+    nivel: 'Cachorros',
+    duracion: '25 min',
+    xp: 30,
+    huesos: 12,
+    imagen: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800',
+    descripcion: 'Enseña a tu cachorro a estar tranquilo cuando te vas. La prevención es clave.',
+    objetivos: ['Crear independencia gradual', 'Despedidas y llegadas neutras', 'Señales de calma', 'Enriquecimiento cuando está solo'],
+    pasos: [
+      { titulo: 'Independencia en Casa', contenido: 'Aunque estés en casa, deja que pase tiempo solo en otra habitación. Usa barreras para bebés. Premia la calma.', tip: 'No lo lleves contigo a todas partes de la casa.', duracion: '6 min' },
+      { titulo: 'Despedidas Neutras', contenido: 'No hagas drama al irte. Sin despedidas largas ni "pobrecito". Simplemente vete. Lo mismo al llegar: saluda calmadamente.', tip: 'El drama aumenta la ansiedad.', duracion: '6 min' },
+      { titulo: 'Ausencias Graduales', contenido: 'Empieza dejándolo solo 1 minuto, luego 2, 5, 10... Vuelve ANTES de que se estrese. Aumenta muy gradualmente.', tip: 'Es mejor 10 ausencias cortas que 1 larga.', duracion: '7 min' },
+      { titulo: 'Enriquecimiento', contenido: 'Deja kongs rellenos, juguetes puzzle, radio a bajo volumen. Que asocie tu ausencia con cosas buenas.', tip: 'Dale el kong especial SOLO cuando te vas.', duracion: '6 min' }
+    ],
+    erroresComunes: ['Despedidas dramáticas', 'Volver cuando llora (refuerza el llanto)', 'Aumentar el tiempo demasiado rápido', 'No practicar antes de necesitarlo'],
+    ejercicioPractico: 'Practica 5 salidas de 1 minuto hoy. Sal, cierra la puerta, espera en silencio, vuelve.'
+  },
+  'ventana-socializacion': {
+    id: 'ventana-socializacion',
+    titulo: 'La Ventana de Socialización',
+    subtitulo: 'Períodos críticos del desarrollo',
+    nivel: 'Cachorros',
+    duracion: '15 min',
+    xp: 20,
+    huesos: 8,
+    imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+    descripcion: 'Aprende sobre la ventana crítica de socialización y cómo aprovecharla.',
+    objetivos: ['Entender los períodos críticos', 'Planificar exposiciones', 'Calidad sobre cantidad', 'Qué hacer si ya pasó'],
+    pasos: [
+      { titulo: 'La Ventana', contenido: 'Entre las 3-14 semanas es cuando el cerebro del cachorro está más receptivo a nuevas experiencias. Lo que viva ahora le marcará.', tip: 'Esto no significa exponerle a todo. Calidad > cantidad.', duracion: '4 min' },
+      { titulo: 'Lista de Socialización', contenido: 'Personas (niños, mayores, uniformes), animales, superficies, sonidos, lugares, objetos (paraguas, bicis).', tip: 'Busca "lista de socialización cachorro" para una checklist completa.', duracion: '4 min' },
+      { titulo: 'Cómo Hacerlo', contenido: 'Cada experiencia debe ser POSITIVA. Observa, no fuerces. Premio por curiosidad y calma. Retírate si muestra miedo.', tip: 'Una mala experiencia puede causar miedo de por vida.', duracion: '4 min' },
+      { titulo: 'Después de la Ventana', contenido: 'Si tu perro es mayor, aún puedes socializar, pero será más lento. Usa desensibilización y contra-condicionamiento.', tip: 'Nunca es tarde, solo requiere más paciencia.', duracion: '3 min' }
+    ],
+    erroresComunes: ['Esperar a tener todas las vacunas para salir', 'Forzar interacciones', 'Exponer a demasiadas cosas', 'No premiar durante las experiencias'],
+    ejercicioPractico: 'Haz una lista de 5 cosas que tu cachorro aún no ha experimentado positivamente.'
   }
 };
 
