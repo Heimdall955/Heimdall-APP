@@ -9,13 +9,12 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { SecureStore } from '../../utils/secureStore';
 import { Card, Button } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
-
-type Language = 'es' | 'en' | 'it';
 
 const TRANSLATIONS: Record<Language, Record<string, string>> = {
   es: {
