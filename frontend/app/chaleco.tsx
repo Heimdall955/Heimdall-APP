@@ -85,8 +85,8 @@ export default function ChalecoScreen() {
             <Ionicons name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
           <View style={styles.headerText}>
-            <Text style={styles.title}>Chaleco Heimdall</Text>
-            <Text style={styles.subtitle}>Conexión Bluetooth</Text>
+            <Text style={styles.title}>{t('heimdallVest')}</Text>
+            <Text style={styles.subtitle}>Bluetooth ESP32</Text>
           </View>
         </View>
 
@@ -98,7 +98,7 @@ export default function ChalecoScreen() {
               { backgroundColor: isConnected ? Colors.success : Colors.gray }
             ]} />
             <Text style={styles.statusText}>
-              {isConnected ? 'Conectado' : isScanning ? 'Buscando...' : 'Desconectado'}
+              {isConnected ? t('connected') : isScanning ? t('searching') : t('disconnected')}
             </Text>
           </View>
           
@@ -108,7 +108,7 @@ export default function ChalecoScreen() {
 
           {isConnected ? (
             <Button
-              title="Desconectar"
+              title={t('disconnectDevice')}
               onPress={handleDisconnect}
               variant="outline"
               style={styles.actionButton}
@@ -116,14 +116,14 @@ export default function ChalecoScreen() {
           ) : (
             <View style={styles.buttonRow}>
               <Button
-                title={isScanning ? 'Detener' : 'Buscar Dispositivos'}
+                title={isScanning ? t('stopScanning') : t('scanForDevices')}
                 onPress={isScanning ? stopScan : handleStartScan}
                 loading={isScanning}
                 style={styles.scanButton}
                 icon={<Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={20} color={Colors.white} />}
               />
               <Button
-                title="Simulador"
+                title={t('useSimulator')}
                 onPress={startSimulation}
                 variant="secondary"
                 style={styles.simButton}
