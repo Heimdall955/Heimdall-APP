@@ -305,7 +305,7 @@ export default function PerfilScreen() {
             </View>
             <View style={styles.proBenefit}>
               <Ionicons name="checkmark" size={18} color={Colors.success} />
-              <Text style={styles.proBenefitText}>{t("vet")Reports}</Text>
+              <Text style={styles.proBenefitText}>{t("vetReports")}</Text>
             </View>
             <View style={styles.proBenefit}>
               <Ionicons name="checkmark" size={18} color={Colors.success} />
