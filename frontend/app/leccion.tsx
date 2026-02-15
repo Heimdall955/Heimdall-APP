@@ -413,7 +413,7 @@ export default function LeccionScreen() {
         </TouchableOpacity>
         <View style={styles.headerProgress}>
           <Text style={styles.headerProgressText}>
-            Paso {pasoActual + 1} de {leccion.pasos.length}
+            {t('step')} {pasoActual + 1} {t('of')} {leccion.pasos.length}
           </Text>
         </View>
         <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
