@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, StatusBadge, ProgressCircle } from '../../components/ui';
+import { WalletCard } from '../../components/WalletCard';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 // Define DogStatus type locally to avoid import issues
 interface DogStatus {
