@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Ale
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Button, Input } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 
 export default function RegistroScreen() {
   const router = useRouter();
-  const { login, register, loginWithGoogle, isLoading } = useAuth();
+  const { login, register, loginWithGoogle, isLoading, refreshDogs } = useAuth();
+  const { t } = useLanguage();
   
   const [isLogin, setIsLogin] = useState(false);
   const [name, setName] = useState('');
@@ -20,17 +22,17 @@ export default function RegistroScreen() {
     const newErrors: typeof errors = {};
     
     if (!isLogin && !name.trim()) {
-      newErrors.name = 'El nombre es requerido';
+      newErrors.name = t('nameRequired') || 'El nombre es requerido';
     }
     if (!email.trim()) {
-      newErrors.email = 'El email es requerido';
+      newErrors.email = t('emailRequired') || 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = t('invalidEmail') || 'Email inválido';
     }
     if (!password.trim()) {
-      newErrors.password = 'La contraseña es requerida';
+      newErrors.password = t('passwordRequired') || 'La contraseña es requerida';
     } else if (password.length < 6) {
-      newErrors.password = 'Mínimo 6 caracteres';
+      newErrors.password = t('minCharacters') || 'Mínimo 6 caracteres';
     }
     
     setErrors(newErrors);
@@ -42,15 +44,21 @@ export default function RegistroScreen() {
     
     try {
       if (isLogin) {
+        // Para login: autenticar y luego verificar si tiene perros
         await login(email, password);
+        // Refrescar perros para verificar si ya tiene registrados
+        const dogsResponse = await refreshDogs();
+        // La navegación se maneja en el index.tsx basado en el estado de dogs
+        router.replace('/');
       } else {
+        // Para registro nuevo: siempre ir a registrar perro
         await register(email, password, name);
+        router.push('/onboarding/perro');
       }
-      router.push('/onboarding/perro');
     } catch (error: any) {
       Alert.alert(
-        'Error',
-        error.response?.data?.detail || 'Ha ocurrido un error. Inténtalo de nuevo.'
+        t('error') || 'Error',
+        error.response?.data?.detail || t('genericError') || 'Ha ocurrido un error. Inténtalo de nuevo.'
       );
     }
   };
