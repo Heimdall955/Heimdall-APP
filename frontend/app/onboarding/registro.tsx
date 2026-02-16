@@ -67,7 +67,7 @@ export default function RegistroScreen() {
     try {
       await loginWithGoogle();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo iniciar sesión con Google');
+      Alert.alert(t('error') || 'Error', t('googleLoginError') || 'No se pudo iniciar sesión con Google');
     }
   };
 
@@ -84,17 +84,17 @@ export default function RegistroScreen() {
 
           <View style={styles.header}>
             <Ionicons name="paw" size={60} color={Colors.primary} />
-            <Text style={styles.title}>{isLogin ? 'Bienvenido de vuelta' : 'Crear cuenta'}</Text>
+            <Text style={styles.title}>{isLogin ? t('welcomeBack') || 'Bienvenido de vuelta' : t('createAccount') || 'Crear cuenta'}</Text>
             <Text style={styles.subtitle}>
-              {isLogin ? 'Inicia sesión para continuar' : 'Regístrate para comenzar'}
+              {isLogin ? t('loginToContinue') || 'Inicia sesión para continuar' : t('registerToStart') || 'Regístrate para comenzar'}
             </Text>
           </View>
 
           <View style={styles.form}>
             {!isLogin && (
               <Input
-                label="Nombre"
-                placeholder="Tu nombre"
+                label={t('name') || 'Nombre'}
+                placeholder={t('yourName') || 'Tu nombre'}
                 value={name}
                 onChangeText={setName}
                 icon="person-outline"
@@ -104,7 +104,7 @@ export default function RegistroScreen() {
             )}
             
             <Input
-              label="Email"
+              label={t('email') || 'Email'}
               placeholder="tu@email.com"
               value={email}
               onChangeText={setEmail}
@@ -114,7 +114,7 @@ export default function RegistroScreen() {
             />
             
             <Input
-              label="Contraseña"
+              label={t('password') || 'Contraseña'}
               placeholder="••••••••"
               value={password}
               onChangeText={setPassword}
@@ -124,7 +124,7 @@ export default function RegistroScreen() {
             />
 
             <Button
-              title={isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+              title={isLogin ? t('loginButton') || 'Iniciar Sesión' : t('createAccountButton') || 'Crear Cuenta'}
               onPress={handleSubmit}
               loading={isLoading}
               style={styles.submitButton}
@@ -132,13 +132,13 @@ export default function RegistroScreen() {
 
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>o continúa con</Text>
+              <Text style={styles.dividerText}>{t('orContinueWith') || 'o continúa con'}</Text>
               <View style={styles.dividerLine} />
             </View>
 
             <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
               <Ionicons name="logo-google" size={24} color={Colors.text} />
-              <Text style={styles.googleButtonText}>Continuar con Google</Text>
+              <Text style={styles.googleButtonText}>{t('continueWithGoogle') || 'Continuar con Google'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -146,9 +146,9 @@ export default function RegistroScreen() {
               onPress={() => setIsLogin(!isLogin)}
             >
               <Text style={styles.switchModeText}>
-                {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
+                {isLogin ? (t('noAccount') || '¿No tienes cuenta? ') : (t('haveAccount') || '¿Ya tienes cuenta? ')}
                 <Text style={styles.switchModeLink}>
-                  {isLogin ? 'Regístrate' : 'Inicia sesión'}
+                  {isLogin ? t('register') || 'Regístrate' : t('login') || 'Inicia sesión'}
                 </Text>
               </Text>
             </TouchableOpacity>
