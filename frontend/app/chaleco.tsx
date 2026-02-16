@@ -28,10 +28,19 @@ export default function ChalecoScreen() {
   const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
 
   const handleStartScan = async () => {
+    console.log('Starting scan...');
     try {
       await startScan();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      console.log('Scan error:', error);
+      Alert.alert(
+        'Error de Bluetooth', 
+        error.message || 'No se pudo iniciar el escaneo. ¿Quieres usar el simulador?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Usar Simulador', onPress: startSimulation },
+        ]
+      );
     }
   };
 
