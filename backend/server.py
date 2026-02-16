@@ -947,7 +947,7 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict) -> str:
     claims = {
         "iss": credentials_info["client_email"],
         "aud": "google",
-        "origins": ["https://caninehealth-hub.preview.emergentagent.com"],
+        "origins": ["https://pethani.preview.emergentagent.com"],
         "typ": "savetowallet",
         "payload": {
             "genericObjects": [generic_object]
