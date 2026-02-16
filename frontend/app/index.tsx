@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, Image, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,19 +6,38 @@ import { Colors, FontSizes } from '../constants/theme';
 
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, onboardingCompleted, dogs } = useAuth();
+  const { isAuthenticated, isLoading, onboardingCompleted, dogs, refreshDogs } = useAuth();
+  const [hasCheckedDogs, setHasCheckedDogs] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.replace('/onboarding/idioma');
-      } else if (!onboardingCompleted || dogs.length === 0) {
-        router.replace('/onboarding/perro');
-      } else {
+    const checkAndNavigate = async () => {
+      if (!isLoading) {
+        if (!isAuthenticated) {
+          // No autenticado -> ir a selección de idioma
+          router.replace('/onboarding/idioma');
+        } else {
+          // Autenticado -> verificar si tiene perros
+          if (!hasCheckedDogs) {
+            await refreshDogs();
+            setHasCheckedDogs(true);
+          }
+        }
+      }
+    };
+    
+    checkAndNavigate();
+  }, [isLoading, isAuthenticated]);
+
+  useEffect(() => {
+    // Una vez que hemos verificado los perros, navegar
+    if (hasCheckedDogs && isAuthenticated && !isLoading) {
+      if (dogs.length > 0) {
         router.replace('/(tabs)');
+      } else {
+        router.replace('/onboarding/perro');
       }
     }
-  }, [isLoading, isAuthenticated, onboardingCompleted, dogs]);
+  }, [hasCheckedDogs, dogs, isAuthenticated, isLoading]);
 
   return (
     <View style={styles.container}>
