@@ -422,6 +422,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  heimdallCard: {
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  heimdallIcon: {
+    backgroundColor: Colors.primary,
+  },
+  heimdallConnectButton: {
+    backgroundColor: Colors.secondary,
+  },
+  deviceNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  heimdallBadge: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  heimdallBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  scanningCard: {
+    alignItems: 'center',
+    padding: Spacing.xl,
+    marginTop: Spacing.lg,
+  },
+  scanningText: {
+    fontSize: FontSizes.lg,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginTop: Spacing.md,
+  },
+  scanningHint: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
+  },
   biometricCard: {
     marginBottom: Spacing.sm,
   },
