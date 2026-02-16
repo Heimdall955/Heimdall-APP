@@ -104,6 +104,31 @@
 
 user_problem_statement: "Test the Heimdall backend API endpoints"
 
+frontend:
+  - task: "Language Selection Bug Fix"
+    implemented: true
+    working: true
+    file: "frontend/app/onboarding/idioma.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "VERIFIED: Selecting English on idioma.tsx correctly displays registration screen in English. Language is saved and applied."
+
+  - task: "Re-onboarding Loop Bug Fix"
+    implemented: true
+    working: true
+    file: "frontend/app/onboarding/registro.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "VERIFIED: User with existing dog (testuser@example.com) goes directly to Home after login, NOT to pet registration screen. Navigation logic fixed in registro.tsx and index.tsx."
+
 backend:
   - task: "Health Check API"
     implemented: true
