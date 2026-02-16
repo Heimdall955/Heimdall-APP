@@ -605,4 +605,58 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     textAlign: 'center',
   },
+  infoCard: {
+    marginTop: Spacing.md,
+    backgroundColor: Colors.white,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  infoTitle: {
+    fontSize: FontSizes.lg,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  infoStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    paddingLeft: Spacing.sm,
+  },
+  infoNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: FontSizes.md,
+    color: Colors.text,
+  },
+  infoDivider: {
+    height: 1,
+    backgroundColor: Colors.grayLight,
+    marginVertical: Spacing.md,
+  },
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: Colors.accent + '15',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+  },
+  warningText: {
+    flex: 1,
+    fontSize: FontSizes.sm,
+    color: Colors.text,
+    lineHeight: 20,
+  },
 });
