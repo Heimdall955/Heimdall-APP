@@ -2,9 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
-import { Language } from '../../types';
 
 const languages: { code: Language; name: string; flag: string }[] = [
   { code: 'es', name: 'Español', flag: '🇪🇸' },
@@ -14,7 +13,7 @@ const languages: { code: Language; name: string; flag: string }[] = [
 
 export default function IdiomaScreen() {
   const router = useRouter();
-  const { language, setLanguage } = useAuth();
+  const { language, setLanguage } = useLanguage();
 
   const handleSelectLanguage = async (lang: Language) => {
     await setLanguage(lang);
