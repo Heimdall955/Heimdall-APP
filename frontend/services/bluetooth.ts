@@ -159,12 +159,13 @@ class BluetoothService {
   async startScan(onDeviceFound: ScanCallback): Promise<void> {
     if (Platform.OS === 'web') {
       console.log('BLE not available on web');
-      throw new Error('Bluetooth no disponible en navegador web');
+      throw new Error('Bluetooth no disponible en navegador web. Usa el simulador para probar.');
     }
 
     const initialized = await this.initBLE();
     if (!initialized) {
-      throw new Error('No se pudo inicializar Bluetooth');
+      // BLE not available - this is normal in Expo Go
+      throw new Error('Bluetooth no disponible en Expo Go.\n\nPara usar Bluetooth real necesitas crear un "development build" de la app.\n\nPor ahora, usa el "Simulador" para probar la funcionalidad.');
     }
     
     if (this.isScanning) {
