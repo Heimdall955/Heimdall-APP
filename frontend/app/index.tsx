@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet, Image, Text } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Image, Text, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
-import { Colors, FontSizes } from '../constants/theme';
+import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width, height } = Dimensions.get('window');
 
 export default function Index() {
   const router = useRouter();
@@ -56,36 +59,99 @@ export default function Index() {
   }, [navigationState, dogs, isAuthenticated]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>HEIMDALL</Text>
-        <Text style={styles.subtitle}>Bienestar Canino</Text>
+    <LinearGradient
+      colors={['#1a1a2e', '#16213e', '#0f3460']}
+      style={styles.container}
+    >
+      <View style={styles.content}>
+        {/* Heimdall Image */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: 'https://customer-assets.emergentagent.com/job_pethani/artifacts/20rghbje_Gemini_Generated_Image_2r7wpq2r7wpq2r7w.png' }}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
+        </View>
+
+        {/* Logo and Text */}
+        <View style={styles.logoContainer}>
+          <Text style={styles.logoText}>HEIMDALL</Text>
+          <Text style={styles.subtitle}>Guardián de tu mejor amigo</Text>
+        </View>
+
+        {/* Loading Indicator */}
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>
+            {navigationState === 'checking' ? 'Verificando...' : 'Cargando...'}
+          </Text>
+        </View>
       </View>
-      <ActivityIndicator size="large" color={Colors.primary} />
-    </View>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Powered by HANI AI</Text>
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+  },
+  content: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+  },
+  imageContainer: {
+    width: width * 0.7,
+    height: height * 0.4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: Spacing.xl,
   },
   logoText: {
-    fontSize: 42,
-    fontWeight: '800',
-    color: Colors.secondary,
-    letterSpacing: 4,
+    fontSize: 48,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: 6,
+    textShadowColor: Colors.primary,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
   subtitle: {
     fontSize: FontSizes.lg,
     color: Colors.primary,
-    marginTop: 8,
+    marginTop: Spacing.sm,
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.lg,
+  },
+  loadingText: {
+    fontSize: FontSizes.md,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: Spacing.sm,
+  },
+  footer: {
+    paddingBottom: Spacing.xl,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.5)',
   },
 });
