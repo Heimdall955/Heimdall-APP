@@ -210,8 +210,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await api.get('/dogs');
       setDogs(response.data);
-      if (response.data.length > 0 && !currentDog) {
-        setCurrentDog(response.data[0]);
+      if (response.data.length > 0) {
+        // Si hay perros, el onboarding está completado
+        if (!currentDog) {
+          setCurrentDog(response.data[0]);
+        }
+        // Marcar onboarding como completado si hay perros
+        if (!onboardingCompleted) {
+          setOnboardingCompletedState(true);
+          await SecureStore.setItemAsync('onboarding_completed', 'true');
+        }
       }
     } catch (error) {
       console.log('Failed to fetch dogs:', error);
