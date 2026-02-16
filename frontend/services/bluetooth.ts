@@ -63,15 +63,26 @@ class BluetoothService {
 
   private async initBLE(): Promise<boolean> {
     if (this.manager) return true;
-    if (Platform.OS === 'web') return false;
+    if (Platform.OS === 'web') {
+      console.log('BLE: Web platform detected, BLE not available');
+      return false;
+    }
 
     try {
-      const { BleManager } = await import('react-native-ble-plx');
-      this.manager = new BleManager();
-      console.log('BLE Manager initialized successfully');
-      return true;
-    } catch (e) {
-      console.log('BLE not available:', e);
+      // Dynamic import to avoid crashes when library is not available
+      const blePlx = await import('react-native-ble-plx');
+      if (blePlx && blePlx.BleManager) {
+        this.manager = new blePlx.BleManager();
+        console.log('BLE Manager initialized successfully');
+        return true;
+      } else {
+        console.log('BLE: BleManager not available in module');
+        return false;
+      }
+    } catch (e: any) {
+      // This will fail in Expo Go because react-native-ble-plx requires native code
+      console.log('BLE not available (this is normal in Expo Go):', e?.message || e);
+      console.log('TIP: Use "Usar Simulador" button to test the app, or create a development build for real BLE');
       return false;
     }
   }
