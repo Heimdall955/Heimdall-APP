@@ -11,15 +11,24 @@ export default function Index() {
   const router = useRouter();
   const { isAuthenticated, isLoading, dogs, refreshDogs } = useAuth();
   const [navigationState, setNavigationState] = useState<'loading' | 'checking' | 'ready'>('loading');
+  const [showSplash, setShowSplash] = useState(true);
   const hasNavigated = useRef(false);
+
+  // Mostrar splash por un mínimo de 2 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const performNavigation = async () => {
       // Evitar navegación múltiple
       if (hasNavigated.current) return;
       
-      // Esperar a que termine la carga inicial de auth
-      if (isLoading) {
+      // Esperar a que termine el splash y la carga inicial de auth
+      if (showSplash || isLoading) {
         setNavigationState('loading');
         return;
       }
@@ -44,7 +53,7 @@ export default function Index() {
     };
 
     performNavigation();
-  }, [isLoading, isAuthenticated]);
+  }, [showSplash, isLoading, isAuthenticated]);
 
   useEffect(() => {
     // Navegar solo cuando estamos listos y no hemos navegado aún
