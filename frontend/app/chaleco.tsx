@@ -307,39 +307,6 @@ export default function ChalecoScreen() {
           </View>
         )}
 
-        {/* Instructions */}
-        {!isConnected && !isScanning && scannedDevices.length === 0 && (
-          <Card style={styles.instructionsCard}>
-            <Text style={styles.instructionsTitle}>¿Cómo conectar?</Text>
-            <View style={styles.instruction}>
-              <View style={styles.instructionNumber}>
-                <Text style={styles.instructionNumberText}>1</Text>
-              </View>
-              <Text style={styles.instructionText}>Enciende el chaleco Heimdall</Text>
-            </View>
-            <View style={styles.instruction}>
-              <View style={styles.instructionNumber}>
-                <Text style={styles.instructionNumberText}>2</Text>
-              </View>
-              <Text style={styles.instructionText}>Activa Bluetooth en tu móvil</Text>
-            </View>
-            <View style={styles.instruction}>
-              <View style={styles.instructionNumber}>
-                <Text style={styles.instructionNumberText}>3</Text>
-              </View>
-              <Text style={styles.instructionText}>Pulsa "Buscar Dispositivos"</Text>
-            </View>
-            <View style={styles.instruction}>
-              <View style={styles.instructionNumber}>
-                <Text style={styles.instructionNumberText}>4</Text>
-              </View>
-              <Text style={styles.instructionText}>Selecciona tu chaleco de la lista</Text>
-            </View>
-            <Text style={styles.tipText}>
-              💡 Si no tienes un chaleco, usa el "Simulador" para probar las funciones.
-            </Text>
-          </Card>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
