@@ -138,7 +138,7 @@ export default function ChalecoScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('availableDevices')}</Text>
             {scannedDevices.map((device) => (
-              <Card key={device.id} style={[styles.deviceCard, device.isHeimdallVest && styles.heimdallCard]} variant="elevated">
+              <Card key={device.id} style={[styles.deviceCard, device.isHeimdallVest ? styles.heimdallCard : null]} variant="elevated">
                 <View style={styles.deviceRow}>
                   <View style={[styles.deviceIcon, device.isHeimdallVest && styles.heimdallIcon]}>
                     <Ionicons 
