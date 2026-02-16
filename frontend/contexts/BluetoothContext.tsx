@@ -42,9 +42,14 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
     });
 
     bluetoothService.onStateChange((state) => {
+      console.log('Bluetooth state changed:', state);
       setConnectionState(state);
       setIsScanning(state === 'scanning');
       setIsConnected(state === 'connected');
+      
+      if (state === 'disconnected') {
+        setScannedDevices([]);
+      }
     });
 
     return () => {
@@ -56,7 +61,7 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
     if (Platform.OS === 'web') {
       Alert.alert(
         'Bluetooth no disponible',
-        'El escaneo Bluetooth solo está disponible en dispositivos móviles. ¿Quieres usar el simulador?',
+        'El escaneo Bluetooth solo está disponible en dispositivos móviles con Expo Go. ¿Quieres usar el simulador para probar?',
         [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Usar Simulador', onPress: () => startSimulation() },
@@ -72,16 +77,28 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
     try {
       await bluetoothService.startScan((device) => {
         setScannedDevices((prev) => {
-          // Avoid duplicates
+          // Avoid duplicates and sort by signal strength
           if (prev.some((d) => d.id === device.id)) {
-            return prev;
+            // Update RSSI if device already exists
+            return prev.map(d => d.id === device.id ? { ...d, rssi: device.rssi } : d);
           }
-          return [...prev, device];
+          const newDevices = [...prev, device];
+          // Sort: Heimdall devices first, then by signal strength
+          return newDevices.sort((a, b) => {
+            if (a.isHeimdallVest && !b.isHeimdallVest) return -1;
+            if (!a.isHeimdallVest && b.isHeimdallVest) return 1;
+            return (b.rssi || -100) - (a.rssi || -100);
+          });
         });
       });
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo iniciar el escaneo');
+      console.error('Scan error:', error);
+      setIsScanning(false);
       setConnectionState('error');
+      Alert.alert(
+        'Error de Bluetooth', 
+        error.message || 'No se pudo iniciar el escaneo. Verifica que Bluetooth esté activado.'
+      );
     }
   }, []);
 
@@ -95,13 +112,19 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
 
   const connectToDevice = useCallback(async (deviceId: string): Promise<boolean> => {
     try {
+      console.log('Connecting to device:', deviceId);
+      setConnectionState('scanning'); // Show loading state
       const success = await bluetoothService.connectToDevice(deviceId);
       if (success) {
         setIsConnected(true);
         setConnectionState('connected');
+        setScannedDevices([]); // Clear the list after successful connection
+      } else {
+        setConnectionState('error');
       }
       return success;
     } catch (error) {
+      console.error('Connect error:', error);
       setConnectionState('error');
       return false;
     }
