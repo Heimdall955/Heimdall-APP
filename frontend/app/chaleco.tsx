@@ -196,6 +196,37 @@ export default function ChalecoScreen() {
           </Card>
         )}
 
+        {/* Info when not connected */}
+        {!isConnected && !isScanning && scannedDevices.length === 0 && (
+          <Card style={styles.infoCard}>
+            <View style={styles.infoHeader}>
+              <Ionicons name="information-circle" size={24} color={Colors.primary} />
+              <Text style={styles.infoTitle}>{t('howToConnect')}</Text>
+            </View>
+            <View style={styles.infoStep}>
+              <Text style={styles.infoNumber}>1</Text>
+              <Text style={styles.infoText}>{t('turnOnVest')}</Text>
+            </View>
+            <View style={styles.infoStep}>
+              <Text style={styles.infoNumber}>2</Text>
+              <Text style={styles.infoText}>{t('pressSearchButton')}</Text>
+            </View>
+            <View style={styles.infoStep}>
+              <Text style={styles.infoNumber}>3</Text>
+              <Text style={styles.infoText}>{t('selectDevice')}</Text>
+            </View>
+            
+            <View style={styles.infoDivider} />
+            
+            <View style={styles.warningBox}>
+              <Ionicons name="warning" size={20} color={Colors.accent} />
+              <Text style={styles.warningText}>
+                {t('bleNotAvailableInExpoGo')}
+              </Text>
+            </View>
+          </Card>
+        )}
+
         {/* Biometric Data */}
         {isConnected && (
           <View style={styles.section}>
