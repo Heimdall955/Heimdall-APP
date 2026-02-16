@@ -138,17 +138,31 @@ export default function ChalecoScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('availableDevices')}</Text>
             {scannedDevices.map((device) => (
-              <Card key={device.id} style={styles.deviceCard} variant="elevated">
+              <Card key={device.id} style={[styles.deviceCard, device.isHeimdallVest && styles.heimdallCard]} variant="elevated">
                 <View style={styles.deviceRow}>
-                  <View style={styles.deviceIcon}>
-                    <Ionicons name="bluetooth" size={24} color={Colors.primary} />
+                  <View style={[styles.deviceIcon, device.isHeimdallVest && styles.heimdallIcon]}>
+                    <Ionicons 
+                      name={device.isHeimdallVest ? "paw" : "bluetooth"} 
+                      size={24} 
+                      color={device.isHeimdallVest ? Colors.white : Colors.primary} 
+                    />
                   </View>
                   <View style={styles.deviceInfo}>
-                    <Text style={styles.deviceCardName}>{device.name || t('esp32Device')}</Text>
-                    <Text style={styles.deviceRssi}>{t('signalStrength')}: {device.rssi} dBm</Text>
+                    <View style={styles.deviceNameRow}>
+                      <Text style={styles.deviceCardName}>{device.name || t('esp32Device')}</Text>
+                      {device.isHeimdallVest && (
+                        <View style={styles.heimdallBadge}>
+                          <Text style={styles.heimdallBadgeText}>HEIMDALL</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.deviceRssi}>
+                      {t('signalStrength')}: {device.rssi} dBm 
+                      {device.rssi && device.rssi > -60 ? ' 📶📶📶' : device.rssi && device.rssi > -75 ? ' 📶📶' : ' 📶'}
+                    </Text>
                   </View>
                   <TouchableOpacity
-                    style={styles.connectButton}
+                    style={[styles.connectButton, device.isHeimdallVest && styles.heimdallConnectButton]}
                     onPress={() => handleConnect(device.id)}
                     disabled={connectingDeviceId !== null}
                   >
@@ -162,6 +176,15 @@ export default function ChalecoScreen() {
               </Card>
             ))}
           </View>
+        )}
+
+        {/* Scanning indicator */}
+        {isScanning && scannedDevices.length === 0 && (
+          <Card style={styles.scanningCard}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.scanningText}>{t('searching')}...</Text>
+            <Text style={styles.scanningHint}>Asegúrate de que el chaleco esté encendido y cerca</Text>
+          </Card>
         )}
 
         {/* Biometric Data */}
