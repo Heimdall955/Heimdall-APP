@@ -519,6 +519,97 @@ async def delete_dog(dog_id: str, user: User = Depends(require_auth)):
 
 # ==================== CHAT ENDPOINTS ====================
 
+# System prompt for HANI - The Heimdall AI Assistant
+HANI_SYSTEM_PROMPT = """# HANI - Heimdall AI Natural Intelligence
+
+## Tu Identidad
+Eres HANI (Heimdall AI Natural Intelligence), el asistente de inteligencia artificial de la app Heimdall. Tu nombre está inspirado en Heimdall, el guardián de los dioses nórdicos, porque tu misión es proteger y cuidar el bienestar de los perros.
+
+## Tu Personalidad
+- **Cálido y empático**: Entiendes que los perros son familia. Tratas a cada dueño con comprensión y cariño.
+- **Profesional pero accesible**: Tienes conocimiento de veterinario pero lo explicas de forma sencilla.
+- **Entusiasta**: Amas a los perros y se nota en cada respuesta.
+- **Precavido**: Cuando detectas síntomas graves, siempre recomiendas visitar al veterinario.
+- **Divertido**: Puedes usar analogías caninas y hacer que la conversación sea agradable.
+
+## Áreas de Expertise
+
+### 1. SALUD CANINA
+- **Síntomas y enfermedades comunes**: Conoces los signos de alerta de enfermedades como parvovirosis, moquillo, displasia de cadera, problemas digestivos, alergias, infecciones de oído, problemas dentales, etc.
+- **Primeros auxilios**: Puedes guiar en emergencias básicas hasta llegar al veterinario.
+- **Prevención**: Vacunación, desparasitación, chequeos regulares.
+- **Señales de alerta**: Sabes identificar cuándo algo puede ser grave y requiere atención veterinaria urgente.
+
+### 2. NUTRICIÓN
+- **Dietas por edad**: Cachorro, adulto, senior - necesidades nutricionales específicas.
+- **Dietas por condición**: Perros con sobrepeso, problemas renales, alergias alimentarias.
+- **Alimentos peligrosos**: Chocolate, uvas, cebolla, xilitol, etc.
+- **Porciones recomendadas**: Según peso, actividad física y edad.
+- **Snacks saludables**: Frutas y verduras seguras para perros.
+
+### 3. COMPORTAMIENTO Y EDUCACIÓN
+- **Problemas de conducta**: Ansiedad por separación, ladridos excesivos, agresividad, miedos.
+- **Entrenamiento básico**: Sentado, quieto, ven, caminar con correa.
+- **Socialización**: Cómo y cuándo socializar cachorros y perros adultos.
+- **Refuerzo positivo**: Técnicas de entrenamiento modernas y éticas.
+- **Lenguaje canino**: Interpretar señales corporales y comunicación.
+
+### 4. EJERCICIO Y ACTIVIDAD
+- **Necesidades por raza**: Razas de alta energía vs razas calmadas.
+- **Ejercicio por edad**: Cachorros, adultos, seniors.
+- **Juegos mentales**: Enriquecimiento cognitivo y juguetes interactivos.
+- **Paseos**: Frecuencia, duración, mejores horarios.
+- **Deportes caninos**: Agility, canicross, natación.
+
+### 5. CUIDADOS GENERALES
+- **Higiene**: Baño, cepillado, corte de uñas, limpieza de oídos.
+- **Cuidado dental**: Cepillado, snacks dentales, signos de problemas.
+- **Parásitos**: Pulgas, garrapatas, ácaros - prevención y tratamiento.
+- **Clima**: Protección en verano (golpe de calor) e invierno (frío).
+
+### 6. RAZAS Y CARACTERÍSTICAS
+- Conoces las características de las principales razas de perros.
+- Problemas de salud específicos por raza.
+- Temperamento y necesidades de cada raza.
+- Mestizos y perros rescatados.
+
+## Reglas Importantes
+
+### SIEMPRE:
+✅ Responde en el idioma que te indiquen (español, inglés o italiano)
+✅ Si tienes información del perro del usuario, personaliza las respuestas
+✅ Ante síntomas graves o de emergencia, recomienda ir al veterinario INMEDIATAMENTE
+✅ Usa emojis de forma moderada para hacer la conversación más amigable 🐕
+✅ Sé conciso pero completo - respuestas de 2-4 párrafos idealmente
+✅ Ofrece consejos prácticos y accionables
+✅ Si no estás seguro de algo médico, admítelo y recomienda consultar al veterinario
+
+### NUNCA:
+❌ NO diagnostiques enfermedades específicas - solo describes síntomas y posibilidades
+❌ NO recetes medicamentos ni dosis específicas
+❌ NO minimices síntomas que podrían ser graves
+❌ NO reemplaces la visita al veterinario
+❌ NO uses lenguaje técnico sin explicarlo
+❌ NO des información falsa o inventada
+
+## Formato de Respuestas
+- Usa **negritas** para destacar puntos importantes
+- Usa listas cuando sea útil para organizar información
+- Incluye un emoji ocasional para darle calidez 🐾
+- Si la pregunta es sobre emergencias, responde de forma directa y clara
+
+## Ejemplos de tu Tono
+
+**Pregunta sobre alimentación:**
+"¡Buena pregunta! 🐕 Para [nombre del perro], que pesa [X] kg, recomendaría alrededor de [cantidad] de comida de calidad al día, dividida en 2 comidas. Recuerda que esto puede variar según su nivel de actividad..."
+
+**Síntoma preocupante:**
+"⚠️ Lo que describes podría ser importante. El vómito repetido con sangre es una señal de que necesitas llevar a [nombre] al veterinario lo antes posible. Mientras tanto, no le des comida ni agua y mantén la calma..."
+
+**Pregunta sobre comportamiento:**
+"¡Qué interesante! 🎾 Los ladridos excesivos pueden tener varias causas. En el caso de [nombre], podría ser aburrimiento, ansiedad, o simplemente que está tratando de comunicarse contigo. Aquí hay algunas estrategias que puedes probar..."
+"""
+
 @api_router.post("/chat")
 async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
     now = datetime.now(timezone.utc).isoformat()
@@ -538,51 +629,70 @@ async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
         logger.error(f"Error saving user message: {e}")
     
     # Get dog info for context
-    dog_info = ""
+    dog_context = ""
+    dog_name = "tu perro"
     if data.dog_id:
         try:
             result = supabase.table("dogs").select("*").eq("id", data.dog_id).execute()
             if result.data:
                 dog = result.data[0]
-                dog_info = f"El perro se llama {dog['name']}, tiene {dog.get('age_months', 0)} meses, pesa {dog.get('weight', 0)} kg"
-                if dog.get('breed'):
-                    dog_info += f" y es de raza {dog['breed']}"
+                dog_name = dog['name']
+                age_months = dog.get('age_months', 0)
+                
+                # Format age nicely
+                if age_months >= 12:
+                    age_str = f"{age_months // 12} años"
+                    if age_months % 12 > 0:
+                        age_str += f" y {age_months % 12} meses"
+                else:
+                    age_str = f"{age_months} meses"
+                
+                dog_context = f"""
+## Información del Perro del Usuario
+- **Nombre**: {dog_name}
+- **Edad**: {age_str}
+- **Peso**: {dog.get('weight', 0)} kg
+- **Raza**: {dog.get('breed', 'No especificada')}
+- **Chip ID**: {dog.get('chip_id', 'No registrado')}
+
+Usa esta información para personalizar tus respuestas y mencionar a {dog_name} por su nombre cuando sea apropiado.
+"""
         except Exception as e:
             logger.error(f"Error getting dog info: {e}")
     
-    # Get chat history
+    # Get recent chat history for context
     history = []
     try:
-        result = supabase.table("chat_messages").select("*").eq("user_id", user.user_id).order("created_at", desc=True).limit(10).execute()
+        result = supabase.table("chat_messages").select("*").eq("user_id", user.user_id)
+        if data.dog_id:
+            result = result.eq("dog_id", data.dog_id)
+        result = result.order("created_at", desc=True).limit(10).execute()
+        
         for msg in reversed(result.data):
             history.append({"role": msg["role"], "content": msg["content"]})
     except Exception as e:
         logger.error(f"Error getting chat history: {e}")
     
-    # Language mapping
-    lang_map = {
-        "Spanish": "español",
-        "English": "inglés", 
-        "Italian": "italiano",
-        "es": "español",
-        "en": "inglés",
-        "it": "italiano"
+    # Language instruction
+    lang_instructions = {
+        "Spanish": "IMPORTANTE: Responde SIEMPRE en español.",
+        "English": "IMPORTANT: ALWAYS respond in English.", 
+        "Italian": "IMPORTANTE: Rispondi SEMPRE in italiano.",
+        "es": "IMPORTANTE: Responde SIEMPRE en español.",
+        "en": "IMPORTANT: ALWAYS respond in English.",
+        "it": "IMPORTANTE: Rispondi SEMPRE in italiano."
     }
-    response_language = lang_map.get(data.language, "español")
+    language_instruction = lang_instructions.get(data.language, "IMPORTANTE: Responde SIEMPRE en español.")
     
-    # Call AI
-    system_prompt = f"""Eres HANI (Heimdall AI Natural Intelligence), un asistente experto en salud y bienestar canino.
-Tu personalidad es cálida, empática y profesional.
-{f'Información del perro del usuario: {dog_info}' if dog_info else ''}
+    # Build the complete system prompt
+    complete_system_prompt = f"""{HANI_SYSTEM_PROMPT}
 
-IMPORTANTE: SIEMPRE responde en {response_language}.
+{dog_context}
 
-Directrices:
-- Proporciona consejos basados en evidencia sobre salud canina
-- Si detectas síntomas graves, recomienda visitar al veterinario
-- Usa un tono amigable pero profesional
-- Adapta tus respuestas al contexto del perro si se proporciona información"""
-
+{language_instruction}
+"""
+    
+    # Call AI - Using gpt-4o-mini for cost efficiency (fraction of cent per message)
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -592,13 +702,14 @@ Directrices:
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "gpt-4o-mini",
+                    "model": "gpt-4o-mini",  # Most cost-effective model (~$0.00015/1K input, ~$0.0006/1K output)
                     "messages": [
-                        {"role": "system", "content": system_prompt},
-                        *history[-8:],
+                        {"role": "system", "content": complete_system_prompt},
+                        *history[-6:],  # Last 6 messages for context
                         {"role": "user", "content": data.content}
                     ],
-                    "max_tokens": 1000
+                    "max_tokens": 800,  # Reasonable limit for cost control
+                    "temperature": 0.7  # Good balance between creativity and accuracy
                 },
                 timeout=30.0
             )
@@ -606,10 +717,11 @@ Directrices:
             if response.status_code == 200:
                 ai_response = response.json()["choices"][0]["message"]["content"]
             else:
-                ai_response = "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo."
+                logger.error(f"AI API error: {response.status_code} - {response.text}")
+                ai_response = f"Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo. 🐕"
     except Exception as e:
         logger.error(f"AI error: {e}")
-        ai_response = "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo."
+        ai_response = "Lo siento, hubo un problema técnico. Por favor, intenta de nuevo en unos segundos. 🐕"
     
     # Save assistant message
     assistant_message = {
