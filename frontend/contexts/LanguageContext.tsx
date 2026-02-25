@@ -1037,6 +1037,28 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     useSimulator: 'Usa simulatore',
     realDevice: 'Dispositivo reale',
     disconnectConfirm: 'Sei sicuro di voler disconnettere il gilet?',
+    
+    // Leaderboard
+    leaderboard: 'Classifica',
+    leaderboardTitle: 'Classifica del Branco',
+    topTrainers: 'Migliori Addestratori',
+    yourPosition: 'La tua posizione',
+    noRankYet: 'Completa lezioni per apparire',
+    rank: 'Posizione',
+    totalBones: 'Ossa totali',
+    viewLeaderboard: 'Vedi classifica',
+    
+    // Weekly Summary
+    weeklyProgress: 'Progresso Settimanale',
+    thisWeek: 'Questa settimana',
+    bonesThisWeek: 'Ossa',
+    exercisesThisWeek: 'Attivit\u00e0',
+    xpThisWeek: 'XP guadagnato',
+    streakActive: 'Serie attiva',
+    keepItUp: 'Continua cos\u00ec!',
+    startTraining: 'Inizia ad allenarti questa settimana!',
+    weeklyGoal: 'Obiettivo settimanale',
+    daysActive: 'Giorni attivi',
   },
 };
 
