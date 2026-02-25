@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, 
   RefreshControl, Modal, TextInput, Image, Platform 
@@ -15,6 +15,28 @@ import { Card, Button } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+
+interface GamificationData {
+  bones: number;
+  xp: number;
+  level: number;
+  level_progress: number;
+  level_target: number;
+  streak_days: number;
+  exercises_completed: number;
+  practice_minutes: number;
+  achievements_unlocked: string[];
+  last_activity: string | null;
+}
+
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  bones_reward: number;
+  unlocked: boolean;
+}
 
 export default function PerfilScreen() {
   const router = useRouter();
