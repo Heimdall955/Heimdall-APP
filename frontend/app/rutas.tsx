@@ -8,7 +8,7 @@ import axios from 'axios';
 import { SecureStore } from '../utils/secureStore';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui';
-import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';

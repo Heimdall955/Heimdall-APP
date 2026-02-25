@@ -8,7 +8,7 @@ import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { Card, Button, ProgressCircle } from '../../components/ui';
-import { Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getTrainingPrograms, getExercises, getGames } from '../../data/educationContent';
 

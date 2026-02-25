@@ -13,7 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { SecureStore } from '../../utils/secureStore';
 import { Card, Button } from '../../components/ui';
-import { Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';

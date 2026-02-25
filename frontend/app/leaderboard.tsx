@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { SecureStore } from '../utils/secureStore';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';

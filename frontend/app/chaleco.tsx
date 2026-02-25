@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useBluetooth } from '../contexts/BluetoothContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, Button } from '../components/ui';
-import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function ChalecoScreen() {
