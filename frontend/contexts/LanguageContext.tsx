@@ -230,6 +230,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     levelUp: '¡Subiste al Nivel',
     newAchievement: '¡Nuevo Logro!',
     noAchievements: 'Completa lecciones para desbloquear logros',
+    inviteSent: '¡Invitación enviada! +5 huesos',
     
     // Exercises
     completed: 'completados',
@@ -562,6 +563,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     levelUp: 'Level Up!',
     newAchievement: 'New Achievement!',
     noAchievements: 'Complete lessons to unlock achievements',
+    inviteSent: 'Invitation sent! +5 bones',
     
     // Exercises
     completed: 'completed',
@@ -889,6 +891,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     levelUp: 'Livello Su!',
     newAchievement: 'Nuovo Traguardo!',
     noAchievements: 'Completa le lezioni per sbloccare i traguardi',
+    inviteSent: 'Invito inviato! +5 ossa',
     
     // Exercises
     completed: 'completati',
