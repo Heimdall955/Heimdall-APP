@@ -590,6 +590,9 @@ export default function LeccionScreen() {
   const { t, language } = useLanguage();
   const [pasoActual, setPasoActual] = useState(0);
   const [completado, setCompletado] = useState(false);
+  const [rewardData, setRewardData] = useState<any>(null);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [submittingReward, setSubmittingReward] = useState(false);
 
   const leccion = LECCIONES_DB[id || 'llamada-perfecta'];
 
@@ -601,11 +604,33 @@ export default function LeccionScreen() {
     );
   }
 
+  const submitReward = async () => {
+    setSubmittingReward(true);
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const response = await axios.post(
+        `${BACKEND_URL}/api/gamification/add-bones`,
+        { amount: leccion.huesos, reason: `Lección: ${leccion.titulo}`, lesson_id: leccion.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRewardData(response.data);
+      if (response.data.leveled_up) {
+        setShowLevelUp(true);
+      }
+    } catch (error) {
+      console.log('Error submitting reward:', error);
+    } finally {
+      setSubmittingReward(false);
+    }
+  };
+
   const handleSiguiente = () => {
     if (pasoActual < leccion.pasos.length - 1) {
       setPasoActual(pasoActual + 1);
     } else {
       setCompletado(true);
+      submitReward();
     }
   };
 
@@ -628,13 +653,57 @@ export default function LeccionScreen() {
           <View style={styles.recompensasRow}>
             <View style={styles.recompensaItem}>
               <Ionicons name="flash" size={32} color={Colors.accent} />
-              <Text style={styles.recompensaValor}>+{leccion.xp} XP</Text>
+              <Text style={styles.recompensaValor}>+{rewardData?.xp_added || leccion.xp} XP</Text>
             </View>
             <View style={styles.recompensaItem}>
               <Text style={styles.boneEmoji}>🦴</Text>
-              <Text style={styles.recompensaValor}>+{leccion.huesos}</Text>
+              <Text style={styles.recompensaValor}>+{rewardData?.bones_added || leccion.huesos}</Text>
             </View>
           </View>
+
+          {/* Level Up notification */}
+          {rewardData?.leveled_up && (
+            <View style={styles.levelUpBanner} data-testid="level-up-banner">
+              <Ionicons name="arrow-up-circle" size={28} color={Colors.accent} />
+              <Text style={styles.levelUpText}>{t('levelUp')} {rewardData.level}!</Text>
+            </View>
+          )}
+
+          {/* New Achievements */}
+          {rewardData?.new_achievements && rewardData.new_achievements.length > 0 && (
+            <View style={styles.newAchievementsContainer} data-testid="new-achievements">
+              <Text style={styles.newAchievementsTitle}>{t('newAchievement')}</Text>
+              {rewardData.new_achievements.map((ach: any) => (
+                <View key={ach.id} style={styles.achievementItem}>
+                  <Ionicons name={ach.icon as any} size={24} color={Colors.accent} />
+                  <View style={styles.achievementInfo}>
+                    <Text style={styles.achievementName}>{ach.name}</Text>
+                    <Text style={styles.achievementDesc}>{ach.description}</Text>
+                  </View>
+                  <Text style={styles.achievementBones}>+{ach.bones_reward} 🦴</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Updated total stats */}
+          {rewardData && (
+            <View style={styles.totalStatsRow} data-testid="total-stats">
+              <View style={styles.totalStatItem}>
+                <Text style={styles.totalStatValue}>{rewardData.bones}</Text>
+                <Text style={styles.totalStatLabel}>{t('totalBones')}</Text>
+              </View>
+              <View style={styles.totalStatItem}>
+                <Text style={styles.totalStatValue}>{t('level')} {rewardData.level}</Text>
+                <Text style={styles.totalStatLabel}>{rewardData.xp} XP</Text>
+              </View>
+              <View style={styles.totalStatItem}>
+                <Ionicons name="flame" size={20} color={Colors.accentOrange} />
+                <Text style={styles.totalStatValue}>{rewardData.streak_days}</Text>
+                <Text style={styles.totalStatLabel}>{t('days')}</Text>
+              </View>
+            </View>
+          )}
 
           <Card style={styles.ejercicioCard}>
             <View style={styles.ejercicioHeader}>
