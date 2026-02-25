@@ -208,7 +208,7 @@ export default function HomeScreen() {
           <Card style={styles.progressCard}>
             <View style={styles.progressHeader}>
               <View>
-                <Text style={styles.levelTitle}>{t('level')} 3: {t('explorerLevel')}</Text>
+                <Text style={styles.levelTitle}>{t('level')} {dogStatus.level}: {t('explorerLevel')}</Text>
                 <View style={styles.progressBarContainer}>
                   <View style={styles.progressBarTrack}>
                     <View 
@@ -222,16 +222,12 @@ export default function HomeScreen() {
                     {dogStatus.level_progress}/{dogStatus.level_target} XP
                   </Text>
                 </View>
-                <Text style={styles.progressHint}>{t('almostLevel')} 4!</Text>
+                <Text style={styles.progressHint}>{t('almostLevel')} {dogStatus.level + 1}!</Text>
               </View>
               <View style={styles.streakBadges}>
                 <View style={styles.streakBadge}>
                   <Ionicons name="flash" size={14} color={Colors.accent} />
-                  <Text style={styles.streakBadgeText}>3 {t('days')}</Text>
-                </View>
-                <View style={styles.streakBadge}>
-                  <Ionicons name="trending-up" size={14} color={Colors.accentOrange} />
-                  <Text style={styles.streakBadgeText}>{t('nextGoal')}: 50</Text>
+                  <Text style={styles.streakBadgeText}>{dogStatus.streak_days} {t('days')}</Text>
                 </View>
               </View>
             </View>
@@ -239,11 +235,11 @@ export default function HomeScreen() {
             {/* Stats Row */}
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
-                <Text style={styles.statNumber}>12</Text>
+                <Text style={styles.statNumber}>{dogStatus.exercises_completed}</Text>
                 <Text style={styles.statLabel}>{t('exercises')}</Text>
               </View>
               <View style={styles.statBox}>
-                <Text style={styles.statNumber}>45m</Text>
+                <Text style={styles.statNumber}>{dogStatus.practice_minutes}m</Text>
                 <Text style={styles.statLabel}>{t('practice')}</Text>
               </View>
               <View style={styles.statBox}>
