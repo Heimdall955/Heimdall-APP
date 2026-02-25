@@ -185,6 +185,9 @@ export default function EjercicioScreen() {
   const [ejercicioActual, setEjercicioActual] = useState(0);
   const [completados, setCompletados] = useState<number[]>([]);
 
+  const [rewardData, setRewardData] = useState<any>(null);
+  const [submittingReward, setSubmittingReward] = useState(false);
+
   const ejercicio = EJERCICIOS_DB[id || 'senales-basicas'];
 
   if (!ejercicio) {
@@ -199,7 +202,30 @@ export default function EjercicioScreen() {
     if (completados.includes(index)) {
       setCompletados(completados.filter(i => i !== index));
     } else {
-      setCompletados([...completados, index]);
+      const newCompletados = [...completados, index];
+      setCompletados(newCompletados);
+      // Auto-submit reward when all exercises completed
+      if (newCompletados.length === ejercicio.ejercicios.length && !submittingReward) {
+        submitReward();
+      }
+    }
+  };
+
+  const submitReward = async () => {
+    setSubmittingReward(true);
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const response = await axios.post(
+        `${BACKEND_URL}/api/gamification/add-bones`,
+        { amount: ejercicio.huesos, reason: `Ejercicio: ${ejercicio.titulo}` },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRewardData(response.data);
+    } catch (error) {
+      console.log('Error submitting reward:', error);
+    } finally {
+      setSubmittingReward(false);
     }
   };
 
@@ -299,15 +325,27 @@ export default function EjercicioScreen() {
 
         {/* Completion Button */}
         {todosCompletados && (
-          <TouchableOpacity 
-            style={styles.completarButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="checkmark-circle" size={24} color={Colors.white} />
-            <Text style={styles.completarButtonText}>
-              {t('exercisesCompleted')} +{ejercicio.huesos} 🦴
-            </Text>
-          </TouchableOpacity>
+          <View>
+            {rewardData && (
+              <View style={styles.rewardBanner} data-testid="exercise-reward-banner">
+                <Text style={styles.rewardText}>+{rewardData.bones_added} 🦴</Text>
+                <Text style={styles.rewardSubtext}>{t('level')} {rewardData.level} - {rewardData.xp} XP</Text>
+                {rewardData.leveled_up && (
+                  <Text style={styles.levelUpText}>{t('levelUp')} {rewardData.level}!</Text>
+                )}
+              </View>
+            )}
+            <TouchableOpacity 
+              style={styles.completarButton}
+              onPress={() => router.back()}
+              data-testid="exercise-complete-button"
+            >
+              <Ionicons name="checkmark-circle" size={24} color={Colors.white} />
+              <Text style={styles.completarButtonText}>
+                {rewardData ? t('backToEducation') : `${t('exercisesCompleted')} +${ejercicio.huesos} 🦴`}
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         <View style={{ height: 100 }} />
