@@ -865,7 +865,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     instructions: 'Istruzioni:',
     repetitions: 'ripetizioni',
     exercisesCompleted: 'Esercizi Completati!',
-    lessons: 'lezioni',
     description: 'Descrizione',
     benefits: 'Benefici',
     materials: 'Materiali necessari',
