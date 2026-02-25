@@ -277,6 +277,68 @@ export default function PerfilScreen() {
           )}
         </Card>
 
+        {/* Gamification Section */}
+        <View style={styles.section} data-testid="gamification-section">
+          <Text style={styles.sectionTitle}>{t('myRewards')}</Text>
+          <Card variant="elevated" style={styles.gamCard}>
+            {/* Level + Progress */}
+            <View style={styles.gamLevelRow}>
+              <View style={styles.gamLevelIcon}>
+                <Ionicons name="shield-checkmark" size={28} color={Colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.gamLevelText}>{t('level')} {gamification?.level || 1}</Text>
+                <View style={styles.gamProgressTrack}>
+                  <View style={[styles.gamProgressFill, { width: `${gamification ? (gamification.level_progress / gamification.level_target) * 100 : 0}%` }]} />
+                </View>
+                <Text style={styles.gamProgressLabel}>{gamification?.level_progress || 0}/{gamification?.level_target || 500} XP</Text>
+              </View>
+            </View>
+
+            {/* Stats Grid */}
+            <View style={styles.gamStatsGrid}>
+              <View style={styles.gamStatItem}>
+                <Text style={styles.gamStatEmoji}>🦴</Text>
+                <Text style={styles.gamStatValue}>{gamification?.bones || 0}</Text>
+                <Text style={styles.gamStatLabel}>{t('bones')}</Text>
+              </View>
+              <View style={styles.gamStatDivider} />
+              <View style={styles.gamStatItem}>
+                <Ionicons name="flame" size={22} color={Colors.accentOrange} />
+                <Text style={styles.gamStatValue}>{gamification?.streak_days || 0}</Text>
+                <Text style={styles.gamStatLabel}>{t('streak')}</Text>
+              </View>
+              <View style={styles.gamStatDivider} />
+              <View style={styles.gamStatItem}>
+                <Ionicons name="school" size={22} color={Colors.accentPurple} />
+                <Text style={styles.gamStatValue}>{gamification?.exercises_completed || 0}</Text>
+                <Text style={styles.gamStatLabel}>{t('lessons')}</Text>
+              </View>
+            </View>
+          </Card>
+        </View>
+
+        {/* Achievements Section */}
+        <View style={styles.section} data-testid="achievements-section">
+          <Text style={styles.sectionTitle}>{t('achievements')}</Text>
+          <Card variant="elevated">
+            <View style={styles.achGrid}>
+              {achievements.map((ach) => (
+                <View key={ach.id} style={[styles.achItem, !ach.unlocked && styles.achItemLocked]} data-testid={`achievement-${ach.id}`}>
+                  <View style={[styles.achIconCircle, ach.unlocked ? styles.achIconUnlocked : styles.achIconLockedBg]}>
+                    <Ionicons name={ach.icon as any} size={22} color={ach.unlocked ? Colors.white : Colors.gray} />
+                  </View>
+                  <Text style={[styles.achName, !ach.unlocked && styles.achNameLocked]} numberOfLines={2}>{ach.name}</Text>
+                  <Text style={styles.achBones}>+{ach.bones_reward} 🦴</Text>
+                </View>
+              ))}
+            </View>
+            {achievements.length === 0 && (
+              <Text style={styles.achEmpty}>{t('noAchievements')}</Text>
+            )}
+          </Card>
+        </View>
+
         {/* Pack Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
