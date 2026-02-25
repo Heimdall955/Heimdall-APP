@@ -40,6 +40,7 @@ export default function PerfilScreen() {
   const router = useRouter();
   const { currentDog, user, logout, dogs, refreshDogs, setCurrentDog } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { colors, isDark, toggleTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
