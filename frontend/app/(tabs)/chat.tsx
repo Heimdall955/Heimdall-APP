@@ -53,18 +53,18 @@ const SUGGESTED_QUESTIONS = {
 
 const WELCOME_MESSAGES = {
   es: {
-    title: '¡Hola! Soy Hani 🐕',
-    text: 'Hoy vengo en modo cachorro curioso... pero si hablamos de salud animal, me pongo serio. ¿Qué necesitas?',
+    title: '¡Hola! Soy Heimdall 🐕',
+    text: 'Soy tu guardián conversacional. Estoy aquí para acompañarte, orientarte y proteger a tu mejor amigo. ¿En qué puedo ayudarte?',
     suggestions: 'Prueba preguntar:',
   },
   en: {
-    title: 'Hello! I\'m Hani 🐕',
-    text: 'Today I\'m in curious puppy mode... but when it comes to animal health, I get serious. What do you need?',
+    title: 'Hello! I\'m Heimdall 🐕',
+    text: 'I\'m your conversational guardian. I\'m here to accompany you, guide you and protect your best friend. How can I help you?',
     suggestions: 'Try asking:',
   },
   it: {
-    title: 'Ciao! Sono Hani 🐕',
-    text: 'Oggi sono in modalità cucciolo curioso... ma quando si parla di salute animale, divento serio. Di cosa hai bisogno?',
+    title: 'Ciao! Sono Heimdall 🐕',
+    text: 'Sono il tuo guardiano conversazionale. Sono qui per accompagnarti, guidarti e proteggere il tuo migliore amico. Come posso aiutarti?',
     suggestions: 'Prova a chiedere:',
   },
 };
