@@ -52,6 +52,15 @@ Premium mobile app for monitoring dog health, providing education, and connectin
   - Multi-language detection with langdetect library
   - Validated: 7/7 backend tests passed
 
+- Profile overhaul (Feb 25, 2026)
+  - Photo upload: Fixed crop with aspect [1,1] and base64 storage
+  - Pack/Friends: Invite via Share (WhatsApp etc.) + 5 bones reward + friend circles with empty slots
+  - Clinical file: Full editable modal (country, vet, allergies, medication, neutered, insurance) → Supabase
+  - Settings: Weight unit (kg/lb), temperature (°C/°F), language
+  - Notifications: Toggle panel (daily reminder, health alerts, achievements, pack activity)
+  - All save to Supabase tables: clinical_files, pack_friends, user_settings
+  - **REQUIRES**: User to create 3 tables in Supabase SQL Editor (SQL provided)
+
 ## P1 - Pending
 - Translate detailed education content (lesson internals still in Spanish)
 
