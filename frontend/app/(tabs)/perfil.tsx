@@ -14,6 +14,7 @@ import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { SecureStore } from '../../utils/secureStore';
 import { Card, Button } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
