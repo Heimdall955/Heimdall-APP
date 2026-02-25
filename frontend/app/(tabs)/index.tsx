@@ -103,12 +103,12 @@ export default function HomeScreen() {
               <Text style={s.subtitle}>{t('positiveEducation')}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <TouchableOpacity style={[s.iconBtn, isDark && { backgroundColor: colors.accent + '25' }]} onPress={toggleTheme} testID="theme-toggle-btn">
-              <Ionicons name={isDark ? 'sunny' : 'moon-outline'} size={22} color={isDark ? colors.accent : colors.secondary} />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity style={[s.iconBtn, { marginRight: 10 }]} onPress={toggleTheme} accessibilityLabel="Toggle theme">
+              <Ionicons name={isDark ? 'sunny' : 'moon-outline'} size={22} color={isDark ? colors.accent : colors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={s.iconBtn}>
-              <Ionicons name="notifications-outline" size={24} color={colors.secondary} />
+              <Ionicons name="notifications-outline" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
         </View>
