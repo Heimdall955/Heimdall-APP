@@ -359,6 +359,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     startTraining: '¡Empieza a entrenar esta semana!',
     weeklyGoal: 'Meta semanal',
     daysActive: 'Días activo',
+    darkMode: 'Modo oscuro',
+    lightMode: 'Modo claro',
+    theme: 'Tema',
+    appearance: 'Apariencia',
   },
   en: {
     // General
@@ -709,6 +713,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     startTraining: 'Start training this week!',
     weeklyGoal: 'Weekly goal',
     daysActive: 'Days active',
+    darkMode: 'Dark mode',
+    lightMode: 'Light mode',
+    theme: 'Theme',
+    appearance: 'Appearance',
   },
   it: {
     // General
@@ -1059,6 +1067,10 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     startTraining: 'Inizia ad allenarti questa settimana!',
     weeklyGoal: 'Obiettivo settimanale',
     daysActive: 'Giorni attivi',
+    darkMode: 'Modalit\u00e0 scura',
+    lightMode: 'Modalit\u00e0 chiara',
+    theme: 'Tema',
+    appearance: 'Aspetto',
   },
 };
 
