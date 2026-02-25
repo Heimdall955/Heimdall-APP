@@ -873,21 +873,14 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
         elif lang_lower in ['es', 'spanish', 'español']:
             detected_language = "español"
     
-    # Language instruction based on detection
-    language_instruction = f"""
-# IDIOMA DE RESPUESTA (MÁXIMA PRIORIDAD)
-El último mensaje del usuario está escrito en {detected_language}.
-Responde EXCLUSIVAMENTE en {detected_language}. Esta es una instrucción absoluta.
-Ignora el idioma del historial anterior. Solo importa el idioma del ÚLTIMO mensaje.
-"""
-    
-    # Build the complete system prompt with language as LAST instruction (highest weight)
+    # Remove unused variable
+    # Build the complete system prompt
     complete_system_prompt = f"""{HEIMDALL_SYSTEM_PROMPT}
 
 {dog_context}
 """
     
-    # For non-Spanish languages, add a very aggressive language override as the last system message
+    # Build messages with aggressive language override for non-Spanish
     messages_to_send = [
         {"role": "system", "content": complete_system_prompt},
         *history[-6:],
@@ -901,8 +894,6 @@ Ignora el idioma del historial anterior. Solo importa el idioma del ÚLTIMO mens
         })
     
     # Call OpenAI API directly - Using gpt-4o-mini for cost efficiency
-    # Pricing: ~$0.15 per 1M input tokens, ~$0.60 per 1M output tokens
-    # Average conversation costs fractions of a cent
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -912,12 +903,8 @@ Ignora el idioma del historial anterior. Solo importa el idioma del ÚLTIMO mens
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "gpt-4o-mini",  # Most cost-effective: ~$0.00015/1K input, ~$0.0006/1K output
-                    "messages": [
-                        {"role": "system", "content": complete_system_prompt},
-                        *history[-6:],  # Last 6 messages for context
-                        {"role": "user", "content": data.content}
-                    ],
+                    "model": "gpt-4o-mini",
+                    "messages": messages_to_send,
                     "max_tokens": 800,
                     "temperature": 0.7
                 },
