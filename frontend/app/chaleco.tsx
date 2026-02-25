@@ -7,6 +7,7 @@ import { useBluetooth } from '../contexts/BluetoothContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, Button } from '../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function ChalecoScreen() {
   const router = useRouter();

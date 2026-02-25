@@ -7,6 +7,7 @@ import { PurchasesPackage } from 'react-native-purchases';
 import { useSubscription } from '../hooks/useSubscription';
 import { Card, Button } from '../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 const proFeatures = [
   {

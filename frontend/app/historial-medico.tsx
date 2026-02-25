@@ -8,6 +8,7 @@ import { SecureStore } from '../utils/secureStore';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button, Input } from '../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
