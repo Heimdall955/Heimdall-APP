@@ -65,8 +65,12 @@ export default function HomeScreen() {
       setDogStatus(prev => ({
         ...prev,
         bones: response.data.bones,
+        level: response.data.level || 1,
         level_progress: response.data.level_progress,
         level_target: response.data.level_target,
+        streak_days: response.data.streak_days || 0,
+        exercises_completed: response.data.exercises_completed || 0,
+        practice_minutes: response.data.practice_minutes || 0,
       }));
     } catch (error) {
       console.log('Error loading gamification stats');
