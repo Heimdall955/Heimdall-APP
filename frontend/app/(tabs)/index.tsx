@@ -32,6 +32,7 @@ export default function HomeScreen() {
   const { isConnected, biometricData } = useBluetooth();
   const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
+  const [weeklySummary, setWeeklySummary] = useState<any>(null);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
     status: 'calm',
     bones: 0,
