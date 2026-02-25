@@ -132,7 +132,7 @@ export default function EducacionScreen() {
             </View>
           </View>
           
-          <TouchableOpacity style={styles.sessionCard}>
+          <TouchableOpacity style={styles.sessionCard} onPress={() => router.push('/leccion?id=llamada-perfecta')}>
             <Image 
               source={{ uri: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600' }}
               style={styles.sessionImage}
