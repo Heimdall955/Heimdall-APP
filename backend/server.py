@@ -344,16 +344,26 @@ async def register(data: UserCreate, request: Request):
     }
 
 @api_router.post("/auth/login")
-async def login(data: UserLogin):
+async def login(data: UserLogin, request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Check brute force protection
+    check_login_rate(data.email, client_ip)
+    
     try:
-        result = supabase.table("users").select("*").eq("email", data.email).execute()
+        result = supabase.table("users").select("*").eq("email", data.email.strip().lower()).execute()
         if not result.data or len(result.data) == 0:
+            record_failed_login(data.email, client_ip)
             raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
         
         user_data = result.data[0]
         
         if not user_data.get("password_hash") or not verify_password(data.password, user_data["password_hash"]):
+            record_failed_login(data.email, client_ip)
             raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+        
+        # Successful login - clear attempts
+        clear_login_attempts(data.email)
         
         session_token = generate_session_token()
         sessions[session_token] = {
