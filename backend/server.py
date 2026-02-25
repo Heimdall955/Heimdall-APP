@@ -2013,7 +2013,7 @@ async def get_wallet_pass(dog_id: str, user: User = Depends(require_auth)):
             "id": str(dog_data["id"]),
             "name": dog_data["name"],
             "breed": dog_data.get("breed"),
-            "age": dog_data.get("age", 0),
+            "age": dog_data.get("age_months", 0),
             "weight": float(dog_data.get("weight", 0)),
             "chip_id": dog_data.get("chip_id"),
             "avatar": dog_data.get("photo_url") or dog_data.get("avatar")
@@ -2024,8 +2024,17 @@ async def get_wallet_pass(dog_id: str, user: User = Depends(require_auth)):
             "email": user.email
         }
         
-        # Generate JWT
-        jwt_token = create_wallet_pass_jwt(dog_formatted, user_data)
+        # Fetch clinical data (resilient - won't crash if table doesn't exist)
+        clinical_data = None
+        try:
+            clinical_result = supabase.table("clinical_files").select("*").eq("dog_id", dog_id).execute()
+            if clinical_result.data and len(clinical_result.data) > 0:
+                clinical_data = clinical_result.data[0]
+        except Exception as clin_err:
+            logger.warning(f"Could not fetch clinical data (table may not exist): {clin_err}")
+        
+        # Generate JWT with clinical data
+        jwt_token = create_wallet_pass_jwt(dog_formatted, user_data, clinical_data)
         
         # Create save URL
         save_url = f"https://pay.google.com/gp/v/save/{jwt_token}"
