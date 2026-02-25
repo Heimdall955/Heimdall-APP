@@ -26,6 +26,8 @@ export default function RootLayout() {
                 <Stack.Screen name="pro" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="leccion" options={{ presentation: 'card' }} />
                 <Stack.Screen name="ejercicio" options={{ presentation: 'card' }} />
+                <Stack.Screen name="leaderboard" options={{ presentation: 'card' }} />
+                <Stack.Screen name="juego" options={{ presentation: 'card' }} />
               </Stack>
             </BluetoothProvider>
           </AuthProvider>
