@@ -274,6 +274,42 @@ backend:
         agent: "testing"
         comment: "Achievement system working correctly. First lesson triggers 'first_lesson' achievement with 10 bonus bones. No duplicate achievements triggered on subsequent lessons. Level-up mechanics working when XP crosses 500 threshold."
 
+  - task: "Clinical File Endpoints"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: Clinical file endpoints (GET/PUT /api/dogs/{dog_id}/clinical) failing with 500 errors. Root cause: Supabase table 'clinical_files' does not exist. Backend code is correct but database schema is missing. Affects veterinary data storage functionality."
+
+  - task: "Pack Friends Endpoints"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: Pack friends endpoints (GET/POST /api/pack/friends, /api/pack/invite) failing with 500 errors. Root cause: Supabase table 'pack_friends' does not exist. Backend code is correct but database schema is missing. Affects social features and friend invitations."
+
+  - task: "User Settings Endpoints"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: User settings endpoints (GET/PUT /api/users/settings) partially working. GET returns defaults but PUT fails with 500 error. Root cause: Supabase table 'user_settings' does not exist. Backend code handles fallbacks but cannot persist changes."
+
 frontend:
   # Frontend testing not performed as per testing agent guidelines
 
