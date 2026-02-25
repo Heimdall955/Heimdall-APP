@@ -929,6 +929,20 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
         "content": ai_response,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
+    
+    message_id = None
+    try:
+        result = supabase.table("chat_messages").insert(assistant_message).execute()
+        message_id = str(result.data[0]["id"])
+    except Exception as e:
+        logger.error(f"Error saving assistant message: {e}")
+    
+    return {
+        "id": message_id or str(uuid.uuid4()),
+        "role": "assistant",
+        "content": ai_response,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
 
 # ==================== FILE UPLOAD & ANALYSIS ====================
 
