@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { Card, Button, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { getTrainingPrograms, getExercises, getGames } from '../../data/educationContent';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';

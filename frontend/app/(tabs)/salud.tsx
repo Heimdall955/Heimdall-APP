@@ -10,6 +10,7 @@ import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, ProgressCircle } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
