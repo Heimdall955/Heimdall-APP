@@ -1988,10 +1988,10 @@ async def get_wallet_pass(dog_id: str, user: User = Depends(require_auth)):
             "id": str(dog_data["id"]),
             "name": dog_data["name"],
             "breed": dog_data.get("breed"),
-            "age": dog_data.get("age_months", 0),
+            "age": dog_data.get("age", 0),
             "weight": float(dog_data.get("weight", 0)),
             "chip_id": dog_data.get("chip_id"),
-            "avatar": dog_data.get("photo_url")
+            "avatar": dog_data.get("photo_url") or dog_data.get("avatar")
         }
         
         user_data = {
