@@ -157,15 +157,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginWithGoogle = async () => {
-    // For web: always use current window origin for OAuth redirect
-    // For native: use deep linking
     let redirectUrl: string;
     if (Platform.OS === 'web') {
-      // In browser environment, use window.location.origin
-      // This ensures OAuth works across all deployment environments (preview, production, custom domains)
-      redirectUrl = typeof window !== 'undefined' && window.location?.origin 
-        ? window.location.origin + '/' 
-        : '/';
+      redirectUrl = window.location.origin + '/';
     } else {
       redirectUrl = Linking.createURL('/');
     }
