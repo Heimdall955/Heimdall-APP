@@ -235,8 +235,8 @@ export default function ChatScreen() {
               />
             </View>
             <View>
-              <Text style={styles.headerTitle}>Hani</Text>
-              <Text style={styles.headerSubtitle}>{t('askHani').split(',')[0]}</Text>
+              <Text style={styles.headerTitle}>Heimdall</Text>
+              <Text style={styles.headerSubtitle}>{t('guardianChat') || 'Tu guardián'}</Text>
             </View>
           </View>
         </View>
