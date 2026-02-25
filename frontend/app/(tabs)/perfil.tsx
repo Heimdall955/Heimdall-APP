@@ -1001,4 +1001,121 @@ const styles = StyleSheet.create({
   saveButton: {
     marginTop: Spacing.md,
   },
+  gamCard: {
+    marginBottom: 0,
+  },
+  gamLevelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  gamLevelIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gamLevelText: {
+    fontSize: FontSizes.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  gamProgressTrack: {
+    height: 8,
+    backgroundColor: Colors.grayLight,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  gamProgressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 4,
+  },
+  gamProgressLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+    textAlign: 'right',
+  },
+  gamStatsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.grayLight,
+  },
+  gamStatItem: {
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+  },
+  gamStatEmoji: {
+    fontSize: 22,
+  },
+  gamStatValue: {
+    fontSize: FontSizes.xl,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  gamStatLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+  },
+  gamStatDivider: {
+    width: 1,
+    height: 50,
+    backgroundColor: Colors.grayLight,
+  },
+  achGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  achItem: {
+    width: '30%',
+    alignItems: 'center',
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.md,
+  },
+  achItemLocked: {
+    opacity: 0.5,
+  },
+  achIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  achIconUnlocked: {
+    backgroundColor: Colors.primary,
+  },
+  achIconLockedBg: {
+    backgroundColor: Colors.grayLight,
+  },
+  achName: {
+    fontSize: FontSizes.xs,
+    fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  achNameLocked: {
+    color: Colors.gray,
+  },
+  achBones: {
+    fontSize: FontSizes.xs,
+    color: Colors.accent,
+    fontWeight: '600',
+  },
+  achEmpty: {
+    textAlign: 'center',
+    color: Colors.textSecondary,
+    fontSize: FontSizes.sm,
+    padding: Spacing.md,
+  },
 });
