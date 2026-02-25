@@ -596,8 +596,15 @@ async def update_dog(dog_id: str, data: DogUpdate, user: User = Depends(require_
 @api_router.delete("/dogs/{dog_id}")
 async def delete_dog(dog_id: str, user: User = Depends(require_auth)):
     try:
+        # Verify ownership first
+        check = supabase.table("dogs").select("id").eq("id", dog_id).eq("user_id", user.user_id).execute()
+        if not check.data or len(check.data) == 0:
+            raise HTTPException(status_code=404, detail="Perro no encontrado")
+        
         supabase.table("dogs").delete().eq("id", dog_id).eq("user_id", user.user_id).execute()
         return {"message": "Perro eliminado"}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error deleting dog: {e}")
         raise HTTPException(status_code=500, detail="Error al eliminar perro")
