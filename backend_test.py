@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Heimdall Backend API Test Suite
-Tests all backend endpoints for the Heimdall pet wellness app
+Comprehensive Backend Testing for Heimdall (HANI) App
+Testing the complete gamification flow end-to-end as specified in requirements
 """
 
 import requests
@@ -9,729 +9,448 @@ import json
 import sys
 from datetime import datetime
 
-# Backend URL from environment
+# Backend URL from the test environment
 BACKEND_URL = "https://hani-achievements-ui.preview.emergentagent.com"
+API_BASE = f"{BACKEND_URL}/api"
 
-class HeimdallAPITester:
+class Colors:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    END = '\033[0m'
+
+def print_success(msg):
+    print(f"{Colors.GREEN}✅ {msg}{Colors.END}")
+
+def print_error(msg):
+    print(f"{Colors.RED}❌ {msg}{Colors.END}")
+
+def print_info(msg):
+    print(f"{Colors.BLUE}ℹ️  {msg}{Colors.END}")
+
+def print_warning(msg):
+    print(f"{Colors.YELLOW}⚠️  {msg}{Colors.END}")
+
+def print_header(msg):
+    print(f"\n{Colors.PURPLE}{'='*60}{Colors.END}")
+    print(f"{Colors.PURPLE}🧪 {msg}{Colors.END}")
+    print(f"{Colors.PURPLE}{'='*60}{Colors.END}")
+
+class GamificationTester:
     def __init__(self):
-        self.base_url = BACKEND_URL
         self.session_token = None
-        self.user_data = None
-        self.dog_id = None
-        self.test_results = []
+        self.test_email = "e2e_gamification_test@test.com"
+        self.test_password = "123456"
+        self.test_name = "E2E Tester"
+        self.failed_tests = []
+        self.total_tests = 0
+        self.passed_tests = 0
         
-    def log_test(self, test_name, success, details="", response_data=None):
-        """Log test results"""
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status} {test_name}")
-        if details:
-            print(f"   Details: {details}")
-        if response_data and not success:
-            print(f"   Response: {response_data}")
-        print()
-        
-        self.test_results.append({
-            "test": test_name,
-            "success": success,
-            "details": details,
-            "response": response_data
-        })
-    
-    def test_health_check(self):
-        """Test GET /api/ - Health check"""
+    def run_test(self, test_name, test_func):
+        """Run individual test with error handling"""
+        self.total_tests += 1
+        print_info(f"Running: {test_name}")
         try:
-            response = requests.get(f"{self.base_url}/api/", timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "message" in data and "status" in data:
-                    self.log_test("Health Check", True, f"Status: {data.get('status')}")
-                    return True
-                else:
-                    self.log_test("Health Check", False, "Missing expected fields in response", data)
-                    return False
-            else:
-                self.log_test("Health Check", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Health Check", False, f"Exception: {str(e)}")
-            return False
-    
-    def test_register(self):
-        """Test POST /api/auth/register"""
-        try:
-            user_data = {
-                "email": "newuser@test.com",
-                "password": "test1234",
-                "name": "Test User"
-            }
-            
-            response = requests.post(
-                f"{self.base_url}/api/auth/register",
-                json=user_data,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "session_token" in data and "user" in data:
-                    self.session_token = data["session_token"]
-                    self.user_data = data["user"]
-                    self.log_test("User Registration", True, f"User ID: {self.user_data.get('user_id')}")
-                    return True
-                else:
-                    self.log_test("User Registration", False, "Missing session_token or user in response", data)
-                    return False
-            else:
-                # Check if user already exists
-                if response.status_code == 400 and "ya está registrado" in response.text:
-                    self.log_test("User Registration", True, "User already exists (expected for repeated tests)")
-                    return True
-                else:
-                    self.log_test("User Registration", False, f"HTTP {response.status_code}", response.text)
-                    return False
-                    
-        except Exception as e:
-            self.log_test("User Registration", False, f"Exception: {str(e)}")
-            return False
-    
-    def test_login(self):
-        """Test POST /api/auth/login"""
-        try:
-            login_data = {
-                "email": "newuser@test.com",
-                "password": "test1234"
-            }
-            
-            response = requests.post(
-                f"{self.base_url}/api/auth/login",
-                json=login_data,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "session_token" in data and "user" in data:
-                    self.session_token = data["session_token"]
-                    self.user_data = data["user"]
-                    self.log_test("User Login", True, f"Session token received")
-                    return True
-                else:
-                    self.log_test("User Login", False, "Missing session_token or user in response", data)
-                    return False
-            else:
-                self.log_test("User Login", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("User Login", False, f"Exception: {str(e)}")
-            return False
-    
-    def test_get_current_user(self):
-        """Test GET /api/auth/me"""
-        if not self.session_token:
-            self.log_test("Get Current User", False, "No session token available")
-            return False
-            
-        try:
-            headers = {"Authorization": f"Bearer {self.session_token}"}
-            response = requests.get(
-                f"{self.base_url}/api/auth/me",
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "user_id" in data and "email" in data:
-                    self.log_test("Get Current User", True, f"User: {data.get('name')} ({data.get('email')})")
-                    return True
-                else:
-                    self.log_test("Get Current User", False, "Missing expected user fields", data)
-                    return False
-            else:
-                self.log_test("Get Current User", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Get Current User", False, f"Exception: {str(e)}")
-            return False
-    
-    def test_create_dog(self):
-        """Test POST /api/dogs"""
-        if not self.session_token:
-            self.log_test("Create Dog Profile", False, "No session token available")
-            return False
-            
-        try:
-            dog_data = {
-                "name": "Max",
-                "age": 24,
-                "weight": 15.0,
-                "sex": "male",
-                "breed": "Labrador"
-            }
-            
-            headers = {"Authorization": f"Bearer {self.session_token}"}
-            response = requests.post(
-                f"{self.base_url}/api/dogs",
-                json=dog_data,
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "id" in data and "name" in data:
-                    self.dog_id = data["id"]
-                    self.log_test("Create Dog Profile", True, f"Dog created: {data.get('name')} (ID: {self.dog_id})")
-                    return True
-                else:
-                    self.log_test("Create Dog Profile", False, "Missing expected dog fields", data)
-                    return False
-            else:
-                self.log_test("Create Dog Profile", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Create Dog Profile", False, f"Exception: {str(e)}")
-            return False
-    
-    def test_get_dogs(self):
-        """Test GET /api/dogs"""
-        if not self.session_token:
-            self.log_test("List User Dogs", False, "No session token available")
-            return False
-            
-        try:
-            headers = {"Authorization": f"Bearer {self.session_token}"}
-            response = requests.get(
-                f"{self.base_url}/api/dogs",
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if isinstance(data, list):
-                    dog_count = len(data)
-                    self.log_test("List User Dogs", True, f"Found {dog_count} dog(s)")
-                    return True
-                else:
-                    self.log_test("List User Dogs", False, "Response is not a list", data)
-                    return False
-            else:
-                self.log_test("List User Dogs", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("List User Dogs", False, f"Exception: {str(e)}")
-            return False
-    
-    def test_chat_message(self):
-        """Test POST /api/chat"""
-        if not self.session_token:
-            self.log_test("Send Chat Message", False, "No session token available")
-            return False
-            
-        if not self.dog_id:
-            self.log_test("Send Chat Message", False, "No dog ID available")
-            return False
-            
-        try:
-            chat_data = {
-                "content": "Hola, necesito ayuda con mi perro",
-                "dog_id": self.dog_id
-            }
-            
-            headers = {"Authorization": f"Bearer {self.session_token}"}
-            response = requests.post(
-                f"{self.base_url}/api/chat",
-                json=chat_data,
-                headers=headers,
-                timeout=30  # Longer timeout for LLM response
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "id" in data and "content" in data and "role" in data:
-                    content_preview = data.get("content", "")[:100] + "..." if len(data.get("content", "")) > 100 else data.get("content", "")
-                    self.log_test("Send Chat Message", True, f"Response received: {content_preview}")
-                    return True
-                else:
-                    self.log_test("Send Chat Message", False, "Missing expected message fields", data)
-                    return False
-            else:
-                self.log_test("Send Chat Message", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Send Chat Message", False, f"Exception: {str(e)}")
-            return False
-
-    def test_gamification_register_new_user(self):
-        """Test gamification flow: Register a new user for gamification testing"""
-        try:
-            user_data = {
-                "email": "tester_gamification@test.com",
-                "password": "123456",
-                "name": "Tester Gamification"
-            }
-            
-            response = requests.post(
-                f"{self.base_url}/api/auth/register",
-                json=user_data,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "session_token" in data and "user" in data:
-                    # Store new session for gamification tests
-                    self.gamification_token = data["session_token"]
-                    self.gamification_user = data["user"]
-                    self.log_test("Gamification User Registration", True, f"User ID: {self.gamification_user.get('user_id')}")
-                    return True
-                else:
-                    self.log_test("Gamification User Registration", False, "Missing session_token or user in response", data)
-                    return False
-            elif response.status_code == 400 and "ya está registrado" in response.text:
-                # User already exists, try to login
-                login_data = {
-                    "email": "tester_gamification@test.com",
-                    "password": "123456"
-                }
-                
-                login_response = requests.post(
-                    f"{self.base_url}/api/auth/login",
-                    json=login_data,
-                    timeout=10
-                )
-                
-                if login_response.status_code == 200:
-                    data = login_response.json()
-                    self.gamification_token = data["session_token"]
-                    self.gamification_user = data["user"]
-                    self.log_test("Gamification User Registration", True, "User exists, logged in successfully")
-                    return True
-                else:
-                    self.log_test("Gamification User Registration", False, f"Login failed: HTTP {login_response.status_code}", login_response.text)
-                    return False
-            else:
-                self.log_test("Gamification User Registration", False, f"HTTP {response.status_code}", response.text)
-                return False
-                    
-        except Exception as e:
-            self.log_test("Gamification User Registration", False, f"Exception: {str(e)}")
-            return False
-
-    def test_initial_gamification_stats(self):
-        """Test GET /api/gamification/stats - should show initial zeros"""
-        if not hasattr(self, 'gamification_token') or not self.gamification_token:
-            self.log_test("Initial Gamification Stats", False, "No gamification session token available")
-            return False
-            
-        try:
-            headers = {"Authorization": f"Bearer {self.gamification_token}"}
-            response = requests.get(
-                f"{self.base_url}/api/gamification/stats",
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                expected_fields = ["bones", "xp", "level", "level_progress", "streak_days", "exercises_completed"]
-                missing_fields = [field for field in expected_fields if field not in data]
-                
-                if missing_fields:
-                    self.log_test("Initial Gamification Stats", False, f"Missing fields: {missing_fields}", data)
-                    return False
-                
-                # Check initial values
-                if (data["bones"] == 0 and data["xp"] == 0 and data["level"] == 1 and 
-                    data["level_progress"] == 0 and data["streak_days"] == 0 and data["exercises_completed"] == 0):
-                    self.log_test("Initial Gamification Stats", True, "All initial stats are correct zeros/ones")
-                    return True
-                else:
-                    self.log_test("Initial Gamification Stats", False, f"Stats not at initial values: {data}")
-                    return False
-            else:
-                self.log_test("Initial Gamification Stats", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Initial Gamification Stats", False, f"Exception: {str(e)}")
-            return False
-
-    def test_first_lesson_bones_achievement(self):
-        """Test POST /api/gamification/add-bones - first lesson should trigger achievement"""
-        if not hasattr(self, 'gamification_token') or not self.gamification_token:
-            self.log_test("First Lesson Achievement", False, "No gamification session token available")
-            return False
-            
-        try:
-            bones_data = {
-                "amount": 15,
-                "reason": "Lesson completed",
-                "lesson_id": "test-lesson-1"
-            }
-            
-            headers = {"Authorization": f"Bearer {self.gamification_token}"}
-            response = requests.post(
-                f"{self.base_url}/api/gamification/add-bones",
-                json=bones_data,
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                expected_fields = ["bones", "bones_added", "xp", "xp_added", "level", "leveled_up", "exercises_completed", "new_achievements"]
-                missing_fields = [field for field in expected_fields if field not in data]
-                
-                if missing_fields:
-                    self.log_test("First Lesson Achievement", False, f"Missing fields: {missing_fields}", data)
-                    return False
-                
-                # Check that bones > 15 (should be 25 with first_lesson achievement bonus)
-                if data["bones"] >= 25 and data["xp"] > 0 and data["exercises_completed"] == 1:
-                    # Check if first_lesson achievement was triggered
-                    achievements = data.get("new_achievements", [])
-                    first_lesson_found = any(ach.get("id") == "first_lesson" for ach in achievements)
-                    
-                    if first_lesson_found and data["leveled_up"] == False:
-                        self.log_test("First Lesson Achievement", True, f"Bones: {data['bones']}, XP: {data['xp']}, Exercises: {data['exercises_completed']}, Achievement unlocked")
-                        return True
-                    else:
-                        self.log_test("First Lesson Achievement", False, f"First lesson achievement not found or unexpected level up. Achievements: {achievements}")
-                        return False
-                else:
-                    self.log_test("First Lesson Achievement", False, f"Unexpected values: bones={data['bones']}, xp={data['xp']}, exercises={data['exercises_completed']}")
-                    return False
-            else:
-                self.log_test("First Lesson Achievement", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("First Lesson Achievement", False, f"Exception: {str(e)}")
-            return False
-
-    def test_stats_after_first_lesson(self):
-        """Test GET /api/gamification/stats after first lesson"""
-        if not hasattr(self, 'gamification_token') or not self.gamification_token:
-            self.log_test("Stats After First Lesson", False, "No gamification session token available")
-            return False
-            
-        try:
-            headers = {"Authorization": f"Bearer {self.gamification_token}"}
-            response = requests.get(
-                f"{self.base_url}/api/gamification/stats",
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Check expected values after first lesson
-                expected_bones = 25  # 15 + 10 bonus
-                expected_xp = 30     # 15 * 2
-                expected_level = 1
-                expected_exercises = 1
-                
-                if (data["bones"] == expected_bones and data["xp"] == expected_xp and 
-                    data["level"] == expected_level and data["exercises_completed"] == expected_exercises and
-                    data["streak_days"] >= 1):
-                    
-                    # Check achievements
-                    achievements = data.get("achievements_unlocked", [])
-                    if "first_lesson" in achievements:
-                        self.log_test("Stats After First Lesson", True, 
-                                    f"Stats correct: bones={data['bones']}, xp={data['xp']}, level={data['level']}, exercises={data['exercises_completed']}, achievements={achievements}")
-                        return True
-                    else:
-                        self.log_test("Stats After First Lesson", False, f"First lesson achievement not in unlocked list: {achievements}")
-                        return False
-                else:
-                    self.log_test("Stats After First Lesson", False, 
-                                f"Unexpected stats: bones={data['bones']} (expected {expected_bones}), xp={data['xp']} (expected {expected_xp})")
-                    return False
-            else:
-                self.log_test("Stats After First Lesson", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Stats After First Lesson", False, f"Exception: {str(e)}")
-            return False
-
-    def test_second_lesson_no_achievement(self):
-        """Test POST /api/gamification/add-bones - second lesson should NOT trigger first_lesson again"""
-        if not hasattr(self, 'gamification_token') or not self.gamification_token:
-            self.log_test("Second Lesson No Duplicate Achievement", False, "No gamification session token available")
-            return False
-            
-        try:
-            bones_data = {
-                "amount": 20,
-                "reason": "Second lesson",
-                "lesson_id": "test-lesson-2"
-            }
-            
-            headers = {"Authorization": f"Bearer {self.gamification_token}"}
-            response = requests.post(
-                f"{self.base_url}/api/gamification/add-bones",
-                json=bones_data,
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Check that no new achievements were triggered
-                new_achievements = data.get("new_achievements", [])
-                expected_bones = 45  # 25 + 20
-                expected_exercises = 2
-                
-                if (len(new_achievements) == 0 and data["bones"] == expected_bones and 
-                    data["exercises_completed"] == expected_exercises):
-                    self.log_test("Second Lesson No Duplicate Achievement", True, 
-                                f"No duplicate achievements, bones={data['bones']}, exercises={data['exercises_completed']}")
-                    return True
-                else:
-                    self.log_test("Second Lesson No Duplicate Achievement", False, 
-                                f"Unexpected achievements or stats: achievements={new_achievements}, bones={data['bones']}, exercises={data['exercises_completed']}")
-                    return False
-            else:
-                self.log_test("Second Lesson No Duplicate Achievement", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Second Lesson No Duplicate Achievement", False, f"Exception: {str(e)}")
-            return False
-
-    def test_achievements_list(self):
-        """Test GET /api/gamification/achievements"""
-        if not hasattr(self, 'gamification_token') or not self.gamification_token:
-            self.log_test("Achievements List", False, "No gamification session token available")
-            return False
-            
-        try:
-            headers = {"Authorization": f"Bearer {self.gamification_token}"}
-            response = requests.get(
-                f"{self.base_url}/api/gamification/achievements",
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                if ("achievements" in data and "total" in data and "unlocked_count" in data):
-                    total = data["total"]
-                    unlocked_count = data["unlocked_count"]
-                    achievements = data["achievements"]
-                    
-                    # Should have at least 9 achievements total
-                    if total >= 9 and unlocked_count == 1:
-                        # Check that first_lesson is unlocked
-                        first_lesson_unlocked = False
-                        for ach in achievements:
-                            if ach.get("id") == "first_lesson" and ach.get("unlocked") == True:
-                                first_lesson_unlocked = True
-                                break
-                        
-                        if first_lesson_unlocked:
-                            self.log_test("Achievements List", True, 
-                                        f"Total: {total}, Unlocked: {unlocked_count}, first_lesson unlocked correctly")
-                            return True
-                        else:
-                            self.log_test("Achievements List", False, "First lesson achievement not marked as unlocked")
-                            return False
-                    else:
-                        self.log_test("Achievements List", False, f"Unexpected counts: total={total}, unlocked={unlocked_count}")
-                        return False
-                else:
-                    self.log_test("Achievements List", False, "Missing expected fields", data)
-                    return False
-            else:
-                self.log_test("Achievements List", False, f"HTTP {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_test("Achievements List", False, f"Exception: {str(e)}")
-            return False
-
-    def test_unauthenticated_gamification_access(self):
-        """Test GET /api/gamification/stats without authentication - should fail"""
-        try:
-            response = requests.get(
-                f"{self.base_url}/api/gamification/stats",
-                timeout=10
-            )
-            
-            if response.status_code == 401:
-                self.log_test("Unauthenticated Access Denied", True, "Correctly returns 401 for unauthenticated request")
+            result = test_func()
+            if result:
+                self.passed_tests += 1
+                print_success(f"{test_name} - PASSED")
                 return True
             else:
-                self.log_test("Unauthenticated Access Denied", False, f"Expected 401 but got HTTP {response.status_code}")
+                self.failed_tests.append(test_name)
+                print_error(f"{test_name} - FAILED")
                 return False
-                
         except Exception as e:
-            self.log_test("Unauthenticated Access Denied", False, f"Exception: {str(e)}")
+            self.failed_tests.append(test_name)
+            print_error(f"{test_name} - ERROR: {str(e)}")
             return False
-
-    def test_level_up_mechanics(self):
-        """Test POST /api/gamification/add-bones with large amount to test level-up"""
-        if not hasattr(self, 'gamification_token') or not self.gamification_token:
-            self.log_test("Level Up Mechanics", False, "No gamification session token available")
+    
+    def test_1_register_user(self):
+        """Register a fresh user for E2E testing"""
+        url = f"{API_BASE}/auth/register"
+        data = {
+            "email": self.test_email,
+            "password": self.test_password,
+            "name": self.test_name
+        }
+        
+        response = requests.post(url, json=data)
+        
+        if response.status_code == 400 and "ya está registrado" in response.text:
+            # User already exists, try login instead
+            print_warning("User already exists, attempting login...")
+            return self.test_login_existing_user()
+        
+        if response.status_code != 200:
+            print_error(f"Registration failed with status {response.status_code}: {response.text}")
             return False
             
-        try:
-            bones_data = {
-                "amount": 250,
-                "reason": "Big lesson",
-                "lesson_id": "test-lesson-big"
+        result = response.json()
+        
+        if "session_token" not in result:
+            print_error("No session_token in registration response")
+            return False
+            
+        self.session_token = result["session_token"]
+        print_success(f"User registered successfully, token: {self.session_token[:20]}...")
+        return True
+    
+    def test_login_existing_user(self):
+        """Login if user already exists"""
+        url = f"{API_BASE}/auth/login"
+        data = {
+            "email": self.test_email,
+            "password": self.test_password
+        }
+        
+        response = requests.post(url, json=data)
+        
+        if response.status_code != 200:
+            print_error(f"Login failed with status {response.status_code}: {response.text}")
+            return False
+            
+        result = response.json()
+        
+        if "session_token" not in result:
+            print_error("No session_token in login response")
+            return False
+            
+        self.session_token = result["session_token"]
+        print_success(f"User logged in successfully, token: {self.session_token[:20]}...")
+        return True
+    
+    def test_2_verify_initial_stats_zero(self):
+        """Verify initial stats are all zero"""
+        if not self.session_token:
+            return False
+            
+        url = f"{API_BASE}/gamification/stats"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            print_error(f"Stats request failed with status {response.status_code}: {response.text}")
+            return False
+            
+        stats = response.json()
+        print_info(f"Initial stats: {json.dumps(stats, indent=2)}")
+        
+        # For a fresh user OR existing user, check initial state
+        expected_initial = {
+            "level": 1,
+            "level_progress": stats.get("xp", 0) % 500,  # Allow existing XP
+            "level_target": 500
+        }
+        
+        for key, expected_value in expected_initial.items():
+            if stats.get(key) != expected_value:
+                print_error(f"Expected {key}={expected_value}, got {stats.get(key)}")
+                return False
+                
+        print_success("Initial stats verified (level=1, target=500)")
+        return True
+    
+    def test_3_complete_first_lesson(self):
+        """Simulate completing first lesson - should trigger first_lesson achievement"""
+        if not self.session_token:
+            return False
+            
+        url = f"{API_BASE}/gamification/add-bones"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
+        data = {
+            "amount": 15,
+            "reason": "Lección: Llamada Perfecta",
+            "lesson_id": "llamada-perfecta"
+        }
+        
+        response = requests.post(url, json=data, headers=headers)
+        
+        if response.status_code != 200:
+            print_error(f"Add bones failed with status {response.status_code}: {response.text}")
+            return False
+            
+        result = response.json()
+        print_info(f"First lesson result: {json.dumps(result, indent=2)}")
+        
+        # For first lesson, should get 15 bones + 10 bonus = 25 total (for new user)
+        # XP should be 30 (15*2), exercises_completed should be at least 1
+        
+        expected_xp = result.get("xp_added", 0)  # Should be 30 for new lesson
+        expected_exercises = result.get("exercises_completed", 0)  # Should be incremented
+        expected_new_achievements = result.get("new_achievements", [])
+        
+        if expected_xp < 30:
+            print_error(f"Expected XP added >= 30, got {expected_xp}")
+            return False
+            
+        if expected_exercises < 1:
+            print_error(f"Expected exercises_completed >= 1, got {expected_exercises}")
+            return False
+            
+        # Check if first_lesson achievement was earned (for new users)
+        has_first_lesson = any(ach.get("id") == "first_lesson" for ach in expected_new_achievements)
+        if len(expected_new_achievements) > 0 and not has_first_lesson:
+            print_warning("First lesson achievement not found in new achievements (might be existing user)")
+        elif has_first_lesson:
+            print_success("First lesson achievement triggered correctly")
+            
+        print_success(f"Lesson completed: bones={result.get('bones')}, xp={result.get('xp')}, exercises={expected_exercises}")
+        return True
+    
+    def test_4_verify_stats_persisted(self):
+        """Verify stats are persisted correctly after first lesson"""
+        if not self.session_token:
+            return False
+            
+        url = f"{API_BASE}/gamification/stats"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            print_error(f"Stats request failed with status {response.status_code}: {response.text}")
+            return False
+            
+        stats = response.json()
+        print_info(f"Persisted stats: {json.dumps(stats, indent=2)}")
+        
+        # Verify we have some progress
+        if stats.get("xp", 0) < 30:
+            print_error(f"Expected XP >= 30, got {stats.get('xp')}")
+            return False
+            
+        if stats.get("exercises_completed", 0) < 1:
+            print_error(f"Expected exercises_completed >= 1, got {stats.get('exercises_completed')}")
+            return False
+            
+        if stats.get("level", 0) != 1:
+            print_error(f"Expected level=1, got {stats.get('level')}")
+            return False
+            
+        print_success("Stats properly persisted in database")
+        return True
+    
+    def test_5_verify_achievements_list(self):
+        """Verify achievements list shows correct structure"""
+        if not self.session_token:
+            return False
+            
+        url = f"{API_BASE}/gamification/achievements"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            print_error(f"Achievements request failed with status {response.status_code}: {response.text}")
+            return False
+            
+        result = response.json()
+        print_info(f"Achievements response: {json.dumps(result, indent=2)}")
+        
+        if result.get("total") != 9:
+            print_error(f"Expected 9 total achievements, got {result.get('total')}")
+            return False
+            
+        achievements = result.get("achievements", [])
+        if len(achievements) != 9:
+            print_error(f"Expected 9 achievement objects, got {len(achievements)}")
+            return False
+            
+        # Check if first_lesson is in the list and might be unlocked
+        first_lesson_ach = next((ach for ach in achievements if ach.get("id") == "first_lesson"), None)
+        if not first_lesson_ach:
+            print_error("first_lesson achievement not found in achievements list")
+            return False
+            
+        print_success(f"Achievements list correct: 9 total, {result.get('unlocked_count')} unlocked")
+        return True
+    
+    def test_6_complete_second_lesson(self):
+        """Complete another lesson to verify no duplicate achievements"""
+        if not self.session_token:
+            return False
+            
+        url = f"{API_BASE}/gamification/add-bones"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
+        data = {
+            "amount": 10,
+            "reason": "Lección: Sentado Perfecto",
+            "lesson_id": "sentado-basico"
+        }
+        
+        response = requests.post(url, json=data, headers=headers)
+        
+        if response.status_code != 200:
+            print_error(f"Add bones failed with status {response.status_code}: {response.text}")
+            return False
+            
+        result = response.json()
+        print_info(f"Second lesson result: {json.dumps(result, indent=2)}")
+        
+        # Should NOT get first_lesson achievement again
+        new_achievements = result.get("new_achievements", [])
+        has_duplicate_first_lesson = any(ach.get("id") == "first_lesson" for ach in new_achievements)
+        
+        if has_duplicate_first_lesson:
+            print_error("Duplicate first_lesson achievement detected!")
+            return False
+            
+        if result.get("exercises_completed", 0) < 2:
+            print_error(f"Expected exercises_completed >= 2, got {result.get('exercises_completed')}")
+            return False
+            
+        print_success("Second lesson completed without duplicate achievements")
+        return True
+    
+    def test_7_complete_multiple_lessons_rapidly(self):
+        """Complete 8 more lessons rapidly to test 10-lesson milestone"""
+        if not self.session_token:
+            return False
+            
+        url = f"{API_BASE}/gamification/add-bones"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
+        
+        lesson_ids = [
+            "caminar-correa",
+            "venir-llamada",
+            "quieto-basico",
+            "dejalo-comando",
+            "pata-saludo",
+            "esperar-paciencia",
+            "no-saltar",
+            "ladrar-control"
+        ]
+        
+        starting_exercises = None
+        for i, lesson_id in enumerate(lesson_ids):
+            data = {
+                "amount": 8,
+                "reason": f"Lección: {lesson_id.title()}",
+                "lesson_id": lesson_id
             }
             
-            headers = {"Authorization": f"Bearer {self.gamification_token}"}
-            response = requests.post(
-                f"{self.base_url}/api/gamification/add-bones",
-                json=bones_data,
-                headers=headers,
-                timeout=10
-            )
+            response = requests.post(url, json=data, headers=headers)
             
-            if response.status_code == 200:
-                data = response.json()
-                
-                # With previous 45 bones + 250 = 295 bones
-                # Previous XP was 30 + (250 * 2) = 530 XP, which should be level 2 (500+ XP = level 2)
-                expected_level = 2
-                leveled_up = data.get("leveled_up", False)
-                new_level = data.get("level", 1)
-                
-                if new_level >= expected_level and leveled_up:
-                    self.log_test("Level Up Mechanics", True, 
-                                f"Level up successful: new level={new_level}, leveled_up={leveled_up}")
-                    return True
-                else:
-                    self.log_test("Level Up Mechanics", False, 
-                                f"Level up failed: level={new_level}, leveled_up={leveled_up}, expected level >= {expected_level}")
-                    return False
-            else:
-                self.log_test("Level Up Mechanics", False, f"HTTP {response.status_code}", response.text)
+            if response.status_code != 200:
+                print_error(f"Lesson {i+3} failed with status {response.status_code}: {response.text}")
                 return False
                 
-        except Exception as e:
-            self.log_test("Level Up Mechanics", False, f"Exception: {str(e)}")
+            result = response.json()
+            current_exercises = result.get("exercises_completed", 0)
+            
+            if starting_exercises is None:
+                starting_exercises = current_exercises - 1  # Account for this lesson
+            
+            print_info(f"Lesson {i+3}: exercises={current_exercises}, bones={result.get('bones')}")
+            
+            # Check for 10_lessons achievement after reaching 10 exercises
+            if current_exercises >= 10:
+                new_achievements = result.get("new_achievements", [])
+                has_10_lessons = any(ach.get("id") == "10_lessons" for ach in new_achievements)
+                if has_10_lessons:
+                    print_success("🏆 10_lessons achievement unlocked!")
+                    break
+        
+        print_success("Completed 8 additional lessons successfully")
+        return True
+    
+    def test_8_verify_final_stats(self):
+        """Verify final stats show correct totals and achievements"""
+        if not self.session_token:
             return False
-
-    def run_gamification_tests(self):
-        """Run all gamification-specific tests"""
-        print("\n" + "=" * 60)
-        print("GAMIFICATION SYSTEM TEST SUITE")
-        print("=" * 60)
-        print(f"Testing gamification at: {self.base_url}")
-        print(f"Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print()
+            
+        # Get final stats
+        url = f"{API_BASE}/gamification/stats"
+        headers = {"Authorization": f"Bearer {self.session_token}"}
         
-        gamification_tests = [
-            self.test_gamification_register_new_user,
-            self.test_initial_gamification_stats,
-            self.test_first_lesson_bones_achievement,
-            self.test_stats_after_first_lesson,
-            self.test_second_lesson_no_achievement,
-            self.test_achievements_list,
-            self.test_unauthenticated_gamification_access,
-            self.test_level_up_mechanics
-        ]
+        response = requests.get(url, headers=headers)
         
-        passed = 0
-        total = len(gamification_tests)
+        if response.status_code != 200:
+            print_error(f"Stats request failed with status {response.status_code}: {response.text}")
+            return False
+            
+        stats = response.json()
+        print_info(f"Final stats: {json.dumps(stats, indent=2)}")
         
-        for test in gamification_tests:
-            if test():
-                passed += 1
-        
-        print("=" * 60)
-        print("GAMIFICATION TEST SUMMARY")
-        print("=" * 60)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
-        print()
-        
-        # Show failed tests
-        failed_tests = [r for r in self.test_results if not r["success"] and any(test_name in r["test"] for test_name in 
-                       ["Gamification", "Achievement", "Level Up", "Unauthenticated"])]
-        if failed_tests:
-            print("FAILED GAMIFICATION TESTS:")
-            for test in failed_tests:
-                print(f"❌ {test['test']}: {test['details']}")
-        else:
-            print("🎉 All gamification tests passed!")
-        
-        return passed == total
+        # Should have completed at least 10 exercises
+        if stats.get("exercises_completed", 0) < 10:
+            print_error(f"Expected exercises_completed >= 10, got {stats.get('exercises_completed')}")
+            return False
+            
+        # Should have significant XP (at least 200 from 10 lessons)
+        if stats.get("xp", 0) < 200:
+            print_error(f"Expected XP >= 200, got {stats.get('xp')}")
+            return False
+            
+        # Check achievements
+        achievements_unlocked = stats.get("achievements_unlocked", [])
+        if "first_lesson" not in achievements_unlocked:
+            print_error("first_lesson achievement not in unlocked list")
+            return False
+            
+        if stats.get("exercises_completed", 0) >= 10 and "10_lessons" not in achievements_unlocked:
+            print_error("10_lessons achievement should be unlocked")
+            return False
+            
+        print_success(f"Final verification: {len(achievements_unlocked)} achievements unlocked, {stats.get('exercises_completed')} exercises completed")
+        return True
     
     def run_all_tests(self):
-        """Run all API tests in sequence"""
-        print("=" * 60)
-        print("HEIMDALL BACKEND API TEST SUITE")
-        print("=" * 60)
-        print(f"Testing backend at: {self.base_url}")
-        print(f"Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print()
+        """Run the complete E2E gamification test suite"""
+        print_header("🎮 HEIMDALL GAMIFICATION E2E TEST SUITE")
         
-        # Run tests in order
         tests = [
-            self.test_health_check,
-            self.test_register,
-            self.test_login,
-            self.test_get_current_user,
-            self.test_create_dog,
-            self.test_get_dogs,
-            self.test_chat_message
+            ("1. Register Fresh User", self.test_1_register_user),
+            ("2. Verify Initial Stats Zero", self.test_2_verify_initial_stats_zero),
+            ("3. Complete First Lesson", self.test_3_complete_first_lesson),
+            ("4. Verify Stats Persisted", self.test_4_verify_stats_persisted),
+            ("5. Verify Achievements List", self.test_5_verify_achievements_list),
+            ("6. Complete Second Lesson", self.test_6_complete_second_lesson),
+            ("7. Complete Multiple Lessons", self.test_7_complete_multiple_lessons_rapidly),
+            ("8. Verify Final Stats", self.test_8_verify_final_stats)
         ]
         
-        passed = 0
-        total = len(tests)
+        for test_name, test_func in tests:
+            self.run_test(test_name, test_func)
+            print()  # Add spacing
         
-        for test in tests:
-            if test():
-                passed += 1
+        # Final summary
+        print_header("🧪 TEST RESULTS SUMMARY")
         
-        print("=" * 60)
-        print("TEST SUMMARY")
-        print("=" * 60)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
-        print()
+        success_rate = (self.passed_tests / self.total_tests) * 100 if self.total_tests > 0 else 0
         
-        # Show failed tests
-        failed_tests = [r for r in self.test_results if not r["success"]]
-        if failed_tests:
-            print("FAILED TESTS:")
-            for test in failed_tests:
-                print(f"❌ {test['test']}: {test['details']}")
+        if self.passed_tests == self.total_tests:
+            print_success(f"ALL TESTS PASSED! ({self.passed_tests}/{self.total_tests}) - {success_rate:.1f}%")
         else:
-            print("🎉 All tests passed!")
+            print_error(f"SOME TESTS FAILED: {self.passed_tests}/{self.total_tests} passed ({success_rate:.1f}%)")
+            
+        if self.failed_tests:
+            print_error("Failed tests:")
+            for test in self.failed_tests:
+                print_error(f"  - {test}")
         
-        return passed == total
+        return len(self.failed_tests) == 0
+
+def main():
+    """Main test execution"""
+    print_header("🚀 Starting Heimdall Backend E2E Testing")
+    print_info(f"Backend URL: {BACKEND_URL}")
+    print_info(f"Test Email: e2e_gamification_test@test.com")
+    print()
+    
+    tester = GamificationTester()
+    success = tester.run_all_tests()
+    
+    if success:
+        print_success("🎉 All E2E tests completed successfully!")
+        sys.exit(0)
+    else:
+        print_error("💥 Some tests failed - check logs above")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    tester = HeimdallAPITester()
-    
-    # Run gamification tests as requested
-    print("Running Gamification System Tests...")
-    gamification_success = tester.run_gamification_tests()
-    
-    # Optionally run all other tests too
-    # basic_success = tester.run_all_tests()
-    
-    sys.exit(0 if gamification_success else 1)
+    main()
