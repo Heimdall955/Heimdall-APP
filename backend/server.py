@@ -1056,9 +1056,8 @@ async def get_gamification_stats(user: User = Depends(require_auth)):
             current_level = stats.get("level", 1)
             level_progress = current_xp % 500
             
-            # Get unlocked achievements from separate table
-            ach_result = supabase.table("user_achievements").select("achievement_id").eq("user_id", user.user_id).execute()
-            unlocked = [a["achievement_id"] for a in ach_result.data] if ach_result.data else []
+            # Derive unlocked achievements from stats
+            unlocked = derive_unlocked_achievements(stats)
             
             return {
                 "bones": stats.get("bones", 0),
@@ -1123,12 +1122,6 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
         now = datetime.now(timezone.utc)
         now_str = now.isoformat()
         
-        new_achievements = []
-        
-        # Get currently unlocked achievements
-        ach_result = supabase.table("user_achievements").select("achievement_id").eq("user_id", user.user_id).execute()
-        unlocked = [a["achievement_id"] for a in ach_result.data] if ach_result.data else []
-        
         if result.data and len(result.data) > 0:
             current = result.data[0]
             old_bones = current.get("bones", 0)
@@ -1137,6 +1130,9 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             old_exercises = current.get("exercises_completed", 0)
             old_streak = current.get("streak_days", 0)
             last_activity = current.get("updated_at")
+            
+            # Get old achievements to compare
+            old_unlocked = set(derive_unlocked_achievements(current))
             
             # Calculate new values
             new_bones = old_bones + data.amount
@@ -1160,57 +1156,6 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             else:
                 new_streak = 1
             
-            # Check for new achievements
-            def check_achievement(ach_id):
-                if ach_id not in unlocked:
-                    unlocked.append(ach_id)
-                    ach = ACHIEVEMENTS[ach_id]
-                    new_achievements.append({
-                        "id": ach_id,
-                        "name": ach["name"],
-                        "description": ach["description"],
-                        "icon": ach["icon"],
-                        "bones_reward": ach["bones"]
-                    })
-                    # Save to user_achievements table
-                    try:
-                        supabase.table("user_achievements").insert({
-                            "user_id": user.user_id,
-                            "achievement_id": ach_id,
-                            "unlocked_at": now_str
-                        }).execute()
-                    except Exception as e:
-                        logger.error(f"Error saving achievement: {e}")
-                    return ach["bones"]
-                return 0
-            
-            # First lesson
-            if old_exercises == 0:
-                new_bones += check_achievement("first_lesson")
-            
-            # Lesson milestones
-            if new_exercises >= 10 and old_exercises < 10:
-                new_bones += check_achievement("10_lessons")
-            if new_exercises >= 25 and old_exercises < 25:
-                new_bones += check_achievement("25_lessons")
-            
-            # Level achievements
-            if new_level >= 5 and old_level < 5:
-                new_bones += check_achievement("level_5")
-            if new_level >= 10 and old_level < 10:
-                new_bones += check_achievement("level_10")
-            
-            # Streak achievements
-            if new_streak >= 3 and old_streak < 3:
-                new_bones += check_achievement("streak_3")
-            if new_streak >= 7 and old_streak < 7:
-                new_bones += check_achievement("streak_7")
-            
-            # Bones milestone
-            if new_bones >= 100 and old_bones < 100:
-                new_bones += check_achievement("100_bones")
-            
-            # Level up notification data
             leveled_up = new_level > old_level
             
             supabase.table("gamification").update({
@@ -1221,6 +1166,37 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                 "streak_days": new_streak,
                 "updated_at": now_str
             }).eq("user_id", user.user_id).execute()
+            
+            # Check for newly unlocked achievements
+            new_stats = {
+                "bones": new_bones,
+                "xp": new_xp,
+                "level": new_level,
+                "exercises_completed": new_exercises,
+                "streak_days": new_streak,
+            }
+            new_unlocked = set(derive_unlocked_achievements(new_stats))
+            newly_earned = new_unlocked - old_unlocked
+            
+            new_achievements = []
+            bonus_bones = 0
+            for ach_id in newly_earned:
+                ach = ACHIEVEMENTS[ach_id]
+                new_achievements.append({
+                    "id": ach_id,
+                    "name": ach["name"],
+                    "description": ach["description"],
+                    "icon": ach["icon"],
+                    "bones_reward": ach["bones"]
+                })
+                bonus_bones += ach["bones"]
+            
+            # If earned bonus bones from achievements, update again
+            if bonus_bones > 0:
+                new_bones += bonus_bones
+                supabase.table("gamification").update({
+                    "bones": new_bones,
+                }).eq("user_id", user.user_id).execute()
             
             return {
                 "bones": new_bones,
@@ -1237,9 +1213,6 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
         else:
             # Create new record
             initial_bones = data.amount
-            bonus = check_achievement("first_lesson")
-            initial_bones += bonus
-            
             supabase.table("gamification").insert({
                 "user_id": user.user_id,
                 "bones": initial_bones,
@@ -1251,6 +1224,13 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                 "updated_at": now_str
             }).execute()
             
+            # First lesson achievement
+            ach = ACHIEVEMENTS["first_lesson"]
+            initial_bones += ach["bones"]
+            supabase.table("gamification").update({
+                "bones": initial_bones,
+            }).eq("user_id", user.user_id).execute()
+            
             return {
                 "bones": initial_bones,
                 "bones_added": data.amount,
@@ -1261,7 +1241,13 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                 "old_level": 0,
                 "streak_days": 1,
                 "exercises_completed": 1,
-                "new_achievements": new_achievements
+                "new_achievements": [{
+                    "id": "first_lesson",
+                    "name": ach["name"],
+                    "description": ach["description"],
+                    "icon": ach["icon"],
+                    "bones_reward": ach["bones"]
+                }]
             }
     except Exception as e:
         logger.error(f"Error adding bones: {e}")
@@ -1271,8 +1257,11 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
 async def get_achievements(user: User = Depends(require_auth)):
     """Get all achievements and their unlock status"""
     try:
-        ach_result = supabase.table("user_achievements").select("achievement_id").eq("user_id", user.user_id).execute()
-        unlocked = [a["achievement_id"] for a in ach_result.data] if ach_result.data else []
+        result = supabase.table("gamification").select("*").eq("user_id", user.user_id).execute()
+        
+        unlocked = []
+        if result.data and len(result.data) > 0:
+            unlocked = derive_unlocked_achievements(result.data[0])
         
         all_achievements = []
         for ach_id, ach_data in ACHIEVEMENTS.items():
