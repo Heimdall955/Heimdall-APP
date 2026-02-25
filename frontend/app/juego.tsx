@@ -160,8 +160,17 @@ export default function JuegoScreen() {
           <Text style={styles.completadoSubtitulo}>{juego.titulo}</Text>
           
           <View style={styles.recompensaCard}>
-            <Text style={styles.recompensaTexto}>🦴 +{juego.xp} XP</Text>
+            <Text style={styles.recompensaTexto}>+{rewardData?.bones_added || juego.xp} 🦴</Text>
           </View>
+
+          {rewardData && (
+            <View style={styles.statsRow} data-testid="game-reward-stats">
+              <Text style={styles.statsText}>{t('level')} {rewardData.level} - {rewardData.xp} XP</Text>
+              {rewardData.leveled_up && (
+                <Text style={styles.levelUpText}>{t('levelUp')} {rewardData.level}!</Text>
+              )}
+            </View>
+          )}
 
           <TouchableOpacity style={styles.volverButton} onPress={() => router.back()}>
             <Text style={styles.volverButtonText}>{t('backToEducation')}</Text>
