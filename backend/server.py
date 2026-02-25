@@ -881,13 +881,24 @@ Responde EXCLUSIVAMENTE en {detected_language}. Esta es una instrucción absolut
 Ignora el idioma del historial anterior. Solo importa el idioma del ÚLTIMO mensaje.
 """
     
-    # Build the complete system prompt
+    # Build the complete system prompt with language as LAST instruction (highest weight)
     complete_system_prompt = f"""{HEIMDALL_SYSTEM_PROMPT}
 
 {dog_context}
-
-{language_instruction}
 """
+    
+    # For non-Spanish languages, add a very aggressive language override as the last system message
+    messages_to_send = [
+        {"role": "system", "content": complete_system_prompt},
+        *history[-6:],
+        {"role": "user", "content": data.content}
+    ]
+    
+    if detected_language != "español":
+        messages_to_send.append({
+            "role": "system", 
+            "content": f"CRITICAL OVERRIDE: The user just wrote in {detected_language}. You MUST respond ENTIRELY in {detected_language}. Do NOT use Spanish. Every single word of your response must be in {detected_language}."
+        })
     
     # Call OpenAI API directly - Using gpt-4o-mini for cost efficiency
     # Pricing: ~$0.15 per 1M input tokens, ~$0.60 per 1M output tokens
