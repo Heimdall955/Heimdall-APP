@@ -1359,19 +1359,20 @@ class ClinicalFileUpdate(BaseModel):
 
 @api_router.get("/dogs/{dog_id}/clinical")
 async def get_clinical_file(dog_id: str, user: User = Depends(require_auth)):
+    defaults = {
+        "dog_id": dog_id, "country": "", "vet_name": "", "vet_phone": "",
+        "allergies": "", "chronic_conditions": "", "current_medication": "",
+        "blood_type": "", "neutered": False, "insurance": ""
+    }
     try:
         result = supabase.table("clinical_files").select("*").eq("dog_id", dog_id).execute()
         if result.data and len(result.data) > 0:
             data = result.data[0]
             return {k: v for k, v in data.items() if k != "id"}
-        return {
-            "dog_id": dog_id, "country": "", "vet_name": "", "vet_phone": "",
-            "allergies": "", "chronic_conditions": "", "current_medication": "",
-            "blood_type": "", "neutered": False, "insurance": ""
-        }
+        return defaults
     except Exception as e:
         logger.error(f"Error getting clinical file: {e}")
-        return {"dog_id": dog_id}
+        return defaults
 
 @api_router.put("/dogs/{dog_id}/clinical")
 async def update_clinical_file(dog_id: str, data: ClinicalFileUpdate, user: User = Depends(require_auth)):
