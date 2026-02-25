@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { Colors, BorderRadius, Spacing, FontSizes } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
+import { BorderRadius, Spacing, FontSizes } from '../../constants/theme';
 
 interface ButtonProps {
   title: string;
@@ -15,115 +16,58 @@ interface ButtonProps {
 }
 
 export function Button({
-  title,
-  onPress,
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  loading = false,
-  icon,
-  style,
-  textStyle,
+  title, onPress, variant = 'primary', size = 'md',
+  disabled = false, loading = false, icon, style, textStyle,
 }: ButtonProps) {
-  const buttonStyles = [
-    styles.button,
-    styles[variant],
-    styles[`size_${size}`],
-    disabled && styles.disabled,
-    style,
-  ];
+  const { colors } = useTheme();
 
-  const textStyles = [
-    styles.text,
-    styles[`text_${variant}`],
-    styles[`textSize_${size}`],
-    disabled && styles.textDisabled,
-    textStyle,
-  ];
+  const sizeStyles = {
+    sm: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.md },
+    md: { paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg },
+    lg: { paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl },
+  };
+
+  const variantStyles: Record<string, ViewStyle> = {
+    primary: { backgroundColor: colors.primary, borderRadius: BorderRadius.md },
+    secondary: { backgroundColor: colors.secondary, borderRadius: BorderRadius.md },
+    outline: { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.primary, borderRadius: BorderRadius.md },
+    ghost: { backgroundColor: 'transparent' },
+  };
+
+  const textColors: Record<string, string> = {
+    primary: '#FFFFFF',
+    secondary: '#FFFFFF',
+    outline: colors.primary,
+    ghost: colors.primary,
+  };
+
+  const textSizes = { sm: FontSizes.sm, md: FontSizes.md, lg: FontSizes.lg };
 
   return (
     <TouchableOpacity
-      style={buttonStyles}
+      style={[
+        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.sm },
+        variantStyles[variant],
+        sizeStyles[size],
+        disabled && { opacity: 0.5 },
+        style,
+      ]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? Colors.white : Colors.primary} />
+        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : colors.primary} />
       ) : (
         <>
           {icon}
-          <Text style={textStyles}>{title}</Text>
+          <Text style={[
+            { fontWeight: '600', color: textColors[variant], fontSize: textSizes[size] },
+            disabled && { opacity: 0.7 },
+            textStyle,
+          ]}>{title}</Text>
         </>
       )}
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-  },
-  primary: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-  },
-  secondary: {
-    backgroundColor: Colors.secondary,
-    borderRadius: BorderRadius.md,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  size_sm: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-  },
-  size_md: {
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-  },
-  size_lg: {
-    paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.xl,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  text: {
-    fontWeight: '600',
-  },
-  text_primary: {
-    color: Colors.white,
-  },
-  text_secondary: {
-    color: Colors.white,
-  },
-  text_outline: {
-    color: Colors.primary,
-  },
-  text_ghost: {
-    color: Colors.primary,
-  },
-  textSize_sm: {
-    fontSize: FontSizes.sm,
-  },
-  textSize_md: {
-    fontSize: FontSizes.md,
-  },
-  textSize_lg: {
-    fontSize: FontSizes.lg,
-  },
-  textDisabled: {
-    opacity: 0.7,
-  },
-});
