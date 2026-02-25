@@ -726,5 +726,12 @@ class HeimdallAPITester:
 
 if __name__ == "__main__":
     tester = HeimdallAPITester()
-    success = tester.run_all_tests()
-    sys.exit(0 if success else 1)
+    
+    # Run gamification tests as requested
+    print("Running Gamification System Tests...")
+    gamification_success = tester.run_gamification_tests()
+    
+    # Optionally run all other tests too
+    # basic_success = tester.run_all_tests()
+    
+    sys.exit(0 if gamification_success else 1)
