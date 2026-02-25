@@ -221,6 +221,15 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     whatYouWillLearn: 'Lo que aprenderás:',
     commonMistakes: 'Errores Comunes a Evitar:',
     
+    // Gamification
+    myRewards: 'Mis Recompensas',
+    achievements: 'Logros',
+    streak: 'Racha',
+    totalBones: 'Huesos totales',
+    levelUp: '¡Subiste al Nivel',
+    newAchievement: '¡Nuevo Logro!',
+    noAchievements: 'Completa lecciones para desbloquear logros',
+    
     // Exercises
     completed: 'completados',
     instructions: 'Instrucciones:',
