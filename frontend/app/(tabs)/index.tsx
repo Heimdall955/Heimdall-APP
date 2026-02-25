@@ -149,17 +149,18 @@ export default function HomeScreen() {
         </View>
 
         {/* Reward Banner */}
+        {dogStatus.bones > 0 && (
         <View style={styles.rewardBanner}>
           <View style={styles.boneIconContainer}>
             <Text style={styles.boneEmoji}>🦴</Text>
           </View>
           <Text style={styles.rewardText}>{t('greatJob')} </Text>
-          <Text style={styles.rewardHighlight}>+15 {t('bones').toLowerCase()}</Text>
-          <Text style={styles.rewardText}> {t('bonesToday').split(' ')[0]}</Text>
-          <TouchableOpacity>
+          <Text style={styles.rewardHighlight}>{dogStatus.bones} {t('bones').toLowerCase()}</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/perfil')}>
             <Text style={styles.viewRewardsLink}>{t('viewRewards')}</Text>
           </TouchableOpacity>
         </View>
+        )}
 
         {/* Today's Session Card */}
         <View style={styles.section}>
