@@ -837,7 +837,7 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
     spanish_count = sum(1 for pattern in spanish_patterns if pattern in message_lower)
     
     # Log detection for debugging
-    logger.info(f"Language detection - EN:{english_count}, IT:{italian_count}, ES:{spanish_count}")
+    logger.info(f"Language detection - EN:{english_count}, IT:{italian_count}, ES:{spanish_count} -> {detected_language}")
     
     # Determine language based on highest score
     if english_count > italian_count and english_count > spanish_count:
