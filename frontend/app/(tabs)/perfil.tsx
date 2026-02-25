@@ -54,9 +54,12 @@ export default function PerfilScreen() {
   const [editBreed, setEditBreed] = useState('');
   const [editChip, setEditChip] = useState('');
   const [saving, setSaving] = useState(false);
+  const [gamification, setGamification] = useState<GamificationData | null>(null);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
   useEffect(() => {
     loadDogImage();
+    loadGamification();
   }, []);
 
   useEffect(() => {
