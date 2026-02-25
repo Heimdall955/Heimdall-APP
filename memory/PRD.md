@@ -76,13 +76,21 @@ Premium mobile app for monitoring dog health, providing education, and connectin
 - ✅ Added useFocusEffect to Home and Education screens for stat refresh
 - ✅ All 24 lessons, 5 exercises, 2 games verified (14/14 tests passed)
 
+## Leaderboard & Weekly Summary (Feb 2026)
+- ✅ NEW: `/api/gamification/leaderboard` - ranked users with dog names, bones, level, XP, streak
+- ✅ NEW: `/api/gamification/weekly-summary` - weekly progress stats
+- ✅ NEW: `/leaderboard` screen with podium (top 3) and full ranking list
+- ✅ Home screen: "Progreso Semanal" card + "Ranking" card
+- ✅ Weekly tracking has fallback if DB columns don't exist
+- ✅ i18n: es, en, it translations added
+- ✅ 17/17 backend tests passed
+
 ## P1 - Pending
 - Translate detailed education content (lesson internals still in Spanish)
 
 ## P2 - Pending  
 - Refine chat multilingual detection (English detection weak)
 - Guide user through EAS Development Build for real BLE
-- Social leaderboard for gamification system
 
 ## Future/Backlog
 - Push notifications for level-ups
