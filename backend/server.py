@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import httpx
+import base64
 import jwt
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request as GoogleRequest
