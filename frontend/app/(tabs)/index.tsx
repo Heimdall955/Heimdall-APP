@@ -11,6 +11,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, StatusBadge, ProgressCircle } from '../../components/ui';
 import { WalletCard } from '../../components/WalletCard';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 // Define DogStatus type locally to avoid import issues
 interface DogStatus {
   status: 'calm' | 'active' | 'anxious' | 'sleeping' | 'playing';
@@ -31,6 +32,7 @@ export default function HomeScreen() {
   const { currentDog, user } = useAuth();
   const { isConnected, biometricData } = useBluetooth();
   const { t } = useLanguage();
+  const { colors, shadows, isDark, toggleTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [weeklySummary, setWeeklySummary] = useState<any>(null);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
