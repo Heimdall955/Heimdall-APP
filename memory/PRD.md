@@ -31,14 +31,16 @@ Premium mobile app for monitoring dog health, providing education, and connectin
 - ✅ **Gamification System (Feb 25, 2026)**: Bones, XP, Levels, Achievements, Streak tracking - Backend + Frontend
 
 ## P0 - Done
-- Gamification system fully operational
+- Gamification system fully operational (Feb 25, 2026)
   - `POST /api/gamification/add-bones` awards points, checks achievements, tracks streak
   - `GET /api/gamification/stats` returns all stats
   - `GET /api/gamification/achievements` returns all 9 achievements with unlock status
   - Profile screen shows rewards, level, bones, streak, and achievements grid
-  - Home screen uses real data from API
-  - Lesson completion calls backend to award points
+  - Home screen uses real data from API (no hardcoded values)
+  - Home banner shows actual bones count, "Ver premios" navigates to profile
+  - Lesson completion calls backend to award points with achievement notifications
   - Achievements derived from stats (no extra DB table needed)
+  - Level-up detection and notifications on lesson completion screen
 
 ## P1 - Pending
 - Translate detailed education content (lesson internals still in Spanish)
