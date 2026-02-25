@@ -1,456 +1,527 @@
 #!/usr/bin/env python3
-"""
-Comprehensive Backend Testing for Heimdall (HANI) App
-Testing the complete gamification flow end-to-end as specified in requirements
-"""
 
+import asyncio
+import io
+import struct
+import zlib
+import os
+import tempfile
 import requests
-import json
-import sys
-from datetime import datetime
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import time
 
-# Backend URL from the test environment
-BACKEND_URL = "https://hani-achievements-ui.preview.emergentagent.com"
-API_BASE = f"{BACKEND_URL}/api"
+# Test Configuration
+BASE_URL = "https://hani-achievements-ui.preview.emergentagent.com/api"
 
-class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    PURPLE = '\033[95m'
-    CYAN = '\033[96m'
-    END = '\033[0m'
-
-def print_success(msg):
-    print(f"{Colors.GREEN}✅ {msg}{Colors.END}")
-
-def print_error(msg):
-    print(f"{Colors.RED}❌ {msg}{Colors.END}")
-
-def print_info(msg):
-    print(f"{Colors.BLUE}ℹ️  {msg}{Colors.END}")
-
-def print_warning(msg):
-    print(f"{Colors.YELLOW}⚠️  {msg}{Colors.END}")
-
-def print_header(msg):
-    print(f"\n{Colors.PURPLE}{'='*60}{Colors.END}")
-    print(f"{Colors.PURPLE}🧪 {msg}{Colors.END}")
-    print(f"{Colors.PURPLE}{'='*60}{Colors.END}")
-
-class GamificationTester:
+class BackendTester:
     def __init__(self):
         self.session_token = None
-        self.test_email = "e2e_gamification_test@test.com"
-        self.test_password = "123456"
-        self.test_name = "E2E Tester"
-        self.failed_tests = []
-        self.total_tests = 0
-        self.passed_tests = 0
+        self.user_id = None
+        self.test_results = []
+    
+    def log_test(self, test_name, success, details="", error=None):
+        """Log test results"""
+        result = {
+            "test": test_name,
+            "success": success,
+            "details": details,
+            "error": str(error) if error else None
+        }
+        self.test_results.append(result)
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"    Details: {details}")
+        if error:
+            print(f"    Error: {error}")
+        print()
+
+    def create_test_png(self):
+        """Create a minimal valid PNG image (1x1 pixel)"""
+        # PNG signature
+        png_signature = b'\x89PNG\r\n\x1a\n'
         
-    def run_test(self, test_name, test_func):
-        """Run individual test with error handling"""
-        self.total_tests += 1
-        print_info(f"Running: {test_name}")
+        # IHDR chunk (image header)
+        width = height = 1
+        bit_depth = 8
+        color_type = 2  # RGB
+        compression = filter_method = interlace = 0
+        
+        ihdr_data = struct.pack('>2I5B', width, height, bit_depth, color_type, 
+                               compression, filter_method, interlace)
+        ihdr_crc = zlib.crc32(b'IHDR' + ihdr_data) & 0xffffffff
+        ihdr_chunk = struct.pack('>I', len(ihdr_data)) + b'IHDR' + ihdr_data + struct.pack('>I', ihdr_crc)
+        
+        # IDAT chunk (image data) - single red pixel
+        pixel_data = b'\x00\xff\x00\x00'  # Filter byte + RGB pixel (red)
+        compressed_data = zlib.compress(pixel_data)
+        idat_crc = zlib.crc32(b'IDAT' + compressed_data) & 0xffffffff
+        idat_chunk = struct.pack('>I', len(compressed_data)) + b'IDAT' + compressed_data + struct.pack('>I', idat_crc)
+        
+        # IEND chunk (end of image)
+        iend_crc = zlib.crc32(b'IEND') & 0xffffffff
+        iend_chunk = struct.pack('>I', 0) + b'IEND' + struct.pack('>I', iend_crc)
+        
+        return png_signature + ihdr_chunk + idat_chunk + iend_chunk
+
+    def create_test_pdf(self):
+        """Create a simple PDF with blood test data"""
+        buffer = io.BytesIO()
+        
+        # Create PDF with blood test results
+        p = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        
+        # Title
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(100, height - 100, "ANÁLISIS DE SANGRE - LABORATORIO VETERINARIO")
+        
+        # Patient info
+        p.setFont("Helvetica", 12)
+        y_pos = height - 150
+        p.drawString(100, y_pos, "Paciente: Max (Perro)")
+        p.drawString(100, y_pos - 20, "Edad: 3 años")
+        p.drawString(100, y_pos - 40, "Raza: Golden Retriever")
+        p.drawString(100, y_pos - 60, "Fecha: 15/12/2024")
+        
+        # Test results
+        y_pos = height - 250
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(100, y_pos, "RESULTADOS:")
+        
+        y_pos -= 30
+        p.setFont("Helvetica", 11)
+        results = [
+            ("Hemoglobina", "15.2 g/dL", "(12.0-18.0)", "Normal"),
+            ("Hematocrito", "45%", "(37-55%)", "Normal"),
+            ("Leucocitos", "8.500/µL", "(6.000-17.000)", "Normal"),
+            ("Neutrófilos", "65%", "(60-77%)", "Normal"),
+            ("Linfocitos", "28%", "(12-30%)", "Normal"),
+            ("Plaquetas", "350.000/µL", "(200.000-500.000)", "Normal"),
+            ("Glucosa", "95 mg/dL", "(70-110)", "Normal"),
+            ("Creatinina", "1.1 mg/dL", "(0.5-1.8)", "Normal"),
+            ("ALT", "32 U/L", "(10-100)", "Normal"),
+            ("Proteínas totales", "6.8 g/dL", "(5.4-7.1)", "Normal")
+        ]
+        
+        for param, value, range_val, status in results:
+            p.drawString(100, y_pos, f"{param}:")
+            p.drawString(250, y_pos, value)
+            p.drawString(350, y_pos, range_val)
+            p.drawString(450, y_pos, status)
+            y_pos -= 20
+        
+        # Conclusion
+        y_pos -= 30
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(100, y_pos, "CONCLUSIÓN:")
+        y_pos -= 20
+        p.setFont("Helvetica", 11)
+        p.drawString(100, y_pos, "Todos los parámetros están dentro de los valores normales.")
+        p.drawString(100, y_pos - 15, "El animal presenta un estado de salud óptimo.")
+        
+        p.save()
+        buffer.seek(0)
+        return buffer.getvalue()
+
+    def create_invalid_text_file(self):
+        """Create a text file to test invalid file type"""
+        return b"This is a text file, not an image."
+
+    async def test_user_registration(self):
+        """Test 1: Register a user"""
         try:
-            result = test_func()
-            if result:
-                self.passed_tests += 1
-                print_success(f"{test_name} - PASSED")
+            test_email = f"upload_e2e@test.com"
+            response = requests.post(f"{BASE_URL}/auth/register", 
+                json={
+                    "email": test_email,
+                    "password": "123456",
+                    "name": "Upload E2E"
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.session_token = data.get("session_token")
+                self.user_id = data.get("user", {}).get("user_id")
+                self.log_test("User Registration", True, 
+                             f"User registered successfully. Token: {self.session_token[:20]}...")
                 return True
+            elif response.status_code == 400 and "ya está registrado" in response.json().get("detail", ""):
+                # User already exists, try login
+                return await self.test_user_login(test_email)
             else:
-                self.failed_tests.append(test_name)
-                print_error(f"{test_name} - FAILED")
+                self.log_test("User Registration", False, 
+                             f"Status: {response.status_code}, Response: {response.text}")
                 return False
         except Exception as e:
-            self.failed_tests.append(test_name)
-            print_error(f"{test_name} - ERROR: {str(e)}")
+            self.log_test("User Registration", False, error=e)
             return False
-    
-    def test_1_register_user(self):
-        """Register a fresh user for E2E testing"""
-        url = f"{API_BASE}/auth/register"
-        data = {
-            "email": self.test_email,
-            "password": self.test_password,
-            "name": self.test_name
-        }
-        
-        response = requests.post(url, json=data)
-        
-        if response.status_code == 400 and "ya está registrado" in response.text:
-            # User already exists, try login instead
-            print_warning("User already exists, attempting login...")
-            return self.test_login_existing_user()
-        
-        if response.status_code != 200:
-            print_error(f"Registration failed with status {response.status_code}: {response.text}")
-            return False
+
+    async def test_user_login(self, email):
+        """Login with existing user"""
+        try:
+            response = requests.post(f"{BASE_URL}/auth/login", 
+                json={
+                    "email": email,
+                    "password": "123456"
+                },
+                timeout=30
+            )
             
-        result = response.json()
-        
-        if "session_token" not in result:
-            print_error("No session_token in registration response")
-            return False
-            
-        self.session_token = result["session_token"]
-        print_success(f"User registered successfully, token: {self.session_token[:20]}...")
-        return True
-    
-    def test_login_existing_user(self):
-        """Login if user already exists"""
-        url = f"{API_BASE}/auth/login"
-        data = {
-            "email": self.test_email,
-            "password": self.test_password
-        }
-        
-        response = requests.post(url, json=data)
-        
-        if response.status_code != 200:
-            print_error(f"Login failed with status {response.status_code}: {response.text}")
-            return False
-            
-        result = response.json()
-        
-        if "session_token" not in result:
-            print_error("No session_token in login response")
-            return False
-            
-        self.session_token = result["session_token"]
-        print_success(f"User logged in successfully, token: {self.session_token[:20]}...")
-        return True
-    
-    def test_2_verify_initial_stats_zero(self):
-        """Verify initial stats are all zero"""
-        if not self.session_token:
-            return False
-            
-        url = f"{API_BASE}/gamification/stats"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
-        
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code != 200:
-            print_error(f"Stats request failed with status {response.status_code}: {response.text}")
-            return False
-            
-        stats = response.json()
-        print_info(f"Initial stats: {json.dumps(stats, indent=2)}")
-        
-        # For a fresh user OR existing user, check initial state
-        expected_initial = {
-            "level": 1,
-            "level_progress": stats.get("xp", 0) % 500,  # Allow existing XP
-            "level_target": 500
-        }
-        
-        for key, expected_value in expected_initial.items():
-            if stats.get(key) != expected_value:
-                print_error(f"Expected {key}={expected_value}, got {stats.get(key)}")
+            if response.status_code == 200:
+                data = response.json()
+                self.session_token = data.get("session_token")
+                self.user_id = data.get("user", {}).get("user_id")
+                self.log_test("User Login", True, 
+                             f"User logged in successfully. Token: {self.session_token[:20]}...")
+                return True
+            else:
+                self.log_test("User Login", False, 
+                             f"Status: {response.status_code}, Response: {response.text}")
                 return False
+        except Exception as e:
+            self.log_test("User Login", False, error=e)
+            return False
+
+    async def test_image_upload_analysis(self):
+        """Test 2: Test image upload and analysis"""
+        if not self.session_token:
+            self.log_test("Image Upload Analysis", False, "No session token available")
+            return False
+        
+        try:
+            png_bytes = self.create_test_png()
+            
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp_file:
+                tmp_file.write(png_bytes)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                with open(tmp_file_path, 'rb') as f:
+                    files = {'file': ('test_dog.png', f, 'image/png')}
+                    data = {
+                        'dog_id': '',
+                        'message': 'Analiza esta foto de mi perro',
+                        'file_type': 'image',
+                        'language': 'Spanish'
+                    }
+                    
+                    headers = {'Authorization': f'Bearer {self.session_token}'}
+                    
+                    response = requests.post(f"{BASE_URL}/chat/upload", 
+                                           files=files, 
+                                           data=data,
+                                           headers=headers,
+                                           timeout=60)
                 
-        print_success("Initial stats verified (level=1, target=500)")
-        return True
-    
-    def test_3_complete_first_lesson(self):
-        """Simulate completing first lesson - should trigger first_lesson achievement"""
+                if response.status_code == 200:
+                    result = response.json()
+                    if (result.get('role') == 'assistant' and 
+                        result.get('content') and 
+                        result.get('file_type') == 'image'):
+                        self.log_test("Image Upload Analysis", True, 
+                                     f"Image analyzed successfully. Response length: {len(result.get('content', ''))} chars")
+                        return True
+                    else:
+                        self.log_test("Image Upload Analysis", False, 
+                                     f"Invalid response structure: {result}")
+                        return False
+                else:
+                    self.log_test("Image Upload Analysis", False, 
+                                 f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+            finally:
+                os.unlink(tmp_file_path)
+                
+        except Exception as e:
+            self.log_test("Image Upload Analysis", False, error=e)
+            return False
+
+    async def test_pdf_upload_analysis(self):
+        """Test 3: Test PDF upload and analysis"""
         if not self.session_token:
+            self.log_test("PDF Upload Analysis", False, "No session token available")
             return False
+        
+        try:
+            pdf_bytes = self.create_test_pdf()
             
-        url = f"{API_BASE}/gamification/add-bones"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
-        data = {
-            "amount": 15,
-            "reason": "Lección: Llamada Perfecta",
-            "lesson_id": "llamada-perfecta"
-        }
-        
-        response = requests.post(url, json=data, headers=headers)
-        
-        if response.status_code != 200:
-            print_error(f"Add bones failed with status {response.status_code}: {response.text}")
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp_file:
+                tmp_file.write(pdf_bytes)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                with open(tmp_file_path, 'rb') as f:
+                    files = {'file': ('blood_test.pdf', f, 'application/pdf')}
+                    data = {
+                        'dog_id': '',
+                        'message': 'Analiza este análisis de sangre',
+                        'file_type': 'pdf',
+                        'language': 'Spanish'
+                    }
+                    
+                    headers = {'Authorization': f'Bearer {self.session_token}'}
+                    
+                    response = requests.post(f"{BASE_URL}/chat/upload", 
+                                           files=files, 
+                                           data=data,
+                                           headers=headers,
+                                           timeout=60)
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    if (result.get('role') == 'assistant' and 
+                        result.get('content') and 
+                        result.get('file_type') == 'pdf'):
+                        self.log_test("PDF Upload Analysis", True, 
+                                     f"PDF analyzed successfully. Response length: {len(result.get('content', ''))} chars")
+                        return True
+                    else:
+                        self.log_test("PDF Upload Analysis", False, 
+                                     f"Invalid response structure: {result}")
+                        return False
+                else:
+                    self.log_test("PDF Upload Analysis", False, 
+                                 f"Status: {response.status_code}, Response: {response.text}")
+                    return False
+            finally:
+                os.unlink(tmp_file_path)
+                
+        except Exception as e:
+            self.log_test("PDF Upload Analysis", False, error=e)
             return False
-            
-        result = response.json()
-        print_info(f"First lesson result: {json.dumps(result, indent=2)}")
-        
-        # For first lesson, should get 15 bones + 10 bonus = 25 total (for new user)
-        # XP should be 30 (15*2), exercises_completed should be at least 1
-        
-        expected_xp = result.get("xp_added", 0)  # Should be 30 for new lesson
-        expected_exercises = result.get("exercises_completed", 0)  # Should be incremented
-        expected_new_achievements = result.get("new_achievements", [])
-        
-        if expected_xp < 30:
-            print_error(f"Expected XP added >= 30, got {expected_xp}")
-            return False
-            
-        if expected_exercises < 1:
-            print_error(f"Expected exercises_completed >= 1, got {expected_exercises}")
-            return False
-            
-        # Check if first_lesson achievement was earned (for new users)
-        has_first_lesson = any(ach.get("id") == "first_lesson" for ach in expected_new_achievements)
-        if len(expected_new_achievements) > 0 and not has_first_lesson:
-            print_warning("First lesson achievement not found in new achievements (might be existing user)")
-        elif has_first_lesson:
-            print_success("First lesson achievement triggered correctly")
-            
-        print_success(f"Lesson completed: bones={result.get('bones')}, xp={result.get('xp')}, exercises={expected_exercises}")
-        return True
-    
-    def test_4_verify_stats_persisted(self):
-        """Verify stats are persisted correctly after first lesson"""
+
+    async def test_invalid_file_type_rejection(self):
+        """Test 4: Test invalid file type rejection"""
         if not self.session_token:
+            self.log_test("Invalid File Type Rejection", False, "No session token available")
             return False
-            
-        url = f"{API_BASE}/gamification/stats"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
         
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code != 200:
-            print_error(f"Stats request failed with status {response.status_code}: {response.text}")
-            return False
+        try:
+            text_bytes = self.create_invalid_text_file()
             
-        stats = response.json()
-        print_info(f"Persisted stats: {json.dumps(stats, indent=2)}")
-        
-        # Verify we have some progress
-        if stats.get("xp", 0) < 30:
-            print_error(f"Expected XP >= 30, got {stats.get('xp')}")
-            return False
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as tmp_file:
+                tmp_file.write(text_bytes)
+                tmp_file_path = tmp_file.name
             
-        if stats.get("exercises_completed", 0) < 1:
-            print_error(f"Expected exercises_completed >= 1, got {stats.get('exercises_completed')}")
+            try:
+                with open(tmp_file_path, 'rb') as f:
+                    files = {'file': ('invalid.txt', f, 'text/plain')}
+                    data = {
+                        'dog_id': '',
+                        'message': 'Test invalid file',
+                        'file_type': 'image',  # Claiming it's an image but sending text
+                        'language': 'Spanish'
+                    }
+                    
+                    headers = {'Authorization': f'Bearer {self.session_token}'}
+                    
+                    response = requests.post(f"{BASE_URL}/chat/upload", 
+                                           files=files, 
+                                           data=data,
+                                           headers=headers,
+                                           timeout=30)
+                
+                if response.status_code == 400:
+                    self.log_test("Invalid File Type Rejection", True, 
+                                 f"Correctly rejected invalid file type. Status: 400")
+                    return True
+                else:
+                    self.log_test("Invalid File Type Rejection", False, 
+                                 f"Expected 400, got {response.status_code}. Response: {response.text}")
+                    return False
+            finally:
+                os.unlink(tmp_file_path)
+                
+        except Exception as e:
+            self.log_test("Invalid File Type Rejection", False, error=e)
             return False
+
+    async def test_upload_without_auth(self):
+        """Test 5: Test upload without authentication"""
+        try:
+            png_bytes = self.create_test_png()
             
-        if stats.get("level", 0) != 1:
-            print_error(f"Expected level=1, got {stats.get('level')}")
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp_file:
+                tmp_file.write(png_bytes)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                with open(tmp_file_path, 'rb') as f:
+                    files = {'file': ('test.png', f, 'image/png')}
+                    data = {
+                        'dog_id': '',
+                        'message': 'Test without auth',
+                        'file_type': 'image',
+                        'language': 'Spanish'
+                    }
+                    
+                    # No Authorization header
+                    
+                    response = requests.post(f"{BASE_URL}/chat/upload", 
+                                           files=files, 
+                                           data=data,
+                                           timeout=30)
+                
+                if response.status_code == 401:
+                    self.log_test("Upload Without Auth", True, 
+                                 f"Correctly rejected unauthorized request. Status: 401")
+                    return True
+                else:
+                    self.log_test("Upload Without Auth", False, 
+                                 f"Expected 401, got {response.status_code}. Response: {response.text}")
+                    return False
+            finally:
+                os.unlink(tmp_file_path)
+                
+        except Exception as e:
+            self.log_test("Upload Without Auth", False, error=e)
             return False
-            
-        print_success("Stats properly persisted in database")
-        return True
-    
-    def test_5_verify_achievements_list(self):
-        """Verify achievements list shows correct structure"""
+
+    async def test_regular_chat(self):
+        """Test 6: Test regular chat still works"""
         if not self.session_token:
+            self.log_test("Regular Chat", False, "No session token available")
             return False
-            
-        url = f"{API_BASE}/gamification/achievements"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
         
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code != 200:
-            print_error(f"Achievements request failed with status {response.status_code}: {response.text}")
-            return False
-            
-        result = response.json()
-        print_info(f"Achievements response: {json.dumps(result, indent=2)}")
-        
-        if result.get("total") != 9:
-            print_error(f"Expected 9 total achievements, got {result.get('total')}")
-            return False
-            
-        achievements = result.get("achievements", [])
-        if len(achievements) != 9:
-            print_error(f"Expected 9 achievement objects, got {len(achievements)}")
-            return False
-            
-        # Check if first_lesson is in the list and might be unlocked
-        first_lesson_ach = next((ach for ach in achievements if ach.get("id") == "first_lesson"), None)
-        if not first_lesson_ach:
-            print_error("first_lesson achievement not found in achievements list")
-            return False
-            
-        print_success(f"Achievements list correct: 9 total, {result.get('unlocked_count')} unlocked")
-        return True
-    
-    def test_6_complete_second_lesson(self):
-        """Complete another lesson to verify no duplicate achievements"""
-        if not self.session_token:
-            return False
-            
-        url = f"{API_BASE}/gamification/add-bones"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
-        data = {
-            "amount": 10,
-            "reason": "Lección: Sentado Perfecto",
-            "lesson_id": "sentado-basico"
-        }
-        
-        response = requests.post(url, json=data, headers=headers)
-        
-        if response.status_code != 200:
-            print_error(f"Add bones failed with status {response.status_code}: {response.text}")
-            return False
-            
-        result = response.json()
-        print_info(f"Second lesson result: {json.dumps(result, indent=2)}")
-        
-        # Should NOT get first_lesson achievement again
-        new_achievements = result.get("new_achievements", [])
-        has_duplicate_first_lesson = any(ach.get("id") == "first_lesson" for ach in new_achievements)
-        
-        if has_duplicate_first_lesson:
-            print_error("Duplicate first_lesson achievement detected!")
-            return False
-            
-        if result.get("exercises_completed", 0) < 2:
-            print_error(f"Expected exercises_completed >= 2, got {result.get('exercises_completed')}")
-            return False
-            
-        print_success("Second lesson completed without duplicate achievements")
-        return True
-    
-    def test_7_complete_multiple_lessons_rapidly(self):
-        """Complete 8 more lessons rapidly to test 10-lesson milestone"""
-        if not self.session_token:
-            return False
-            
-        url = f"{API_BASE}/gamification/add-bones"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
-        
-        lesson_ids = [
-            "caminar-correa",
-            "venir-llamada",
-            "quieto-basico",
-            "dejalo-comando",
-            "pata-saludo",
-            "esperar-paciencia",
-            "no-saltar",
-            "ladrar-control"
-        ]
-        
-        starting_exercises = None
-        for i, lesson_id in enumerate(lesson_ids):
+        try:
+            headers = {'Authorization': f'Bearer {self.session_token}'}
             data = {
-                "amount": 8,
-                "reason": f"Lección: {lesson_id.title()}",
-                "lesson_id": lesson_id
+                'content': 'Hola Heimdall',
+                'dog_id': ''
             }
             
-            response = requests.post(url, json=data, headers=headers)
+            response = requests.post(f"{BASE_URL}/chat", 
+                                   json=data,
+                                   headers=headers,
+                                   timeout=30)
             
-            if response.status_code != 200:
-                print_error(f"Lesson {i+3} failed with status {response.status_code}: {response.text}")
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('role') == 'assistant' and result.get('content'):
+                    self.log_test("Regular Chat", True, 
+                                 f"Chat working correctly. Response length: {len(result.get('content', ''))} chars")
+                    return True
+                else:
+                    self.log_test("Regular Chat", False, 
+                                 f"Invalid response structure: {result}")
+                    return False
+            else:
+                self.log_test("Regular Chat", False, 
+                             f"Status: {response.status_code}, Response: {response.text}")
                 return False
                 
-            result = response.json()
-            current_exercises = result.get("exercises_completed", 0)
-            
-            if starting_exercises is None:
-                starting_exercises = current_exercises - 1  # Account for this lesson
-            
-            print_info(f"Lesson {i+3}: exercises={current_exercises}, bones={result.get('bones')}")
-            
-            # Check for 10_lessons achievement after reaching 10 exercises
-            if current_exercises >= 10:
-                new_achievements = result.get("new_achievements", [])
-                has_10_lessons = any(ach.get("id") == "10_lessons" for ach in new_achievements)
-                if has_10_lessons:
-                    print_success("🏆 10_lessons achievement unlocked!")
-                    break
-        
-        print_success("Completed 8 additional lessons successfully")
-        return True
-    
-    def test_8_verify_final_stats(self):
-        """Verify final stats show correct totals and achievements"""
-        if not self.session_token:
+        except Exception as e:
+            self.log_test("Regular Chat", False, error=e)
             return False
-            
-        # Get final stats
-        url = f"{API_BASE}/gamification/stats"
-        headers = {"Authorization": f"Bearer {self.session_token}"}
-        
-        response = requests.get(url, headers=headers)
-        
-        if response.status_code != 200:
-            print_error(f"Stats request failed with status {response.status_code}: {response.text}")
-            return False
-            
-        stats = response.json()
-        print_info(f"Final stats: {json.dumps(stats, indent=2)}")
-        
-        # Should have completed at least 10 exercises
-        if stats.get("exercises_completed", 0) < 10:
-            print_error(f"Expected exercises_completed >= 10, got {stats.get('exercises_completed')}")
-            return False
-            
-        # Should have significant XP (calculated: 15*2 + 10*2 + 8*8*2 = 30+20+128 = 178)
-        if stats.get("xp", 0) < 170:
-            print_error(f"Expected XP >= 170, got {stats.get('xp')}")
-            return False
-            
-        # Check achievements
-        achievements_unlocked = stats.get("achievements_unlocked", [])
-        if "first_lesson" not in achievements_unlocked:
-            print_error("first_lesson achievement not in unlocked list")
-            return False
-            
-        if stats.get("exercises_completed", 0) >= 10 and "10_lessons" not in achievements_unlocked:
-            print_error("10_lessons achievement should be unlocked")
-            return False
-            
-        print_success(f"Final verification: {len(achievements_unlocked)} achievements unlocked, {stats.get('exercises_completed')} exercises completed")
-        return True
-    
-    def run_all_tests(self):
-        """Run the complete E2E gamification test suite"""
-        print_header("🎮 HEIMDALL GAMIFICATION E2E TEST SUITE")
-        
-        tests = [
-            ("1. Register Fresh User", self.test_1_register_user),
-            ("2. Verify Initial Stats Zero", self.test_2_verify_initial_stats_zero),
-            ("3. Complete First Lesson", self.test_3_complete_first_lesson),
-            ("4. Verify Stats Persisted", self.test_4_verify_stats_persisted),
-            ("5. Verify Achievements List", self.test_5_verify_achievements_list),
-            ("6. Complete Second Lesson", self.test_6_complete_second_lesson),
-            ("7. Complete Multiple Lessons", self.test_7_complete_multiple_lessons_rapidly),
-            ("8. Verify Final Stats", self.test_8_verify_final_stats)
-        ]
-        
-        for test_name, test_func in tests:
-            self.run_test(test_name, test_func)
-            print()  # Add spacing
-        
-        # Final summary
-        print_header("🧪 TEST RESULTS SUMMARY")
-        
-        success_rate = (self.passed_tests / self.total_tests) * 100 if self.total_tests > 0 else 0
-        
-        if self.passed_tests == self.total_tests:
-            print_success(f"ALL TESTS PASSED! ({self.passed_tests}/{self.total_tests}) - {success_rate:.1f}%")
-        else:
-            print_error(f"SOME TESTS FAILED: {self.passed_tests}/{self.total_tests} passed ({success_rate:.1f}%)")
-            
-        if self.failed_tests:
-            print_error("Failed tests:")
-            for test in self.failed_tests:
-                print_error(f"  - {test}")
-        
-        return len(self.failed_tests) == 0
 
-def main():
+    async def test_english_chat(self):
+        """Test 7: Test chat with English (language detection)"""
+        if not self.session_token:
+            self.log_test("English Chat", False, "No session token available")
+            return False
+        
+        try:
+            headers = {'Authorization': f'Bearer {self.session_token}'}
+            data = {
+                'content': 'Hello Heimdall, how is my dog doing today?',
+                'dog_id': ''
+            }
+            
+            response = requests.post(f"{BASE_URL}/chat", 
+                                   json=data,
+                                   headers=headers,
+                                   timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('role') == 'assistant' and result.get('content'):
+                    content = result.get('content', '').lower()
+                    # Check if response contains English words and not Spanish
+                    english_indicators = ['hello', 'how', 'today', 'your', 'doing', 'great', 'well']
+                    spanish_indicators = ['hola', 'cómo', 'hoy', 'tu', 'haciendo', 'bien', 'está']
+                    
+                    has_english = any(word in content for word in english_indicators)
+                    has_spanish = any(word in content for word in spanish_indicators)
+                    
+                    if has_english or not has_spanish:
+                        self.log_test("English Chat", True, 
+                                     f"Language detection working. Response appears to be in English")
+                        return True
+                    else:
+                        self.log_test("English Chat", False, 
+                                     f"Response appears to be in Spanish despite English input: {content[:200]}")
+                        return False
+                else:
+                    self.log_test("English Chat", False, 
+                                 f"Invalid response structure: {result}")
+                    return False
+            else:
+                self.log_test("English Chat", False, 
+                             f"Status: {response.status_code}, Response: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("English Chat", False, error=e)
+            return False
+
+    def print_summary(self):
+        """Print test summary"""
+        print("\n" + "="*60)
+        print("FILE UPLOAD & ANALYSIS - TEST SUMMARY")
+        print("="*60)
+        
+        passed = sum(1 for test in self.test_results if test['success'])
+        total = len(self.test_results)
+        
+        print(f"PASSED: {passed}/{total}")
+        print(f"SUCCESS RATE: {(passed/total*100):.1f}%")
+        
+        print("\nDETAILED RESULTS:")
+        for test in self.test_results:
+            status = "✅" if test['success'] else "❌"
+            print(f"  {status} {test['test']}")
+            if test['error'] and not test['success']:
+                print(f"     Error: {test['error']}")
+        
+        print("\nCRITICAL ISSUES:")
+        failed_tests = [test for test in self.test_results if not test['success']]
+        if not failed_tests:
+            print("  None - All tests passed!")
+        else:
+            for test in failed_tests:
+                print(f"  ❌ {test['test']}: {test['error'] or 'Check details above'}")
+        
+        return passed, total
+
+async def main():
     """Main test execution"""
-    print_header("🚀 Starting Heimdall Backend E2E Testing")
-    print_info(f"Backend URL: {BACKEND_URL}")
-    print_info(f"Test Email: e2e_gamification_test@test.com")
-    print()
+    print("Starting Heimdall File Upload & Analysis Testing...")
+    print(f"Backend URL: {BASE_URL}")
+    print("="*60)
     
-    tester = GamificationTester()
-    success = tester.run_all_tests()
+    tester = BackendTester()
     
-    if success:
-        print_success("🎉 All E2E tests completed successfully!")
-        sys.exit(0)
-    else:
-        print_error("💥 Some tests failed - check logs above")
-        sys.exit(1)
+    # Execute tests in sequence
+    await tester.test_user_registration()
+    await tester.test_image_upload_analysis()
+    await tester.test_pdf_upload_analysis() 
+    await tester.test_invalid_file_type_rejection()
+    await tester.test_upload_without_auth()
+    await tester.test_regular_chat()
+    await tester.test_english_chat()
+    
+    # Print summary
+    passed, total = tester.print_summary()
+    
+    return passed, total
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
