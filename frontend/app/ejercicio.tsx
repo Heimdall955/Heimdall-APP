@@ -544,4 +544,27 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.white,
   },
+  rewardBanner: {
+    backgroundColor: Colors.accentLight,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.md,
+    alignItems: 'center',
+  },
+  rewardText: {
+    fontSize: FontSizes.xl,
+    fontWeight: '800',
+    color: Colors.accent,
+  },
+  rewardSubtext: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
+  levelUpText: {
+    fontSize: FontSizes.lg,
+    fontWeight: '800',
+    color: Colors.primary,
+    marginTop: Spacing.xs,
+  },
 });
