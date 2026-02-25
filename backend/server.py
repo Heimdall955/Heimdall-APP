@@ -924,7 +924,7 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
     # Save assistant message
     assistant_message = {
         "user_id": user.user_id,
-        "dog_id": data.dog_id,
+        "dog_id": data.dog_id if data.dog_id else None,
         "role": "assistant",
         "content": ai_response,
         "created_at": datetime.now(timezone.utc).isoformat()
