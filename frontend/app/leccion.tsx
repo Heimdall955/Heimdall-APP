@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import axios from 'axios';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { Card } from '../components/ui';
 import { useLanguage, Language } from '../contexts/LanguageContext';
+import { SecureStore } from '../utils/secureStore';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 // Base de datos de lecciones de educación canina en positivo
 const LECCIONES_DB: Record<string, Leccion> = {
