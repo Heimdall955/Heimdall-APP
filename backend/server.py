@@ -2237,13 +2237,37 @@ async def health_check():
 
 # ==================== CORS & APP SETUP ====================
 
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else []
+# Always allow the preview/production URL
+PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://wallet-pass-feature.preview.emergentagent.com")
+if PREVIEW_URL and PREVIEW_URL not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append(PREVIEW_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+# Rate limiting middleware
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    path = request.url.path
+    
+    # Strict rate limit on auth endpoints (10 req/min)
+    if "/auth/register" in path or "/auth/login" in path:
+        if rate_limiter.is_limited(f"auth:{client_ip}", max_requests=10, window_seconds=60):
+            return JSONResponse(status_code=429, content={"detail": "Demasiadas solicitudes. Espera un momento."})
+    
+    # General rate limit (100 req/min per IP)
+    if rate_limiter.is_limited(f"general:{client_ip}", max_requests=100, window_seconds=60):
+        return JSONResponse(status_code=429, content={"detail": "Demasiadas solicitudes."})
+    
+    response = await call_next(request)
+    return response
 
 app.include_router(api_router)
 
