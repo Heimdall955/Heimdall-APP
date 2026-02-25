@@ -281,6 +281,9 @@ export default function HomeScreen() {
               dogId={currentDog.id}
               dogName={currentDog.name}
               dogBreed={currentDog.breed}
+              dogAge={currentDog.age}
+              dogWeight={currentDog.weight}
+              chipId={currentDog.chip_id}
               dogPhoto={currentDog.avatar}
             />
           </View>
