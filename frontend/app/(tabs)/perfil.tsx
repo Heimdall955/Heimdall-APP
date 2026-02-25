@@ -81,6 +81,22 @@ export default function PerfilScreen() {
     }
   };
 
+  const loadGamification = async () => {
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const headers = { Authorization: `Bearer ${token}` };
+      const [statsRes, achRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/gamification/stats`, { headers }),
+        axios.get(`${BACKEND_URL}/api/gamification/achievements`, { headers }),
+      ]);
+      setGamification(statsRes.data);
+      setAchievements(achRes.data.achievements || []);
+    } catch (error) {
+      console.log('Error loading gamification:', error);
+    }
+  };
+
   const changeLanguage = async (newLang: Language) => {
     await setLanguage(newLang);
     setShowLanguageModal(false);
