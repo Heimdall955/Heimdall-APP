@@ -34,9 +34,13 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
     status: 'calm',
-    bones: 240,
-    level_progress: 340,
+    bones: 0,
+    level: 1,
+    level_progress: 0,
     level_target: 500,
+    streak_days: 0,
+    exercises_completed: 0,
+    practice_minutes: 0,
   });
 
   const quickAccessItems = [
