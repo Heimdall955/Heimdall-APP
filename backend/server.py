@@ -1694,11 +1694,15 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             
             try:
                 supabase.table("gamification").update(update_data).eq("user_id", user.user_id).execute()
-            except Exception as update_err:
+            except Exception:
                 # Fallback: update without weekly fields if columns don't exist
-                logger.warning(f"Weekly columns may not exist, falling back: {update_err}")
+                logger.warning("Weekly columns may not exist, falling back to core update")
                 core_data = {k: v for k, v in update_data.items() if k not in ("bones_this_week", "exercises_this_week", "xp_this_week", "week_start")}
-                supabase.table("gamification").update(core_data).eq("user_id", user.user_id).execute()
+                try:
+                    supabase.table("gamification").update(core_data).eq("user_id", user.user_id).execute()
+                except Exception as core_err:
+                    logger.error(f"Core update also failed: {core_err}")
+                    raise
             
             # Check for newly unlocked achievements
             new_stats = {
@@ -1825,12 +1829,14 @@ async def get_leaderboard(limit: int = 10, user: User = Depends(require_auth)):
         leaderboard = []
         for i, entry in enumerate(result.data):
             # Get user name
-            user_result = supabase.table("users").select("name, picture").eq("id", entry["user_id"]).execute()
             name = "Usuario"
             avatar = None
-            if user_result.data:
-                name = user_result.data[0].get("name", "Usuario")
-                avatar = user_result.data[0].get("picture")
+            try:
+                user_result = supabase.table("users").select("name").eq("id", entry["user_id"]).execute()
+                if user_result.data:
+                    name = user_result.data[0].get("name", "Usuario")
+            except:
+                pass
             
             # Get user's first dog name
             dog_name = None
