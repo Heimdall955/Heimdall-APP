@@ -203,6 +203,7 @@ export default function PerfilScreen() {
   const getLanguageFlag = (lang: Language) => ({ es: '🇪🇸', en: '🇬🇧', it: '🇮🇹' }[lang]);
 
   const menuItems = [
+    { id: 'theme', icon: isDark ? 'sunny-outline' : 'moon-outline', label: t('appearance'), onPress: toggleTheme, showValue: isDark ? t('darkMode') : t('lightMode') },
     { id: 'settings', icon: 'settings-outline', label: t('settings'), onPress: () => setShowSettingsModal(true) },
     { id: 'notifications', icon: 'notifications-outline', label: t('notifications'), onPress: () => setShowNotificationsModal(true) },
     { id: 'privacy', icon: 'shield-outline', label: t('privacy'), onPress: () => {} },
