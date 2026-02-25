@@ -1,12 +1,17 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, UploadFile, File, Form
 from fastapi.security import HTTPBearer
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 import os
 import logging
 import json
+import re
+import time
+import html
 from pathlib import Path
+from collections import defaultdict
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
