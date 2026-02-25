@@ -12,51 +12,40 @@ export default function Index() {
   const { isAuthenticated, isLoading, dogs, refreshDogs } = useAuth();
   const [navigationState, setNavigationState] = useState<'loading' | 'checking' | 'ready'>('loading');
   const [showSplash, setShowSplash] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const hasNavigated = useRef(false);
 
-  // Mostrar splash por un mínimo de 2 segundos
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 2000);
+    }, 2500);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     const performNavigation = async () => {
-      // Evitar navegación múltiple
       if (hasNavigated.current) return;
-      
-      // Esperar a que termine el splash y la carga inicial de auth
       if (showSplash || isLoading) {
         setNavigationState('loading');
         return;
       }
-
-      // Si no está autenticado, ir a idioma
       if (!isAuthenticated) {
         hasNavigated.current = true;
         router.replace('/onboarding/idioma');
         return;
       }
-
-      // Usuario autenticado - verificar perros
       setNavigationState('checking');
-      
       try {
         await refreshDogs();
       } catch (error) {
         console.log('Error refreshing dogs:', error);
       }
-      
       setNavigationState('ready');
     };
-
     performNavigation();
   }, [showSplash, isLoading, isAuthenticated]);
 
   useEffect(() => {
-    // Navegar solo cuando estamos listos y no hemos navegado aún
     if (navigationState === 'ready' && isAuthenticated && !hasNavigated.current) {
       hasNavigated.current = true;
       if (dogs.length > 0) {
@@ -68,40 +57,48 @@ export default function Index() {
   }, [navigationState, dogs, isAuthenticated]);
 
   return (
-    <LinearGradient
-      colors={['#1a1a2e', '#16213e', '#0f3460']}
-      style={styles.container}
-    >
-      <View style={styles.content}>
-        {/* Heimdall Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: 'https://customer-assets.emergentagent.com/job_pethani/artifacts/20rghbje_Gemini_Generated_Image_2r7wpq2r7wpq2r7w.png' }}
-            style={styles.heroImage}
-            resizeMode="contain"
-          />
-        </View>
+    <View style={styles.container}>
+      {/* Full screen background image */}
+      <Image
+        source={{ uri: 'https://customer-assets.emergentagent.com/job_pethani/artifacts/20rghbje_Gemini_Generated_Image_2r7wpq2r7wpq2r7w.png' }}
+        style={styles.bgImage}
+        resizeMode="cover"
+        onLoad={() => setImageLoaded(true)}
+      />
+      
+      {/* Dark overlay gradient */}
+      <LinearGradient
+        colors={['transparent', 'rgba(10,10,30,0.4)', 'rgba(10,10,30,0.85)', 'rgba(10,10,30,0.95)']}
+        locations={[0, 0.35, 0.65, 1]}
+        style={styles.overlay}
+      />
 
-        {/* Logo and Text */}
+      {/* Content over image */}
+      <View style={styles.content}>
+        <View style={styles.topSpacer} />
+        
+        {/* Logo */}
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>HEIMDALL</Text>
-          <Text style={styles.subtitle}>Guardián de tu mejor amigo</Text>
+          <View style={styles.logoLine} />
+          <Text style={styles.subtitle}>HANI</Text>
+          <Text style={styles.tagline}>{'Guardi\u00e1n de tu mejor amigo'}</Text>
         </View>
 
-        {/* Loading Indicator */}
+        {/* Loading */}
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color="#4ECDC4" />
           <Text style={styles.loadingText}>
             {navigationState === 'checking' ? 'Verificando...' : 'Cargando...'}
           </Text>
         </View>
-      </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Powered by HANI AI</Text>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Powered by HANI AI</Text>
+        </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
