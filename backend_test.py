@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://pethani.preview.emergentagent.com"
+BACKEND_URL = "https://hani-achievements-ui.preview.emergentagent.com"
 
 class HeimdallAPITester:
     def __init__(self):
