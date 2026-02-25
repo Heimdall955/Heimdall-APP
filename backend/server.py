@@ -1949,33 +1949,7 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict 
                 "uri": dog_data.get('avatar') or "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600"
             }
         },
-        "textModulesData": [
-            {
-                "id": "breed",
-                "header": "RAZA",
-                "body": dog_data.get('breed') or "Sin especificar"
-            },
-            {
-                "id": "age",
-                "header": "EDAD",
-                "body": age_display
-            },
-            {
-                "id": "weight",
-                "header": "PESO",
-                "body": f"{dog_data.get('weight', 0)} kg"
-            },
-            {
-                "id": "chip",
-                "header": "Nº CHIP",
-                "body": dog_data.get('chip_id') or "No registrado"
-            },
-            {
-                "id": "owner",
-                "header": "TUTOR",
-                "body": user_data.get('name', user_data.get('email', 'Usuario'))
-            }
-        ]
+        "textModulesData": text_modules
     }
     
     # Create JWT payload
