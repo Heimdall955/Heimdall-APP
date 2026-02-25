@@ -1982,7 +1982,7 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict 
     claims = {
         "iss": credentials_info["client_email"],
         "aud": "google",
-        "origins": ["https://hani-achievements-ui.preview.emergentagent.com"],
+        "origins": ["https://wallet-pass-feature.preview.emergentagent.com"],
         "typ": "savetowallet",
         "payload": {
             "genericObjects": [generic_object]
