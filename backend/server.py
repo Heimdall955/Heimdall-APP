@@ -890,10 +890,10 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
     
     # Language instruction based on detection
     language_instruction = f"""
-# IDIOMA DE RESPUESTA
-CRÍTICO: Debes responder ÚNICAMENTE en {detected_language}.
-El usuario ha escrito en {detected_language}. Toda tu respuesta debe estar completamente en {detected_language}.
-NO mezcles idiomas. NO uses otro idioma que no sea {detected_language}.
+# IDIOMA DE RESPUESTA (MÁXIMA PRIORIDAD)
+El último mensaje del usuario está escrito en {detected_language}.
+Responde EXCLUSIVAMENTE en {detected_language}. Esta es una instrucción absoluta.
+Ignora el idioma del historial anterior. Solo importa el idioma del ÚLTIMO mensaje.
 """
     
     # Build the complete system prompt
