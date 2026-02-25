@@ -1866,7 +1866,7 @@ async def get_routes(dog_id: str, user: User = Depends(require_auth)):
 
 # ==================== GOOGLE WALLET ====================
 
-def create_wallet_pass_jwt(dog_data: dict, user_data: dict) -> str:
+def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict = None) -> str:
     """Generate a signed JWT for Google Wallet pass"""
     
     # Load credentials
@@ -1884,6 +1884,31 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict) -> str:
             age_display += f" {age_months % 12} meses"
     else:
         age_display = f"{age_months} meses"
+    
+    # Build text modules with all dog data
+    text_modules = [
+        {"id": "breed", "header": "RAZA", "body": dog_data.get('breed') or "Sin especificar"},
+        {"id": "age", "header": "EDAD", "body": age_display},
+        {"id": "weight", "header": "PESO", "body": f"{dog_data.get('weight', 0)} kg"},
+        {"id": "chip", "header": "Nº CHIP", "body": dog_data.get('chip_id') or "No registrado"},
+        {"id": "owner", "header": "TUTOR", "body": user_data.get('name', user_data.get('email', 'Usuario'))},
+    ]
+    
+    # Add clinical data if available
+    if clinical_data:
+        if clinical_data.get('vet_name'):
+            text_modules.append({"id": "vet", "header": "VETERINARIO", "body": f"{clinical_data['vet_name']}" + (f" ({clinical_data.get('vet_phone', '')})" if clinical_data.get('vet_phone') else "")})
+        if clinical_data.get('allergies'):
+            text_modules.append({"id": "allergies", "header": "ALERGIAS", "body": clinical_data['allergies']})
+        if clinical_data.get('chronic_conditions'):
+            text_modules.append({"id": "conditions", "header": "CONDICIONES", "body": clinical_data['chronic_conditions']})
+        if clinical_data.get('current_medication'):
+            text_modules.append({"id": "medication", "header": "MEDICACIÓN", "body": clinical_data['current_medication']})
+        if clinical_data.get('insurance'):
+            text_modules.append({"id": "insurance", "header": "SEGURO", "body": clinical_data['insurance']})
+        neutered = clinical_data.get('neutered')
+        if neutered is not None:
+            text_modules.append({"id": "neutered", "header": "ESTERILIZADO", "body": "Sí" if neutered else "No"})
     
     # Create the pass object
     generic_object = {
