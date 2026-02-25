@@ -36,6 +36,7 @@ export default function SaludScreen() {
   const { currentDog } = useAuth();
   const { isConnected, biometricData, startSimulation, stopSimulation } = useBluetooth();
   const { t } = useLanguage();
+  const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'24h' | '7d'>('24h');
   const [medicalEvents, setMedicalEvents] = useState<MedicalEvent[]>([]);

@@ -20,7 +20,7 @@ export default function EducacionScreen() {
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
   const { t, language } = useLanguage();
-  
+  const { colors } = useTheme();
   // Get translated content
   const trainingPrograms = getTrainingPrograms(language as 'es' | 'en' | 'it');
   const exercises = getExercises(language as 'es' | 'en' | 'it');
