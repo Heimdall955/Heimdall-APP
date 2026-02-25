@@ -271,10 +271,22 @@ async def require_auth(request: Request) -> User:
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register")
-async def register(data: UserCreate):
+async def register(data: UserCreate, request: Request):
+    # Input validation
+    if not validate_email(data.email):
+        raise HTTPException(status_code=400, detail="Email inválido")
+    if not validate_password(data.password):
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    if not data.name or len(data.name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="El nombre debe tener al menos 2 caracteres")
+    
+    # Sanitize inputs
+    clean_name = sanitize_input(data.name)[:50]
+    clean_email = data.email.strip().lower()
+    
     # Check if user exists
     try:
-        result = supabase.table("users").select("id").eq("email", data.email).execute()
+        result = supabase.table("users").select("id").eq("email", clean_email).execute()
         if result.data and len(result.data) > 0:
             raise HTTPException(status_code=400, detail="El email ya está registrado")
     except HTTPException:
@@ -285,8 +297,8 @@ async def register(data: UserCreate):
     now = datetime.now(timezone.utc).isoformat()
     
     user_doc = {
-        "email": data.email,
-        "name": data.name,
+        "email": clean_email,
+        "name": clean_name,
         "password_hash": hash_password(data.password),
         "created_at": now,
         "updated_at": now
@@ -326,8 +338,8 @@ async def register(data: UserCreate):
         "session_token": session_token,
         "user": {
             "user_id": str(user_id),
-            "email": data.email,
-            "name": data.name
+            "email": clean_email,
+            "name": clean_name
         }
     }
 
