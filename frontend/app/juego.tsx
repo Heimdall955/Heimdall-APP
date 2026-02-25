@@ -107,6 +107,7 @@ export default function JuegoScreen() {
   const { t } = useLanguage();
   const [pasoActual, setPasoActual] = useState(0);
   const [juegoCompletado, setJuegoCompletado] = useState(false);
+  const [rewardData, setRewardData] = useState<any>(null);
 
   const juego = JUEGOS_DB[id || 'puzzle-mental'];
 
@@ -118,11 +119,27 @@ export default function JuegoScreen() {
     );
   }
 
+  const submitReward = async () => {
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const response = await axios.post(
+        `${BACKEND_URL}/api/gamification/add-bones`,
+        { amount: juego.xp, reason: `Juego: ${juego.titulo}` },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRewardData(response.data);
+    } catch (error) {
+      console.log('Error submitting reward:', error);
+    }
+  };
+
   const handleSiguientePaso = () => {
     if (pasoActual < juego.pasos.length - 1) {
       setPasoActual(pasoActual + 1);
     } else {
       setJuegoCompletado(true);
+      submitReward();
     }
   };
 
