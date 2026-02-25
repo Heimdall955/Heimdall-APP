@@ -820,32 +820,38 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
         logger.error(f"Error getting chat history: {e}")
     
     # Auto-detect language from user message and maintain conversation language
-    detected_language = "español"  # Default
+    detected_language = None  # Start without default
     
     # Simple language detection based on common words and patterns
-    message_lower = data.content.lower()
+    message_lower = ' ' + data.content.lower() + ' '
     
     # English indicators (common words and patterns)
-    english_patterns = ['the ', ' is ', ' are ', 'what ', 'how ', 'why ', ' my ', 'dog ', 'help', 'please', 'thanks', 'hello', ' hi ', ' can ', ' you ', "i'm ", ' want', ' need', "don't", "doesn't", 'could', 'would', 'should', ' not ', 'with ', 'have ', 'this ', 'that ']
+    english_patterns = [' the ', ' is ', ' are ', ' what ', ' how ', ' why ', ' my ', ' dog ', ' help', ' please', ' thanks', ' hello', ' hi ', ' can ', ' you ', " i'm ", ' want', ' need', " don't", " doesn't", ' could', ' would', ' should', ' not ', ' with ', ' have ', ' this ', ' that ', ' eating ', ' eat ']
     # Italian indicators  
-    italian_patterns = [' il ', ' la ', ' che ', 'come ', 'perché', ' mio ', 'cane ', 'aiuto', 'grazie', 'ciao', 'buon', 'vorrei', 'posso', ' sono ', ' ho ', ' non ', 'questo', 'quella', 'quando', 'dove', 'cosa ', ' dei ', ' del ', ' per ']
+    italian_patterns = [' il ', ' la ', ' che ', ' come ', ' perché', ' mio ', ' cane ', ' aiuto', ' grazie', ' ciao', ' buon', ' vorrei', ' posso', ' sono ', ' ho ', ' non ', ' questo', ' quella', ' quando', ' dove', ' cosa ', ' dei ', ' del ', ' per ', ' mangia', ' bene']
     # Spanish indicators
-    spanish_patterns = [' el ', ' la ', ' que ', 'cómo ', 'por qué', ' mi ', 'perro ', 'ayuda', 'gracias', 'hola', 'buenos', 'quiero', 'puedo', ' soy ', ' tengo', ' no ', 'este', 'esta', 'cuando', 'donde', 'qué ', ' los ', ' las ', ' para ']
+    spanish_patterns = [' el ', ' la ', ' que ', ' cómo ', ' por qué', ' mi ', ' perro ', ' ayuda', ' gracias', ' hola', ' buenos', ' quiero', ' puedo', ' soy ', ' tengo', ' no ', ' este', ' esta', ' cuando', ' donde', ' qué ', ' los ', ' las ', ' para ', ' come ', ' bien']
     
     english_count = sum(1 for pattern in english_patterns if pattern in message_lower)
     italian_count = sum(1 for pattern in italian_patterns if pattern in message_lower)
     spanish_count = sum(1 for pattern in spanish_patterns if pattern in message_lower)
     
-    # Determine language based on scores
-    max_count = max(english_count, italian_count, spanish_count)
+    # Log detection for debugging
+    logger.info(f"Language detection - EN:{english_count}, IT:{italian_count}, ES:{spanish_count}")
     
-    if max_count > 0:
-        if english_count == max_count and english_count > italian_count and english_count > spanish_count:
-            detected_language = "English"
-        elif italian_count == max_count and italian_count > english_count and italian_count > spanish_count:
-            detected_language = "italiano"
-        elif spanish_count == max_count:
-            detected_language = "español"
+    # Determine language based on highest score
+    if english_count > italian_count and english_count > spanish_count:
+        detected_language = "English"
+    elif italian_count > english_count and italian_count > spanish_count:
+        detected_language = "italiano"
+    elif spanish_count > english_count and spanish_count > italian_count:
+        detected_language = "español"
+    elif english_count > 0:
+        detected_language = "English"
+    elif italian_count > 0:
+        detected_language = "italiano"
+    else:
+        detected_language = "español"  # Default fallback
     
     # Override with explicit language setting if provided
     if data.language:
