@@ -2283,16 +2283,18 @@ app.add_middleware(
 # Rate limiting middleware
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host if request.client else "unknown"
+    # Use X-Forwarded-For for real client IP behind proxy
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     path = request.url.path
     
-    # Strict rate limit on auth endpoints (10 req/min)
+    # Strict rate limit on auth endpoints (15 req/min per IP)
     if "/auth/register" in path or "/auth/login" in path:
-        if rate_limiter.is_limited(f"auth:{client_ip}", max_requests=10, window_seconds=60):
+        if rate_limiter.is_limited(f"auth:{client_ip}", max_requests=15, window_seconds=60):
             return JSONResponse(status_code=429, content={"detail": "Demasiadas solicitudes. Espera un momento."})
     
-    # General rate limit (100 req/min per IP)
-    if rate_limiter.is_limited(f"general:{client_ip}", max_requests=100, window_seconds=60):
+    # General rate limit (200 req/min per IP)
+    if rate_limiter.is_limited(f"general:{client_ip}", max_requests=200, window_seconds=60):
         return JSONResponse(status_code=429, content={"detail": "Demasiadas solicitudes."})
     
     response = await call_next(request)
