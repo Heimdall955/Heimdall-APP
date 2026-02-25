@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Heimdall backend API endpoints"
+user_problem_statement: "Test the Heimdall backend API endpoints and gamification system"
 
 frontend:
   - task: "Language Selection Bug Fix"
