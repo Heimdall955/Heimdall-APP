@@ -15,8 +15,12 @@ import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constan
 interface DogStatus {
   status: 'calm' | 'active' | 'anxious' | 'sleeping' | 'playing';
   bones: number;
+  level: number;
   level_progress: number;
   level_target: number;
+  streak_days: number;
+  exercises_completed: number;
+  practice_minutes: number;
 }
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
