@@ -266,6 +266,67 @@ export default function HomeScreen() {
           </Card>
         </View>
 
+        {/* Weekly Summary */}
+        <View style={styles.section} data-testid="weekly-summary-section">
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('weeklyProgress')}</Text>
+            <Text style={styles.weekLabel}>{t('thisWeek')}</Text>
+          </View>
+          <Card style={styles.weeklyCard}>
+            <View style={styles.weeklyStatsGrid}>
+              <View style={styles.weeklyStat}>
+                <View style={[styles.weeklyStatIcon, { backgroundColor: '#FFD70020' }]}>
+                  <Text style={{ fontSize: 20 }}>{'🦴'}</Text>
+                </View>
+                <Text style={styles.weeklyStatValue}>{weeklySummary?.bones_total || dogStatus.bones || 0}</Text>
+                <Text style={styles.weeklyStatLabel}>{t('bonesThisWeek')}</Text>
+              </View>
+              <View style={styles.weeklyStat}>
+                <View style={[styles.weeklyStatIcon, { backgroundColor: Colors.accentMint + '20' }]}>
+                  <Ionicons name="school" size={20} color={Colors.accentMint} />
+                </View>
+                <Text style={styles.weeklyStatValue}>{weeklySummary?.exercises_total || dogStatus.exercises_completed || 0}</Text>
+                <Text style={styles.weeklyStatLabel}>{t('exercisesThisWeek')}</Text>
+              </View>
+              <View style={styles.weeklyStat}>
+                <View style={[styles.weeklyStatIcon, { backgroundColor: Colors.accentPurple + '20' }]}>
+                  <Ionicons name="flash" size={20} color={Colors.accentPurple} />
+                </View>
+                <Text style={styles.weeklyStatValue}>{weeklySummary?.streak_days || dogStatus.streak_days || 0}</Text>
+                <Text style={styles.weeklyStatLabel}>{t('streakActive')}</Text>
+              </View>
+            </View>
+            {/* Level progress bar */}
+            <View style={styles.weeklyLevelRow}>
+              <Text style={styles.weeklyLevelText}>{t('level')} {weeklySummary?.level || dogStatus.level}</Text>
+              <View style={styles.weeklyProgressBar}>
+                <View style={[styles.weeklyProgressFill, { width: `${((weeklySummary?.level_progress || 0) / (weeklySummary?.level_target || 500)) * 100}%` }]} />
+              </View>
+              <Text style={styles.weeklyLevelXP}>{weeklySummary?.level_progress || 0}/{weeklySummary?.level_target || 500} XP</Text>
+            </View>
+          </Card>
+        </View>
+
+        {/* Leaderboard Preview */}
+        <View style={styles.section} data-testid="leaderboard-preview-section">
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('leaderboard')}</Text>
+            <TouchableOpacity onPress={() => router.push('/leaderboard')}>
+              <Text style={styles.viewAllLink}>{t('viewLeaderboard')}</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.leaderboardCard} onPress={() => router.push('/leaderboard')} data-testid="leaderboard-card">
+            <View style={styles.leaderboardRow}>
+              <Ionicons name="trophy" size={28} color="#FFD700" />
+              <View style={styles.leaderboardInfo}>
+                <Text style={styles.leaderboardTitle}>{t('leaderboardTitle')}</Text>
+                <Text style={styles.leaderboardSub}>{t('topTrainers')}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color={Colors.gray} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
         {/* Quick Access */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('quickAccess')}</Text>
