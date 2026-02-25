@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import axios from 'axios';
 import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
@@ -80,6 +80,13 @@ export default function HomeScreen() {
   useEffect(() => {
     loadGamificationStats();
   }, [loadGamificationStats]);
+
+  // Reload stats when screen comes into focus (e.g., after completing a lesson)
+  useFocusEffect(
+    useCallback(() => {
+      loadGamificationStats();
+    }, [loadGamificationStats])
+  );
 
   // Update status based on biometric data
   useEffect(() => {
