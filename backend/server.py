@@ -1344,6 +1344,160 @@ async def delete_medical_event(event_id: str, user: User = Depends(require_auth)
         logger.error(f"Error deleting medical event: {e}")
         raise HTTPException(status_code=500, detail="Error al eliminar evento")
 
+# ==================== CLINICAL FILE ENDPOINTS ====================
+
+class ClinicalFileUpdate(BaseModel):
+    country: Optional[str] = None
+    vet_name: Optional[str] = None
+    vet_phone: Optional[str] = None
+    allergies: Optional[str] = None
+    chronic_conditions: Optional[str] = None
+    current_medication: Optional[str] = None
+    blood_type: Optional[str] = None
+    neutered: Optional[bool] = None
+    insurance: Optional[str] = None
+
+@api_router.get("/dogs/{dog_id}/clinical")
+async def get_clinical_file(dog_id: str, user: User = Depends(require_auth)):
+    try:
+        result = supabase.table("clinical_files").select("*").eq("dog_id", dog_id).execute()
+        if result.data and len(result.data) > 0:
+            data = result.data[0]
+            return {k: v for k, v in data.items() if k != "id"}
+        return {
+            "dog_id": dog_id, "country": "", "vet_name": "", "vet_phone": "",
+            "allergies": "", "chronic_conditions": "", "current_medication": "",
+            "blood_type": "", "neutered": False, "insurance": ""
+        }
+    except Exception as e:
+        logger.error(f"Error getting clinical file: {e}")
+        return {"dog_id": dog_id}
+
+@api_router.put("/dogs/{dog_id}/clinical")
+async def update_clinical_file(dog_id: str, data: ClinicalFileUpdate, user: User = Depends(require_auth)):
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        update_data = {k: v for k, v in data.dict().items() if v is not None}
+        update_data["updated_at"] = now
+        
+        existing = supabase.table("clinical_files").select("dog_id").eq("dog_id", dog_id).execute()
+        if existing.data and len(existing.data) > 0:
+            supabase.table("clinical_files").update(update_data).eq("dog_id", dog_id).execute()
+        else:
+            update_data["dog_id"] = dog_id
+            update_data["created_at"] = now
+            supabase.table("clinical_files").insert(update_data).execute()
+        
+        return {"message": "Ficha clínica actualizada"}
+    except Exception as e:
+        logger.error(f"Error updating clinical file: {e}")
+        raise HTTPException(status_code=500, detail="Error al actualizar ficha clínica")
+
+# ==================== PACK/FRIENDS ENDPOINTS ====================
+
+class InviteRequest(BaseModel):
+    invited_name: str
+    invited_contact: Optional[str] = None
+
+@api_router.get("/pack/friends")
+async def get_friends(user: User = Depends(require_auth)):
+    try:
+        result = supabase.table("pack_friends").select("*").eq("user_id", user.user_id).execute()
+        friends = []
+        for f in (result.data or []):
+            friends.append({
+                "id": str(f.get("id", "")),
+                "name": f.get("friend_name", ""),
+                "status": f.get("status", "pending"),
+                "created_at": f.get("created_at", "")
+            })
+        return {"friends": friends}
+    except Exception as e:
+        logger.error(f"Error getting friends: {e}")
+        return {"friends": []}
+
+@api_router.post("/pack/invite")
+async def invite_friend(data: InviteRequest, user: User = Depends(require_auth)):
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        invite = {
+            "user_id": user.user_id,
+            "friend_name": data.invited_name,
+            "friend_contact": data.invited_contact,
+            "status": "pending",
+            "created_at": now
+        }
+        result = supabase.table("pack_friends").insert(invite).execute()
+        
+        # Award bones for inviting
+        try:
+            gam = supabase.table("gamification").select("bones").eq("user_id", user.user_id).execute()
+            if gam.data:
+                new_bones = gam.data[0].get("bones", 0) + 5
+                supabase.table("gamification").update({"bones": new_bones, "updated_at": now}).eq("user_id", user.user_id).execute()
+        except:
+            pass
+        
+        return {"message": "Invitación enviada", "bones_earned": 5, "id": str(result.data[0]["id"]) if result.data else ""}
+    except Exception as e:
+        logger.error(f"Error inviting friend: {e}")
+        raise HTTPException(status_code=500, detail="Error al invitar")
+
+# ==================== USER SETTINGS ENDPOINTS ====================
+
+class UserSettingsUpdate(BaseModel):
+    notifications_enabled: Optional[bool] = None
+    daily_reminder: Optional[bool] = None
+    health_alerts: Optional[bool] = None
+    achievement_alerts: Optional[bool] = None
+    pack_alerts: Optional[bool] = None
+    weight_unit: Optional[str] = None
+    temperature_unit: Optional[str] = None
+
+@api_router.get("/users/settings")
+async def get_user_settings(user: User = Depends(require_auth)):
+    try:
+        result = supabase.table("user_settings").select("*").eq("user_id", user.user_id).execute()
+        if result.data and len(result.data) > 0:
+            s = result.data[0]
+            return {
+                "notifications_enabled": s.get("notifications_enabled", True),
+                "daily_reminder": s.get("daily_reminder", True),
+                "health_alerts": s.get("health_alerts", True),
+                "achievement_alerts": s.get("achievement_alerts", True),
+                "pack_alerts": s.get("pack_alerts", True),
+                "weight_unit": s.get("weight_unit", "kg"),
+                "temperature_unit": s.get("temperature_unit", "celsius"),
+            }
+        return {
+            "notifications_enabled": True, "daily_reminder": True, "health_alerts": True,
+            "achievement_alerts": True, "pack_alerts": True, "weight_unit": "kg", "temperature_unit": "celsius"
+        }
+    except Exception as e:
+        logger.error(f"Error getting settings: {e}")
+        return {"notifications_enabled": True, "daily_reminder": True, "health_alerts": True,
+                "achievement_alerts": True, "pack_alerts": True, "weight_unit": "kg", "temperature_unit": "celsius"}
+
+@api_router.put("/users/settings")
+async def update_user_settings(data: UserSettingsUpdate, user: User = Depends(require_auth)):
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        update_data = {k: v for k, v in data.dict().items() if v is not None}
+        update_data["updated_at"] = now
+        
+        existing = supabase.table("user_settings").select("user_id").eq("user_id", user.user_id).execute()
+        if existing.data and len(existing.data) > 0:
+            supabase.table("user_settings").update(update_data).eq("user_id", user.user_id).execute()
+        else:
+            update_data["user_id"] = user.user_id
+            update_data["created_at"] = now
+            supabase.table("user_settings").insert(update_data).execute()
+        
+        return {"message": "Ajustes actualizados"}
+    except Exception as e:
+        logger.error(f"Error updating settings: {e}")
+        raise HTTPException(status_code=500, detail="Error al actualizar ajustes")
+
 # ==================== GAMIFICATION ENDPOINTS ====================
 
 class AddBonesRequest(BaseModel):
