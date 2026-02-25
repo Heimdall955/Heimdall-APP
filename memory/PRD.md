@@ -42,6 +42,16 @@ Premium mobile app for monitoring dog health, providing education, and connectin
   - Achievements derived from stats (no extra DB table needed)
   - Level-up detection and notifications on lesson completion screen
 
+- Heimdall prompt updated (Feb 25, 2026) - 18 sections
+- Chat file upload & analysis (Feb 25, 2026)
+  - Photo upload: GPT-4o-mini vision analysis of pet images
+  - Video upload: frame extraction via ffmpeg + vision analysis (max 4s)
+  - PDF upload: Blood test / medical report analysis via PyMuPDF text extraction
+  - All stored in Supabase (chat_attachments table + Storage bucket)
+  - Frontend: 3 quick action cards + attachment menu modal + file picker
+  - Multi-language detection with langdetect library
+  - Validated: 7/7 backend tests passed
+
 ## P1 - Pending
 - Translate detailed education content (lesson internals still in Spanish)
 
