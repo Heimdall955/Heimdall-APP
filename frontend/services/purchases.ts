@@ -8,8 +8,8 @@ import Purchases, {
 } from 'react-native-purchases';
 
 // RevenueCat API Keys - In production, use environment variables
-const REVENUECAT_API_KEY_GOOGLE = process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_KEY || 'goog_demo_key';
-const REVENUECAT_API_KEY_APPLE = process.env.EXPO_PUBLIC_REVENUECAT_APPLE_KEY || 'appl_demo_key';
+const REVENUECAT_API_KEY_GOOGLE = process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_KEY || '';
+const REVENUECAT_API_KEY_APPLE = process.env.EXPO_PUBLIC_REVENUECAT_APPLE_KEY || '';
 
 export interface HeimdallSubscription {
   isProUser: boolean;
