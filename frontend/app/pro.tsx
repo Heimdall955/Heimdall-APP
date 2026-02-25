@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useSubscription } from '../hooks/useSubscription';
 import { Card, Button } from '../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 const proFeatures = [
@@ -14,37 +14,37 @@ const proFeatures = [
     icon: 'videocam',
     title: 'Análisis de Video IA',
     description: 'Sube videos de tu perro y recibe análisis de comportamiento',
-    color: Colors.primary,
+    color: colors.primary,
   },
   {
     icon: 'document-text',
     title: 'Informes Veterinarios',
     description: 'Genera informes completos para compartir con tu veterinario',
-    color: Colors.info,
+    color: colors.info,
   },
   {
     icon: 'chatbubbles',
     title: 'Chat Ilimitado con Hani',
     description: 'Sin límite de mensajes con tu asistente IA',
-    color: Colors.accentEducation,
+    color: colors.accentEducation,
   },
   {
     icon: 'analytics',
     title: 'Análisis Avanzado',
     description: 'Gráficos detallados de salud y comportamiento',
-    color: Colors.success,
+    color: colors.success,
   },
   {
     icon: 'cloud-upload',
     title: 'Backup en la Nube',
     description: 'Todos tus datos seguros y sincronizados',
-    color: Colors.accent,
+    color: colors.accent,
   },
   {
     icon: 'people',
     title: 'Manada Familiar',
     description: 'Invita hasta 5 miembros a gestionar tu perro',
-    color: Colors.error,
+    color: colors.error,
   },
 ];
 
@@ -69,7 +69,7 @@ export default function ProScreen() {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.successContainer}>
           <View style={styles.successIcon}>
-            <Ionicons name="checkmark-circle" size={80} color={Colors.success} />
+            <Ionicons name="checkmark-circle" size={80} color={colors.success} />
           </View>
           <Text style={styles.successTitle}>¡Ya eres PRO!</Text>
           <Text style={styles.successText}>
@@ -135,20 +135,22 @@ export default function ProScreen() {
   const monthlyPackage = packages.find(pkg => pkg.packageType === 'MONTHLY');
   const annualPackage = packages.find(pkg => pkg.packageType === 'ANNUAL');
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-            <Ionicons name="close" size={28} color={Colors.white} />
+            <Ionicons name="close" size={28} color={colors.white} />
           </TouchableOpacity>
         </View>
 
         {/* Simulated Mode Banner */}
         {isSimulated && (
           <View style={styles.demoBanner}>
-            <Ionicons name="information-circle" size={20} color={Colors.accent} />
+            <Ionicons name="information-circle" size={20} color={colors.accent} />
             <Text style={styles.demoBannerText}>
               Modo demo - Configura RevenueCat para compras reales
             </Text>
@@ -158,7 +160,7 @@ export default function ProScreen() {
         {/* Hero Section */}
         <View style={styles.hero}>
           <View style={styles.proBadge}>
-            <Ionicons name="diamond" size={32} color={Colors.white} />
+            <Ionicons name="diamond" size={32} color={colors.white} />
           </View>
           <Text style={styles.heroTitle}>Heimdall PRO</Text>
           <Text style={styles.heroSubtitle}>Desbloquea todo el potencial de Heimdall</Text>
@@ -189,7 +191,7 @@ export default function ProScreen() {
           
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={Colors.primary} />
+              <ActivityIndicator size="large" color={colors.primary} />
               <Text style={styles.loadingText}>Cargando planes...</Text>
             </View>
           ) : (
@@ -215,7 +217,7 @@ export default function ProScreen() {
                   selectedPlan === 'monthly' && styles.radioCircleSelected,
                 ]}>
                   {selectedPlan === 'monthly' && (
-                    <Ionicons name="checkmark" size={16} color={Colors.white} />
+                    <Ionicons name="checkmark" size={16} color={colors.white} />
                   )}
                 </View>
               </TouchableOpacity>
@@ -250,7 +252,7 @@ export default function ProScreen() {
                   selectedPlan === 'annual' && styles.radioCircleSelected,
                 ]}>
                   {selectedPlan === 'annual' && (
-                    <Ionicons name="checkmark" size={16} color={Colors.white} />
+                    <Ionicons name="checkmark" size={16} color={colors.white} />
                   )}
                 </View>
               </TouchableOpacity>
@@ -275,7 +277,7 @@ export default function ProScreen() {
             disabled={restoring}
           >
             {restoring ? (
-              <ActivityIndicator size="small" color={Colors.primary} />
+              <ActivityIndicator size="small" color={colors.primary} />
             ) : (
               <Text style={styles.restoreButtonText}>Restaurar compras</Text>
             )}
@@ -289,7 +291,7 @@ export default function ProScreen() {
 
         {/* Guarantee */}
         <View style={styles.guaranteeCard}>
-          <Ionicons name="shield-checkmark" size={32} color={Colors.success} />
+          <Ionicons name="shield-checkmark" size={32} color={colors.success} />
           <View style={styles.guaranteeContent}>
             <Text style={styles.guaranteeTitle}>Garantía de 7 días</Text>
             <Text style={styles.guaranteeText}>
@@ -303,7 +305,7 @@ export default function ProScreen() {
           <Text style={styles.paymentTitle}>Pago seguro con</Text>
           <View style={styles.paymentIcons}>
             <View style={styles.paymentIcon}>
-              <Ionicons name="logo-google" size={24} color={Colors.white} />
+              <Ionicons name="logo-google" size={24} color={colors.white} />
             </View>
             <Text style={styles.paymentText}>Google Play</Text>
           </View>
@@ -319,10 +321,10 @@ export default function ProScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: C.backgroundDark,
   },
   scrollView: {
     flex: 1,
@@ -347,7 +349,7 @@ const styles = StyleSheet.create({
   demoBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accent + '20',
+    backgroundColor: C.accent + '20',
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     marginBottom: Spacing.md,
@@ -356,7 +358,7 @@ const styles = StyleSheet.create({
   demoBannerText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: Colors.accent,
+    color: C.accent,
   },
   successContainer: {
     flex: 1,
@@ -370,7 +372,7 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: FontSizes.xxxl,
     fontWeight: '800',
-    color: Colors.white,
+    color: C.white,
     marginBottom: Spacing.md,
   },
   successText: {
@@ -390,7 +392,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Colors.accent,
+    backgroundColor: C.accent,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.md,
@@ -398,7 +400,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: FontSizes.hero,
     fontWeight: '800',
-    color: Colors.white,
+    color: C.white,
     marginBottom: Spacing.xs,
   },
   heroSubtitle: {
@@ -412,7 +414,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
     marginBottom: Spacing.lg,
   },
   featuresGrid: {
@@ -439,7 +441,7 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
     marginBottom: 4,
   },
   featureDescription: {
@@ -474,7 +476,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   planCardSelected: {
-    borderColor: Colors.primary,
+    borderColor: C.primary,
   },
   planCardPopular: {
     backgroundColor: 'rgba(0,191,166,0.15)',
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingVertical: 4,
     paddingHorizontal: Spacing.sm,
     borderBottomLeftRadius: BorderRadius.sm,
@@ -491,12 +493,12 @@ const styles = StyleSheet.create({
   popularText: {
     fontSize: FontSizes.xs,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   planName: {
     fontSize: FontSizes.lg,
     fontWeight: '600',
-    color: Colors.white,
+    color: C.white,
     marginBottom: Spacing.sm,
   },
   priceRow: {
@@ -506,7 +508,7 @@ const styles = StyleSheet.create({
   planPrice: {
     fontSize: FontSizes.xxxl,
     fontWeight: '800',
-    color: Colors.white,
+    color: C.white,
   },
   planPeriod: {
     fontSize: FontSizes.md,
@@ -514,7 +516,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   savingsBadge: {
-    backgroundColor: Colors.accent,
+    backgroundColor: C.accent,
     paddingVertical: 4,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
@@ -524,7 +526,7 @@ const styles = StyleSheet.create({
   savingsText: {
     fontSize: FontSizes.xs,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   radioCircle: {
     position: 'absolute',
@@ -539,8 +541,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioCircleSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: C.primary,
+    borderColor: C.primary,
   },
   ctaSection: {
     marginBottom: Spacing.xl,
@@ -554,7 +556,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   restoreButtonText: {
-    color: Colors.primary,
+    color: C.primary,
     fontSize: FontSizes.md,
     fontWeight: '600',
   },
@@ -564,7 +566,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   termsLink: {
-    color: Colors.primary,
+    color: C.primary,
     textDecorationLine: 'underline',
   },
   guaranteeCard: {
@@ -582,7 +584,7 @@ const styles = StyleSheet.create({
   guaranteeTitle: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   guaranteeText: {
     fontSize: FontSizes.sm,
@@ -612,7 +614,7 @@ const styles = StyleSheet.create({
   },
   paymentText: {
     fontSize: FontSizes.md,
-    color: Colors.white,
+    color: C.white,
     fontWeight: '500',
   },
   testimonialSection: {

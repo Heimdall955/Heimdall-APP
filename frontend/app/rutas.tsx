@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import axios from 'axios';
 import { SecureStore } from '../utils/secureStore';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button } from '../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -26,7 +26,7 @@ interface Route {
 export default function RutasScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -198,13 +198,15 @@ export default function RutasScreen() {
     return `${Math.round(meters)} m`;
   };
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerText}>
             <Text style={styles.title}>Rutas GPS</Text>
@@ -216,7 +218,7 @@ export default function RutasScreen() {
         {location && (
           <Card style={styles.locationCard} variant="elevated">
             <View style={styles.locationHeader}>
-              <Ionicons name="location" size={24} color={Colors.primary} />
+              <Ionicons name="location" size={24} color={colors.primary} />
               <View style={styles.locationInfo}>
                 <Text style={styles.locationTitle}>Ubicación actual</Text>
                 <Text style={styles.locationCoords}>
@@ -255,14 +257,14 @@ export default function RutasScreen() {
                 title="Detener y Guardar"
                 onPress={stopTracking}
                 variant="secondary"
-                icon={<Ionicons name="stop" size={20} color={Colors.white} />}
+                icon={<Ionicons name="stop" size={20} color={colors.white} />}
               />
             </>
           ) : (
             <>
               <View style={styles.startContainer}>
                 <View style={styles.startIcon}>
-                  <Ionicons name="walk" size={48} color={Colors.white} />
+                  <Ionicons name="walk" size={48} color={colors.white} />
                 </View>
                 <Text style={styles.startTitle}>¡Vamos a pasear!</Text>
                 <Text style={styles.startSubtitle}>Graba la ruta de tu paseo con {currentDog?.name}</Text>
@@ -271,7 +273,7 @@ export default function RutasScreen() {
               <Button
                 title="Iniciar Paseo"
                 onPress={startTracking}
-                icon={<Ionicons name="play" size={20} color={Colors.white} />}
+                icon={<Ionicons name="play" size={20} color={colors.white} />}
               />
             </>
           )}
@@ -283,7 +285,7 @@ export default function RutasScreen() {
           
           {routes.length === 0 ? (
             <Card style={styles.emptyCard}>
-              <Ionicons name="map-outline" size={48} color={Colors.gray} />
+              <Ionicons name="map-outline" size={48} color={colors.gray} />
               <Text style={styles.emptyText}>Aún no tienes rutas guardadas</Text>
               <Text style={styles.emptyHint}>Inicia un paseo para guardar tu primera ruta</Text>
             </Card>
@@ -292,7 +294,7 @@ export default function RutasScreen() {
               <Card key={route.id} style={styles.routeCard} variant="elevated">
                 <View style={styles.routeHeader}>
                   <View style={styles.routeIcon}>
-                    <Ionicons name="navigate" size={24} color={Colors.primary} />
+                    <Ionicons name="navigate" size={24} color={colors.primary} />
                   </View>
                   <View style={styles.routeInfo}>
                     <Text style={styles.routeName}>{route.name}</Text>
@@ -301,11 +303,11 @@ export default function RutasScreen() {
                 </View>
                 <View style={styles.routeStats}>
                   <View style={styles.routeStat}>
-                    <Ionicons name="resize" size={16} color={Colors.textSecondary} />
+                    <Ionicons name="resize" size={16} color={colors.textSecondary} />
                     <Text style={styles.routeStatText}>{formatDistance(route.distance)}</Text>
                   </View>
                   <View style={styles.routeStat}>
-                    <Ionicons name="time" size={16} color={Colors.textSecondary} />
+                    <Ionicons name="time" size={16} color={colors.textSecondary} />
                     <Text style={styles.routeStatText}>{formatDuration(route.duration)}</Text>
                   </View>
                 </View>
@@ -318,10 +320,10 @@ export default function RutasScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   scrollView: {
     flex: 1,
@@ -346,11 +348,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSizes.xxl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   subtitle: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   locationCard: {
     marginBottom: Spacing.md,
@@ -366,18 +368,18 @@ const styles = StyleSheet.create({
   locationTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   locationCoords: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   trackingCard: {
     marginBottom: Spacing.lg,
   },
   trackingCardActive: {
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: C.primary,
   },
   trackingHeader: {
     flexDirection: 'row',
@@ -389,19 +391,19 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: Colors.error,
+    backgroundColor: C.error,
   },
   trackingTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: Spacing.lg,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
     borderRadius: BorderRadius.md,
   },
   statBox: {
@@ -410,11 +412,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: FontSizes.xxl,
     fontWeight: '700',
-    color: Colors.primary,
+    color: C.primary,
   },
   statLabel: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   startContainer: {
     alignItems: 'center',
@@ -424,7 +426,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.md,
@@ -432,11 +434,11 @@ const styles = StyleSheet.create({
   startTitle: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   startSubtitle: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     textAlign: 'center',
   },
   section: {
@@ -445,7 +447,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.md,
   },
   emptyCard: {
@@ -455,12 +457,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
     marginTop: Spacing.md,
   },
   emptyHint: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     textAlign: 'center',
   },
   routeCard: {
@@ -475,7 +477,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: C.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -486,18 +488,18 @@ const styles = StyleSheet.create({
   routeName: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   routeDate: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   routeStats: {
     flexDirection: 'row',
     gap: Spacing.lg,
     paddingTop: Spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: Colors.grayLight,
+    borderTopColor: C.grayLight,
   },
   routeStat: {
     flexDirection: 'row',
@@ -506,6 +508,6 @@ const styles = StyleSheet.create({
   },
   routeStatText: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Image, Dimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { Card, Button, ProgressCircle } from '../../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getTrainingPrograms, getExercises, getGames } from '../../data/educationContent';
 
@@ -20,7 +20,7 @@ export default function EducacionScreen() {
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
   const { t, language } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   // Get translated content
   const trainingPrograms = getTrainingPrograms(language as 'es' | 'en' | 'it');
   const exercises = getExercises(language as 'es' | 'en' | 'it');
@@ -92,6 +92,8 @@ export default function EducacionScreen() {
     }
   };
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
@@ -99,14 +101,14 @@ export default function EducacionScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }
       >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.userAvatar}>
-              <Ionicons name="paw" size={20} color={Colors.white} />
+              <Ionicons name="paw" size={20} color={colors.white} />
             </View>
             <View>
               <Text style={styles.headerTitle}>Heimdall</Text>
@@ -158,17 +160,17 @@ export default function EducacionScreen() {
               <Text style={styles.sessionTitle}>{t('thePerfectCall')}</Text>
               <View style={styles.sessionMeta}>
                 <View style={styles.sessionMetaItem}>
-                  <Ionicons name="time-outline" size={14} color={Colors.white} />
+                  <Ionicons name="time-outline" size={14} color={colors.white} />
                   <Text style={styles.sessionMetaText}>10 {t('min')}</Text>
                 </View>
                 <View style={styles.sessionMetaItem}>
-                  <Ionicons name="paw" size={14} color={Colors.white} />
+                  <Ionicons name="paw" size={14} color={colors.white} />
                   <Text style={styles.sessionMetaText}>+50 XP</Text>
                 </View>
               </View>
             </View>
             <View style={styles.playButton}>
-              <Ionicons name="play" size={28} color={Colors.white} />
+              <Ionicons name="play" size={28} color={colors.white} />
             </View>
           </TouchableOpacity>
         </View>
@@ -182,7 +184,7 @@ export default function EducacionScreen() {
               <Text style={styles.progressXp}>{stats.xp} XP</Text>
             </View>
             <View style={styles.streakBadge}>
-              <Ionicons name="flash" size={16} color={Colors.accent} />
+              <Ionicons name="flash" size={16} color={colors.accent} />
               <Text style={styles.streakText}>{stats.streak} {t('days')}</Text>
             </View>
           </View>
@@ -272,7 +274,7 @@ export default function EducacionScreen() {
                   </View>
                   <Text style={styles.exerciseSubtitle}>{exercise.subtitle}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+                <Ionicons name="chevron-forward" size={20} color={colors.gray} />
               </TouchableOpacity>
             ))}
           </Card>
@@ -311,10 +313,10 @@ export default function EducacionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   scrollView: {
     flex: 1,
@@ -337,23 +339,23 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   headerSubtitle: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   bonesButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
@@ -365,17 +367,17 @@ const styles = StyleSheet.create({
   bonesText: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.accent,
+    color: C.accent,
   },
   rewardCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardHighlight,
+    backgroundColor: C.cardHighlight,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.primary + '30',
+    borderColor: C.primary + '30',
   },
   rewardIcon: {
     fontSize: 24,
@@ -387,16 +389,16 @@ const styles = StyleSheet.create({
   rewardTitle: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   rewardSubtitle: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   rewardLink: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.primary,
+    color: C.primary,
   },
   section: {
     marginBottom: Spacing.lg,
@@ -410,10 +412,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   priorityBadge: {
-    backgroundColor: Colors.error + '20',
+    backgroundColor: C.error + '20',
     paddingVertical: 4,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
@@ -421,7 +423,7 @@ const styles = StyleSheet.create({
   priorityText: {
     fontSize: FontSizes.xs,
     fontWeight: '700',
-    color: Colors.error,
+    color: C.error,
   },
   sessionCard: {
     borderRadius: BorderRadius.xl,
@@ -443,7 +445,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sessionBadge: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingVertical: 4,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
@@ -451,12 +453,12 @@ const styles = StyleSheet.create({
   sessionBadgeText: {
     fontSize: FontSizes.xs,
     fontWeight: '600',
-    color: Colors.white,
+    color: C.white,
   },
   sessionXpBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accent,
+    backgroundColor: C.accent,
     paddingVertical: 4,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
@@ -468,7 +470,7 @@ const styles = StyleSheet.create({
   sessionXpText: {
     fontSize: FontSizes.xs,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   sessionContent: {
     position: 'absolute',
@@ -478,7 +480,7 @@ const styles = StyleSheet.create({
   sessionTitle: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
     textShadowColor: 'rgba(0,0,0,0.5)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -495,7 +497,7 @@ const styles = StyleSheet.create({
   },
   sessionMetaText: {
     fontSize: FontSizes.sm,
-    color: Colors.white,
+    color: C.white,
     fontWeight: '500',
   },
   playButton: {
@@ -505,10 +507,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.lg,
+    ...S.lg,
   },
   progressCard: {
     marginBottom: Spacing.lg,
@@ -522,22 +524,22 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   progressLevel: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginTop: 2,
   },
   progressXp: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.accent,
+    color: C.accent,
   },
   streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accent + '20',
+    backgroundColor: C.accent + '20',
     paddingVertical: 6,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
@@ -546,7 +548,7 @@ const styles = StyleSheet.create({
   streakText: {
     fontSize: FontSizes.sm,
     fontWeight: '700',
-    color: Colors.accent,
+    color: C.accent,
   },
   progressBarContainer: {
     flexDirection: 'row',
@@ -557,22 +559,22 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 10,
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
     borderRadius: 5,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     borderRadius: 5,
   },
   progressTarget: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   progressHint: {
     fontSize: FontSizes.sm,
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '500',
     marginBottom: Spacing.md,
   },
@@ -581,7 +583,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.grayLight,
+    borderTopColor: C.grayLight,
   },
   statItem: {
     alignItems: 'center',
@@ -589,14 +591,14 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: FontSizes.xxl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   statLabel: {
     fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   nextButton: {
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
@@ -605,7 +607,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.accent,
+    color: C.accent,
   },
   programsGrid: {
     flexDirection: 'row',
@@ -615,9 +617,9 @@ const styles = StyleSheet.create({
   programCard: {
     width: (width - Spacing.md * 3) / 2,
     borderRadius: BorderRadius.xl,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     overflow: 'hidden',
-    ...Shadows.md,
+    ...S.md,
   },
   programImage: {
     width: '100%',
@@ -634,7 +636,7 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: FontSizes.xs,
     fontWeight: '600',
-    color: Colors.white,
+    color: C.white,
   },
   xpBadge: {
     position: 'absolute',
@@ -642,7 +644,7 @@ const styles = StyleSheet.create({
     right: Spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accent,
+    backgroundColor: C.accent,
     paddingVertical: 4,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.sm,
@@ -654,7 +656,7 @@ const styles = StyleSheet.create({
   xpText: {
     fontSize: FontSizes.xs,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   programContent: {
     padding: Spacing.md,
@@ -662,16 +664,16 @@ const styles = StyleSheet.create({
   programTitle: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   programSubtitle: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   seeAllText: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.primary,
+    color: C.primary,
   },
   exerciseItem: {
     flexDirection: 'row',
@@ -680,7 +682,7 @@ const styles = StyleSheet.create({
   },
   exerciseItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.grayLight,
+    borderBottomColor: C.grayLight,
   },
   exerciseIcon: {
     width: 48,
@@ -701,7 +703,7 @@ const styles = StyleSheet.create({
   exerciseTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   exerciseXp: {
     flexDirection: 'row',
@@ -714,11 +716,11 @@ const styles = StyleSheet.create({
   exerciseXpText: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.accent,
+    color: C.accent,
   },
   exerciseSubtitle: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   gamesRow: {
     flexDirection: 'row',
@@ -728,9 +730,9 @@ const styles = StyleSheet.create({
   gameCard: {
     width: 160,
     borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     overflow: 'hidden',
-    ...Shadows.sm,
+    ...S.sm,
   },
   gameImage: {
     width: '100%',
@@ -742,7 +744,7 @@ const styles = StyleSheet.create({
   gameTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   gameMeta: {
     flexDirection: 'row',
@@ -751,14 +753,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   difficultyBadge: {
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: C.primary + '20',
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 4,
   },
   difficultyText: {
     fontSize: FontSizes.xs,
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '500',
   },
   gameXp: {
@@ -768,6 +770,6 @@ const styles = StyleSheet.create({
   gameXpText: {
     fontSize: FontSizes.xs,
     fontWeight: '600',
-    color: Colors.accent,
+    color: C.accent,
   },
 });

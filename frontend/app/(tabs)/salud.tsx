@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, ProgressCircle } from '../../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -24,11 +24,11 @@ interface MedicalEvent {
 }
 
 const eventTypeConfig: Record<string, { icon: string; color: string }> = {
-  vaccine: { icon: 'medical', color: Colors.success },
-  checkup: { icon: 'clipboard', color: Colors.info },
-  deworming: { icon: 'bug', color: Colors.warning },
-  medication: { icon: 'medkit', color: Colors.accentEducation },
-  note: { icon: 'document-text', color: Colors.gray },
+  vaccine: { icon: 'medical', color: colors.success },
+  checkup: { icon: 'clipboard', color: colors.info },
+  deworming: { icon: 'bug', color: colors.warning },
+  medication: { icon: 'medkit', color: colors.accentEducation },
+  note: { icon: 'document-text', color: colors.gray },
 };
 
 export default function SaludScreen() {
@@ -36,7 +36,7 @@ export default function SaludScreen() {
   const { currentDog } = useAuth();
   const { isConnected, biometricData, startSimulation, stopSimulation } = useBluetooth();
   const { t } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'24h' | '7d'>('24h');
   const [medicalEvents, setMedicalEvents] = useState<MedicalEvent[]>([]);
@@ -106,6 +106,8 @@ export default function SaludScreen() {
     }
   };
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
@@ -113,7 +115,7 @@ export default function SaludScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }
       >
         {/* Header */}
@@ -123,7 +125,7 @@ export default function SaludScreen() {
             <Text style={styles.subtitle}>{t('realTimeMonitoring')}</Text>
           </View>
           <TouchableOpacity style={styles.addButton} onPress={() => router.push('/historial-medico')}>
-            <Ionicons name="add" size={24} color={Colors.white} />
+            <Ionicons name="add" size={24} color={colors.white} />
           </TouchableOpacity>
         </View>
 
@@ -140,7 +142,7 @@ export default function SaludScreen() {
               <Ionicons 
                 name={biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} 
                 size={20} 
-                color={biometricData.battery > 20 ? Colors.success : Colors.error} 
+                color={biometricData.battery > 20 ? colors.success : colors.error} 
               />
               <Text style={styles.batteryText}>{isConnected ? biometricData.battery : '--'}%</Text>
             </View>
@@ -152,7 +154,7 @@ export default function SaludScreen() {
             <Ionicons 
               name={isConnected ? 'pause' : 'play'} 
               size={20} 
-              color={isConnected ? Colors.text : Colors.white} 
+              color={isConnected ? colors.text : colors.white} 
             />
             <Text style={[styles.sensorsButtonText, !isConnected && styles.sensorsButtonTextActive]}>
               {isConnected ? t('stop') : t('connectVest')}
@@ -169,7 +171,7 @@ export default function SaludScreen() {
                 <ProgressCircle 
                   percentage={healthMetrics.physical} 
                   size={80} 
-                  color={Colors.primary}
+                  color={colors.primary}
                   label={t('activity')}
                 />
               </View>
@@ -177,7 +179,7 @@ export default function SaludScreen() {
                 <ProgressCircle 
                   percentage={healthMetrics.sleep} 
                   size={80} 
-                  color={Colors.info}
+                  color={colors.info}
                   label={t('sleeping')}
                 />
               </View>
@@ -185,7 +187,7 @@ export default function SaludScreen() {
                 <ProgressCircle 
                   percentage={healthMetrics.mental} 
                   size={80} 
-                  color={Colors.accentEducation}
+                  color={colors.accentEducation}
                   label={t('stress')}
                 />
               </View>
@@ -193,7 +195,7 @@ export default function SaludScreen() {
                 <ProgressCircle 
                   percentage={healthMetrics.nutrition} 
                   size={80} 
-                  color={Colors.success}
+                  color={colors.success}
                   label={t('normal')}
                 />
               </View>
@@ -222,7 +224,7 @@ export default function SaludScreen() {
           </View>
           <Card variant="elevated">
             <View style={styles.cardioHeader}>
-              <Ionicons name="heart" size={24} color={Colors.error} />
+              <Ionicons name="heart" size={24} color={colors.error} />
               <View style={styles.cardioInfo}>
                 <Text style={styles.cardioValue}>
                   {heartRateData[heartRateData.length - 1]} {t('bpm').toUpperCase()}
@@ -270,12 +272,12 @@ export default function SaludScreen() {
                     <Text style={styles.eventTitle}>{event.title}</Text>
                     <Text style={styles.eventDate}>{new Date(event.date).toLocaleDateString('es-ES')}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+                  <Ionicons name="chevron-forward" size={20} color={colors.gray} />
                 </View>
               ))
             ) : (
               <TouchableOpacity style={styles.emptyEvents} onPress={() => router.push('/historial-medico')}>
-                <Ionicons name="add-circle-outline" size={32} color={Colors.primary} />
+                <Ionicons name="add-circle-outline" size={32} color={colors.primary} />
                 <Text style={styles.emptyEventsText}>{t('addEvent')}</Text>
               </TouchableOpacity>
             )}
@@ -286,10 +288,10 @@ export default function SaludScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   scrollView: {
     flex: 1,
@@ -307,20 +309,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSizes.xxl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   subtitle: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   addButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.md,
+    ...S.md,
   },
   sensorsCard: {
     marginBottom: Spacing.lg,
@@ -340,15 +342,15 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: Colors.gray,
+    backgroundColor: C.gray,
   },
   sensorActive: {
-    backgroundColor: Colors.success,
+    backgroundColor: C.success,
   },
   sensorsTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   batteryContainer: {
     flexDirection: 'row',
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
   },
   batteryText: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   sensorsButton: {
     flexDirection: 'row',
@@ -366,18 +368,18 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
   },
   sensorsButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
   },
   sensorsButtonText: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   sensorsButtonTextActive: {
-    color: Colors.white,
+    color: C.white,
   },
   section: {
     marginBottom: Spacing.lg,
@@ -391,12 +393,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.sm,
   },
   viewAllText: {
     fontSize: FontSizes.sm,
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '600',
   },
   healthGrid: {
@@ -412,7 +414,7 @@ const styles = StyleSheet.create({
   },
   periodSelector: {
     flexDirection: 'row',
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
     borderRadius: BorderRadius.sm,
     padding: 2,
   },
@@ -422,14 +424,14 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
   },
   periodButtonActive: {
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
   },
   periodText: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   periodTextActive: {
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '600',
   },
   cardioHeader: {
@@ -444,11 +446,11 @@ const styles = StyleSheet.create({
   cardioValue: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   cardioLabel: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   chartContainer: {
     flexDirection: 'row',
@@ -460,13 +462,13 @@ const styles = StyleSheet.create({
   chartBar: {
     flex: 1,
     height: '100%',
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
     borderRadius: 4,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
   chartBarFill: {
-    backgroundColor: Colors.error + '60',
+    backgroundColor: C.error + '60',
     borderRadius: 4,
   },
   chartLabels: {
@@ -475,7 +477,7 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   eventItem: {
     flexDirection: 'row',
@@ -484,7 +486,7 @@ const styles = StyleSheet.create({
   },
   eventItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.grayLight,
+    borderBottomColor: C.grayLight,
   },
   eventIcon: {
     width: 44,
@@ -500,11 +502,11 @@ const styles = StyleSheet.create({
   eventTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   eventDate: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   emptyEvents: {
     alignItems: 'center',
@@ -513,7 +515,7 @@ const styles = StyleSheet.create({
   },
   emptyEventsText: {
     fontSize: FontSizes.md,
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '600',
   },
 });

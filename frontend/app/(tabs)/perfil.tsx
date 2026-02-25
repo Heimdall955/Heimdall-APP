@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, 
   RefreshControl, Modal, TextInput, Image, Platform, Share, Switch
@@ -13,7 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { SecureStore } from '../../utils/secureStore';
 import { Card, Button } from '../../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -34,7 +34,7 @@ interface UserSettings {
   achievement_alerts: boolean; pack_alerts: boolean; weight_unit: string; temperature_unit: string;
 }
 
-const PLACEHOLDER_COLORS = [Colors.primary, Colors.accentOrange, Colors.accentPurple, '#4ECDC4', '#FF6B6B'];
+const PLACEHOLDER_COLORS = [colors.primary, colors.accentOrange, colors.accentPurple, '#4ECDC4', '#FF6B6B'];
 
 export default function PerfilScreen() {
   const router = useRouter();
@@ -212,6 +212,8 @@ export default function PerfilScreen() {
     { id: 'logout', icon: 'log-out-outline', label: t('logout'), onPress: handleLogout, danger: true },
   ];
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}
@@ -223,16 +225,16 @@ export default function PerfilScreen() {
           <View style={styles.profileHeader}>
             <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} data-testid="dog-photo-btn">
               {dogImage ? <Image source={{ uri: dogImage }} style={styles.avatarImage} /> : (
-                <View style={styles.avatar}><Ionicons name="paw" size={40} color={Colors.white} /></View>
+                <View style={styles.avatar}><Ionicons name="paw" size={40} color={colors.white} /></View>
               )}
-              <View style={styles.cameraButton}><Ionicons name="camera" size={16} color={Colors.white} /></View>
+              <View style={styles.cameraButton}><Ionicons name="camera" size={16} color={colors.white} /></View>
             </TouchableOpacity>
             <View style={styles.profileInfo}>
               <Text style={styles.dogName}>{currentDog?.name || 'Tu perro'}</Text>
               <Text style={styles.ownerName}>de {user?.name}</Text>
             </View>
             <TouchableOpacity style={styles.editButton} onPress={() => setShowEditModal(true)} data-testid="edit-profile-btn">
-              <Ionicons name="create-outline" size={20} color={Colors.primary} />
+              <Ionicons name="create-outline" size={20} color={colors.primary} />
             </TouchableOpacity>
           </View>
           <View style={styles.statsGrid}>
@@ -243,7 +245,7 @@ export default function PerfilScreen() {
             <View style={styles.statItem}><Text style={styles.statValue}>{currentDog?.breed || 'Mixto'}</Text><Text style={styles.statLabel}>{t('breed')}</Text></View>
           </View>
           {currentDog?.chip_id && (
-            <View style={styles.chipContainer}><Ionicons name="hardware-chip" size={18} color={Colors.primary} /><Text style={styles.chipText}>{t('chip')}: {currentDog.chip_id}</Text></View>
+            <View style={styles.chipContainer}><Ionicons name="hardware-chip" size={18} color={colors.primary} /><Text style={styles.chipText}>{t('chip')}: {currentDog.chip_id}</Text></View>
           )}
         </Card>
 
@@ -252,7 +254,7 @@ export default function PerfilScreen() {
           <Text style={styles.sectionTitle}>{t('myRewards')}</Text>
           <Card variant="elevated" style={{ marginBottom: 0 }}>
             <View style={styles.gamLevelRow}>
-              <View style={styles.gamLevelIcon}><Ionicons name="shield-checkmark" size={28} color={Colors.primary} /></View>
+              <View style={styles.gamLevelIcon}><Ionicons name="shield-checkmark" size={28} color={colors.primary} /></View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.gamLevelText}>{t('level')} {gamification?.level || 1}</Text>
                 <View style={styles.gamProgressTrack}><View style={[styles.gamProgressFill, { width: `${gamification ? (gamification.level_progress / gamification.level_target) * 100 : 0}%` }]} /></View>
@@ -262,9 +264,9 @@ export default function PerfilScreen() {
             <View style={styles.gamStatsGrid}>
               <View style={styles.gamStatItem}><Text style={{ fontSize: 22 }}>🦴</Text><Text style={styles.gamStatValue}>{gamification?.bones || 0}</Text><Text style={styles.gamStatLabel}>{t('bones')}</Text></View>
               <View style={styles.gamStatDivider} />
-              <View style={styles.gamStatItem}><Ionicons name="flame" size={22} color={Colors.accentOrange} /><Text style={styles.gamStatValue}>{gamification?.streak_days || 0}</Text><Text style={styles.gamStatLabel}>{t('streak')}</Text></View>
+              <View style={styles.gamStatItem}><Ionicons name="flame" size={22} color={colors.accentOrange} /><Text style={styles.gamStatValue}>{gamification?.streak_days || 0}</Text><Text style={styles.gamStatLabel}>{t('streak')}</Text></View>
               <View style={styles.gamStatDivider} />
-              <View style={styles.gamStatItem}><Ionicons name="school" size={22} color={Colors.accentPurple} /><Text style={styles.gamStatValue}>{gamification?.exercises_completed || 0}</Text><Text style={styles.gamStatLabel}>{t('lessons')}</Text></View>
+              <View style={styles.gamStatItem}><Ionicons name="school" size={22} color={colors.accentPurple} /><Text style={styles.gamStatValue}>{gamification?.exercises_completed || 0}</Text><Text style={styles.gamStatLabel}>{t('lessons')}</Text></View>
             </View>
           </Card>
         </View>
@@ -276,10 +278,10 @@ export default function PerfilScreen() {
             <View style={styles.achGrid}>
               {achievements.map((ach) => (
                 <View key={ach.id} style={[styles.achItem, !ach.unlocked && styles.achItemLocked]}>
-                  <View style={[styles.achIconCircle, ach.unlocked ? { backgroundColor: Colors.primary } : { backgroundColor: Colors.grayLight }]}>
-                    <Ionicons name={ach.icon as any} size={22} color={ach.unlocked ? Colors.white : Colors.gray} />
+                  <View style={[styles.achIconCircle, ach.unlocked ? { backgroundColor: colors.primary } : { backgroundColor: colors.grayLight }]}>
+                    <Ionicons name={ach.icon as any} size={22} color={ach.unlocked ? colors.white : colors.gray} />
                   </View>
-                  <Text style={[styles.achName, !ach.unlocked && { color: Colors.gray }]} numberOfLines={2}>{ach.name}</Text>
+                  <Text style={[styles.achName, !ach.unlocked && { color: colors.gray }]} numberOfLines={2}>{ach.name}</Text>
                   <Text style={styles.achBones}>+{ach.bones_reward} 🦴</Text>
                 </View>
               ))}
@@ -293,27 +295,27 @@ export default function PerfilScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('myPack')}</Text>
             <TouchableOpacity style={styles.inviteBtn} onPress={() => setShowInviteModal(true)} data-testid="invite-btn">
-              <Ionicons name="person-add" size={16} color={Colors.white} />
+              <Ionicons name="person-add" size={16} color={colors.white} />
               <Text style={styles.inviteBtnText}>{t('invite')}</Text>
             </TouchableOpacity>
           </View>
           <Card variant="elevated">
             {/* Owner */}
             <View style={styles.packMember}>
-              <View style={[styles.memberAvatar, { backgroundColor: Colors.primary }]}><Ionicons name="person" size={20} color={Colors.white} /></View>
+              <View style={[styles.memberAvatar, { backgroundColor: colors.primary }]}><Ionicons name="person" size={20} color={colors.white} /></View>
               <View style={styles.memberInfo}><Text style={styles.memberName}>{user?.name}</Text><Text style={styles.memberRole}>{t('mainOwner')}</Text></View>
-              <View style={styles.ownerBadge}><Ionicons name="star" size={14} color={Colors.accent} /></View>
+              <View style={styles.ownerBadge}><Ionicons name="star" size={14} color={colors.accent} /></View>
             </View>
             
             {/* Friends */}
             {friends.map((f, i) => (
               <View key={f.id} style={[styles.packMember, { marginTop: Spacing.sm }]}>
                 <View style={[styles.memberAvatar, { backgroundColor: PLACEHOLDER_COLORS[(i + 1) % 5] }]}>
-                  <Text style={{ color: Colors.white, fontWeight: '700', fontSize: 16 }}>{f.name.charAt(0).toUpperCase()}</Text>
+                  <Text style={{ color: colors.white, fontWeight: '700', fontSize: 16 }}>{f.name.charAt(0).toUpperCase()}</Text>
                 </View>
                 <View style={styles.memberInfo}>
                   <Text style={styles.memberName}>{f.name}</Text>
-                  <Text style={[styles.memberRole, f.status === 'pending' && { color: Colors.accentOrange }]}>
+                  <Text style={[styles.memberRole, f.status === 'pending' && { color: colors.accentOrange }]}>
                     {f.status === 'pending' ? (language === 'en' ? 'Pending' : language === 'it' ? 'In attesa' : 'Pendiente') : (language === 'en' ? 'Member' : language === 'it' ? 'Membro' : 'Miembro')}
                   </Text>
                 </View>
@@ -323,11 +325,11 @@ export default function PerfilScreen() {
             {/* Empty friend slots */}
             {Array.from({ length: Math.max(0, 3 - friends.length) }).map((_, i) => (
               <TouchableOpacity key={`empty-${i}`} style={[styles.packMember, { marginTop: Spacing.sm }]} onPress={() => setShowInviteModal(true)}>
-                <View style={[styles.memberAvatar, { backgroundColor: Colors.grayLight, borderWidth: 2, borderColor: Colors.gray, borderStyle: 'dashed' }]}>
-                  <Ionicons name="add" size={20} color={Colors.gray} />
+                <View style={[styles.memberAvatar, { backgroundColor: colors.grayLight, borderWidth: 2, borderColor: colors.gray, borderStyle: 'dashed' }]}>
+                  <Ionicons name="add" size={20} color={colors.gray} />
                 </View>
                 <View style={styles.memberInfo}>
-                  <Text style={[styles.memberName, { color: Colors.gray }]}>{language === 'en' ? 'Invite a friend' : language === 'it' ? 'Invita un amico' : 'Invita a un amigo'}</Text>
+                  <Text style={[styles.memberName, { color: colors.gray }]}>{language === 'en' ? 'Invite a friend' : language === 'it' ? 'Invita un amico' : 'Invita a un amigo'}</Text>
                   <Text style={styles.memberRole}>+5 🦴</Text>
                 </View>
               </TouchableOpacity>
@@ -339,27 +341,27 @@ export default function PerfilScreen() {
         <View style={styles.section} data-testid="clinical-section">
           <Text style={styles.sectionTitle}>{t('clinicalFile')}</Text>
           <Card variant="elevated">
-            <View style={styles.clinicalRow}><Ionicons name="location-outline" size={20} color={Colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('country')}</Text><Text style={styles.clinicalValue}>{clinical.country || '--'}</Text></View>
-            <View style={styles.clinicalRow}><Ionicons name="medkit-outline" size={20} color={Colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('vet')}</Text><Text style={styles.clinicalValue}>{clinical.vet_name || t('notAssigned')}</Text></View>
-            <View style={styles.clinicalRow}><Ionicons name="alert-circle-outline" size={20} color={Colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('allergies')}</Text><Text style={styles.clinicalValue}>{clinical.allergies || t('noneRegistered')}</Text></View>
-            <View style={styles.clinicalRow}><Ionicons name="fitness-outline" size={20} color={Colors.textSecondary} /><Text style={styles.clinicalLabel}>{language === 'en' ? 'Neutered' : language === 'it' ? 'Sterilizzato' : 'Esterilizado'}</Text><Text style={styles.clinicalValue}>{clinical.neutered ? (language === 'en' ? 'Yes' : 'Sí') : 'No'}</Text></View>
-            <View style={styles.clinicalRow}><Ionicons name="medical-outline" size={20} color={Colors.textSecondary} /><Text style={styles.clinicalLabel}>{language === 'en' ? 'Medication' : language === 'it' ? 'Farmaci' : 'Medicación'}</Text><Text style={styles.clinicalValue}>{clinical.current_medication || '--'}</Text></View>
+            <View style={styles.clinicalRow}><Ionicons name="location-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('country')}</Text><Text style={styles.clinicalValue}>{clinical.country || '--'}</Text></View>
+            <View style={styles.clinicalRow}><Ionicons name="medkit-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('vet')}</Text><Text style={styles.clinicalValue}>{clinical.vet_name || t('notAssigned')}</Text></View>
+            <View style={styles.clinicalRow}><Ionicons name="alert-circle-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('allergies')}</Text><Text style={styles.clinicalValue}>{clinical.allergies || t('noneRegistered')}</Text></View>
+            <View style={styles.clinicalRow}><Ionicons name="fitness-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{language === 'en' ? 'Neutered' : language === 'it' ? 'Sterilizzato' : 'Esterilizado'}</Text><Text style={styles.clinicalValue}>{clinical.neutered ? (language === 'en' ? 'Yes' : 'Sí') : 'No'}</Text></View>
+            <View style={styles.clinicalRow}><Ionicons name="medical-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{language === 'en' ? 'Medication' : language === 'it' ? 'Farmaci' : 'Medicación'}</Text><Text style={styles.clinicalValue}>{clinical.current_medication || '--'}</Text></View>
             <TouchableOpacity style={styles.clinicalEdit} onPress={() => setShowClinicalModal(true)} data-testid="edit-clinical-btn">
               <Text style={styles.clinicalEditText}>{t('editClinicalFile')}</Text>
-              <Ionicons name="chevron-forward" size={18} color={Colors.primary} />
+              <Ionicons name="chevron-forward" size={18} color={colors.primary} />
             </TouchableOpacity>
           </Card>
         </View>
 
         {/* PRO Card */}
-        <Card style={[styles.profileCard, { backgroundColor: Colors.secondary }]} variant="elevated">
+        <Card style={[styles.profileCard, { backgroundColor: colors.secondary }]} variant="elevated">
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.md }}>
-            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' }}>
-              <Ionicons name="diamond" size={28} color={Colors.white} />
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="diamond" size={28} color={colors.white} />
             </View>
-            <View style={{ marginLeft: Spacing.md }}><Text style={{ fontSize: FontSizes.xl, fontWeight: '700', color: Colors.white }}>{t('goToPro')}</Text><Text style={{ fontSize: FontSizes.md, color: Colors.accent }}>1,99€/mes</Text></View>
+            <View style={{ marginLeft: Spacing.md }}><Text style={{ fontSize: FontSizes.xl, fontWeight: '700', color: colors.white }}>{t('goToPro')}</Text><Text style={{ fontSize: FontSizes.md, color: colors.accent }}>1,99€/mes</Text></View>
           </View>
-          <Button title={t('activatePro')} onPress={() => router.push('/pro')} style={{ backgroundColor: Colors.accent }} />
+          <Button title={t('activatePro')} onPress={() => router.push('/pro')} style={{ backgroundColor: colors.accent }} />
         </Card>
 
         {/* Menu */}
@@ -367,10 +369,10 @@ export default function PerfilScreen() {
           <Card variant="elevated">
             {menuItems.map((item, index) => (
               <TouchableOpacity key={item.id} style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]} onPress={item.onPress} data-testid={`menu-${item.id}`}>
-                <Ionicons name={item.icon as any} size={22} color={item.danger ? Colors.error : Colors.text} />
-                <Text style={[styles.menuItemText, item.danger && { color: Colors.error }]}>{item.label}</Text>
+                <Ionicons name={item.icon as any} size={22} color={item.danger ? colors.error : colors.text} />
+                <Text style={[styles.menuItemText, item.danger && { color: colors.error }]}>{item.label}</Text>
                 {item.showValue && <Text style={styles.menuItemValue}>{getLanguageFlag(language)} {item.showValue}</Text>}
-                <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+                <Ionicons name="chevron-forward" size={20} color={colors.gray} />
               </TouchableOpacity>
             ))}
           </Card>
@@ -383,12 +385,12 @@ export default function PerfilScreen() {
       {/* Language Modal */}
       <Modal visible={showLanguageModal} transparent animationType="slide" onRequestClose={() => setShowLanguageModal(false)}>
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('selectLanguage')}</Text><TouchableOpacity onPress={() => setShowLanguageModal(false)}><Ionicons name="close" size={24} color={Colors.text} /></TouchableOpacity></View>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('selectLanguage')}</Text><TouchableOpacity onPress={() => setShowLanguageModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           {(['es', 'en', 'it'] as Language[]).map(lang => (
             <TouchableOpacity key={lang} style={[styles.langOption, language === lang && styles.langOptionActive]} onPress={() => changeLanguage(lang)}>
               <Text style={{ fontSize: 28, marginRight: Spacing.md }}>{getLanguageFlag(lang)}</Text>
-              <Text style={{ flex: 1, fontSize: FontSizes.lg, fontWeight: '600', color: Colors.text }}>{lang === 'es' ? t('spanish') : lang === 'en' ? t('english') : t('italian')}</Text>
-              {language === lang && <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />}
+              <Text style={{ flex: 1, fontSize: FontSizes.lg, fontWeight: '600', color: colors.text }}>{lang === 'es' ? t('spanish') : lang === 'en' ? t('english') : t('italian')}</Text>
+              {language === lang && <Ionicons name="checkmark-circle" size={24} color={colors.primary} />}
             </TouchableOpacity>
           ))}
         </View></View>
@@ -397,10 +399,10 @@ export default function PerfilScreen() {
       {/* Edit Profile Modal */}
       <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
         <View style={styles.modalOverlay}><View style={[styles.modalContent, { maxHeight: '80%' }]}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('editDogProfile')}</Text><TouchableOpacity onPress={() => setShowEditModal(false)}><Ionicons name="close" size={24} color={Colors.text} /></TouchableOpacity></View>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('editDogProfile')}</Text><TouchableOpacity onPress={() => setShowEditModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false}>
             <TouchableOpacity style={{ alignSelf: 'center', marginBottom: Spacing.md }} onPress={pickImage}>
-              {dogImage ? <Image source={{ uri: dogImage }} style={{ width: 90, height: 90, borderRadius: 45 }} /> : <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="paw" size={36} color={Colors.white} /></View>}
+              {dogImage ? <Image source={{ uri: dogImage }} style={{ width: 90, height: 90, borderRadius: 45 }} /> : <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="paw" size={36} color={colors.white} /></View>}
             </TouchableOpacity>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('dogName')}</Text><TextInput style={styles.input} value={editName} onChangeText={setEditName} /></View>
             <View style={{ flexDirection: 'row', gap: Spacing.md }}>
@@ -417,18 +419,18 @@ export default function PerfilScreen() {
       {/* Clinical File Modal */}
       <Modal visible={showClinicalModal} transparent animationType="slide" onRequestClose={() => setShowClinicalModal(false)}>
         <View style={styles.modalOverlay}><View style={[styles.modalContent, { maxHeight: '85%' }]}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('clinicalFile')}</Text><TouchableOpacity onPress={() => setShowClinicalModal(false)}><Ionicons name="close" size={24} color={Colors.text} /></TouchableOpacity></View>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('clinicalFile')}</Text><TouchableOpacity onPress={() => setShowClinicalModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('country')}</Text><TextInput style={styles.input} value={clinical.country} onChangeText={v => setClinical(p => ({ ...p, country: v }))} placeholder="España" placeholderTextColor={Colors.gray} /></View>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('vet')}</Text><TextInput style={styles.input} value={clinical.vet_name} onChangeText={v => setClinical(p => ({ ...p, vet_name: v }))} placeholder="Dr. García" placeholderTextColor={Colors.gray} /></View>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Vet phone' : 'Teléfono vet'}</Text><TextInput style={styles.input} value={clinical.vet_phone} onChangeText={v => setClinical(p => ({ ...p, vet_phone: v }))} keyboardType="phone-pad" placeholder="+34..." placeholderTextColor={Colors.gray} /></View>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('allergies')}</Text><TextInput style={[styles.input, { minHeight: 60 }]} value={clinical.allergies} onChangeText={v => setClinical(p => ({ ...p, allergies: v }))} multiline placeholder={language === 'en' ? 'None known' : 'Ninguna conocida'} placeholderTextColor={Colors.gray} /></View>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Chronic conditions' : 'Enfermedades crónicas'}</Text><TextInput style={[styles.input, { minHeight: 60 }]} value={clinical.chronic_conditions} onChangeText={v => setClinical(p => ({ ...p, chronic_conditions: v }))} multiline placeholderTextColor={Colors.gray} /></View>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Current medication' : 'Medicación actual'}</Text><TextInput style={[styles.input, { minHeight: 60 }]} value={clinical.current_medication} onChangeText={v => setClinical(p => ({ ...p, current_medication: v }))} multiline placeholderTextColor={Colors.gray} /></View>
-            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Insurance' : 'Seguro'}</Text><TextInput style={styles.input} value={clinical.insurance} onChangeText={v => setClinical(p => ({ ...p, insurance: v }))} placeholderTextColor={Colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('country')}</Text><TextInput style={styles.input} value={clinical.country} onChangeText={v => setClinical(p => ({ ...p, country: v }))} placeholder="España" placeholderTextColor={colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('vet')}</Text><TextInput style={styles.input} value={clinical.vet_name} onChangeText={v => setClinical(p => ({ ...p, vet_name: v }))} placeholder="Dr. García" placeholderTextColor={colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Vet phone' : 'Teléfono vet'}</Text><TextInput style={styles.input} value={clinical.vet_phone} onChangeText={v => setClinical(p => ({ ...p, vet_phone: v }))} keyboardType="phone-pad" placeholder="+34..." placeholderTextColor={colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('allergies')}</Text><TextInput style={[styles.input, { minHeight: 60 }]} value={clinical.allergies} onChangeText={v => setClinical(p => ({ ...p, allergies: v }))} multiline placeholder={language === 'en' ? 'None known' : 'Ninguna conocida'} placeholderTextColor={colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Chronic conditions' : 'Enfermedades crónicas'}</Text><TextInput style={[styles.input, { minHeight: 60 }]} value={clinical.chronic_conditions} onChangeText={v => setClinical(p => ({ ...p, chronic_conditions: v }))} multiline placeholderTextColor={colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Current medication' : 'Medicación actual'}</Text><TextInput style={[styles.input, { minHeight: 60 }]} value={clinical.current_medication} onChangeText={v => setClinical(p => ({ ...p, current_medication: v }))} multiline placeholderTextColor={colors.gray} /></View>
+            <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Insurance' : 'Seguro'}</Text><TextInput style={styles.input} value={clinical.insurance} onChangeText={v => setClinical(p => ({ ...p, insurance: v }))} placeholderTextColor={colors.gray} /></View>
             <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
               <Text style={styles.inputLabel}>{language === 'en' ? 'Neutered/Spayed' : 'Esterilizado/a'}</Text>
-              <Switch value={clinical.neutered} onValueChange={v => setClinical(p => ({ ...p, neutered: v }))} trackColor={{ true: Colors.primary }} />
+              <Switch value={clinical.neutered} onValueChange={v => setClinical(p => ({ ...p, neutered: v }))} trackColor={{ true: colors.primary }} />
             </View>
           </ScrollView>
           <Button title={saving ? '...' : t('save')} onPress={handleSaveClinical} loading={saving} disabled={saving} style={{ marginTop: Spacing.md }} />
@@ -438,12 +440,12 @@ export default function PerfilScreen() {
       {/* Settings Modal */}
       <Modal visible={showSettingsModal} transparent animationType="slide" onRequestClose={() => setShowSettingsModal(false)}>
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('settings')}</Text><TouchableOpacity onPress={() => setShowSettingsModal(false)}><Ionicons name="close" size={24} color={Colors.text} /></TouchableOpacity></View>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('settings')}</Text><TouchableOpacity onPress={() => setShowSettingsModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           <View style={styles.settingRow}><Text style={styles.settingLabel}>{language === 'en' ? 'Weight unit' : 'Unidad de peso'}</Text>
             <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
               {['kg', 'lb'].map(u => (
                 <TouchableOpacity key={u} style={[styles.unitBtn, settings.weight_unit === u && styles.unitBtnActive]} onPress={() => handleSaveSettings({ ...settings, weight_unit: u })}>
-                  <Text style={[styles.unitBtnText, settings.weight_unit === u && { color: Colors.white }]}>{u}</Text>
+                  <Text style={[styles.unitBtnText, settings.weight_unit === u && { color: colors.white }]}>{u}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -452,14 +454,14 @@ export default function PerfilScreen() {
             <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
               {['celsius', 'fahrenheit'].map(u => (
                 <TouchableOpacity key={u} style={[styles.unitBtn, settings.temperature_unit === u && styles.unitBtnActive]} onPress={() => handleSaveSettings({ ...settings, temperature_unit: u })}>
-                  <Text style={[styles.unitBtnText, settings.temperature_unit === u && { color: Colors.white }]}>{u === 'celsius' ? '°C' : '°F'}</Text>
+                  <Text style={[styles.unitBtnText, settings.temperature_unit === u && { color: colors.white }]}>{u === 'celsius' ? '°C' : '°F'}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
           <View style={styles.settingRow}><Text style={styles.settingLabel}>{t('language')}</Text>
             <TouchableOpacity onPress={() => { setShowSettingsModal(false); setShowLanguageModal(true); }}>
-              <Text style={{ color: Colors.primary, fontWeight: '600' }}>{getLanguageFlag(language)} {language.toUpperCase()}</Text>
+              <Text style={{ color: colors.primary, fontWeight: '600' }}>{getLanguageFlag(language)} {language.toUpperCase()}</Text>
             </TouchableOpacity>
           </View>
         </View></View>
@@ -468,7 +470,7 @@ export default function PerfilScreen() {
       {/* Notifications Modal */}
       <Modal visible={showNotificationsModal} transparent animationType="slide" onRequestClose={() => setShowNotificationsModal(false)}>
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('notifications')}</Text><TouchableOpacity onPress={() => setShowNotificationsModal(false)}><Ionicons name="close" size={24} color={Colors.text} /></TouchableOpacity></View>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('notifications')}</Text><TouchableOpacity onPress={() => setShowNotificationsModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           {[
             { key: 'notifications_enabled', label: language === 'en' ? 'Enable notifications' : 'Activar notificaciones', icon: 'notifications' },
             { key: 'daily_reminder', label: language === 'en' ? 'Daily check-in' : 'Check-in diario', icon: 'sunny' },
@@ -478,10 +480,10 @@ export default function PerfilScreen() {
           ].map(item => (
             <View key={item.key} style={styles.settingRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1 }}>
-                <Ionicons name={item.icon as any} size={20} color={Colors.primary} />
+                <Ionicons name={item.icon as any} size={20} color={colors.primary} />
                 <Text style={styles.settingLabel}>{item.label}</Text>
               </View>
-              <Switch value={(settings as any)[item.key]} onValueChange={v => handleSaveSettings({ ...settings, [item.key]: v })} trackColor={{ true: Colors.primary }} />
+              <Switch value={(settings as any)[item.key]} onValueChange={v => handleSaveSettings({ ...settings, [item.key]: v })} trackColor={{ true: colors.primary }} />
             </View>
           ))}
         </View></View>
@@ -490,13 +492,13 @@ export default function PerfilScreen() {
       {/* Invite Modal */}
       <Modal visible={showInviteModal} transparent animationType="slide" onRequestClose={() => setShowInviteModal(false)}>
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
-          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('invite')}</Text><TouchableOpacity onPress={() => setShowInviteModal(false)}><Ionicons name="close" size={24} color={Colors.text} /></TouchableOpacity></View>
-          <Text style={{ fontSize: FontSizes.md, color: Colors.textSecondary, marginBottom: Spacing.lg, textAlign: 'center' }}>
+          <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('invite')}</Text><TouchableOpacity onPress={() => setShowInviteModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
+          <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, marginBottom: Spacing.lg, textAlign: 'center' }}>
             {language === 'en' ? 'Invite friends to join your pack and earn 5 bones!' : language === 'it' ? 'Invita amici e guadagna 5 ossa!' : '¡Invita a amigos a tu manada y gana 5 huesos! 🦴'}
           </Text>
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>{language === 'en' ? "Friend's name" : 'Nombre del amigo'}</Text>
-            <TextInput style={styles.input} value={inviteName} onChangeText={setInviteName} placeholder="Alex" placeholderTextColor={Colors.gray} />
+            <TextInput style={styles.input} value={inviteName} onChangeText={setInviteName} placeholder="Alex" placeholderTextColor={colors.gray} />
           </View>
           <Button title={language === 'en' ? 'Share invitation' : language === 'it' ? 'Condividi invito' : 'Compartir invitación'} onPress={handleInvite} disabled={!inviteName.trim()} style={{ marginTop: Spacing.md }} />
         </View></View>
@@ -505,80 +507,80 @@ export default function PerfilScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (C: any, S: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   scrollView: { flex: 1 },
   scrollContent: { padding: Spacing.md },
   header: { marginBottom: Spacing.lg },
-  title: { fontSize: FontSizes.xxl, fontWeight: '700', color: Colors.text },
+  title: { fontSize: FontSizes.xxl, fontWeight: '700', color: C.text },
   profileCard: { marginBottom: Spacing.lg },
   profileHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
   avatarContainer: { position: 'relative' },
-  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   avatarImage: { width: 80, height: 80, borderRadius: 40 },
-  cameraButton: { position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.white },
+  cameraButton: { position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.white },
   profileInfo: { flex: 1, marginLeft: Spacing.md },
-  dogName: { fontSize: FontSizes.xl, fontWeight: '700', color: Colors.text },
-  ownerName: { fontSize: FontSizes.md, color: Colors.textSecondary },
-  editButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.primary + '20', alignItems: 'center', justifyContent: 'center' },
-  statsGrid: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.grayLight },
+  dogName: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text },
+  ownerName: { fontSize: FontSizes.md, color: C.textSecondary },
+  editButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.primary + '20', alignItems: 'center', justifyContent: 'center' },
+  statsGrid: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: Spacing.md, borderTopWidth: 1, borderTopColor: C.grayLight },
   statItem: { alignItems: 'center', flex: 1 },
-  statValue: { fontSize: FontSizes.md, fontWeight: '700', color: Colors.text, textAlign: 'center' },
-  statLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
-  statDivider: { width: 1, height: 40, backgroundColor: Colors.grayLight },
-  chipContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.xs, marginTop: Spacing.md, paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.grayLight },
-  chipText: { fontSize: FontSizes.sm, color: Colors.textSecondary },
+  statValue: { fontSize: FontSizes.md, fontWeight: '700', color: C.text, textAlign: 'center' },
+  statLabel: { fontSize: FontSizes.xs, color: C.textSecondary, marginTop: 2 },
+  statDivider: { width: 1, height: 40, backgroundColor: C.grayLight },
+  chipContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.xs, marginTop: Spacing.md, paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: C.grayLight },
+  chipText: { fontSize: FontSizes.sm, color: C.textSecondary },
   section: { marginBottom: Spacing.lg },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
-  sectionTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: Colors.text, marginBottom: Spacing.sm },
+  sectionTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text, marginBottom: Spacing.sm },
   gamLevelRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.lg },
-  gamLevelIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  gamLevelText: { fontSize: FontSizes.lg, fontWeight: '700', color: Colors.text, marginBottom: 4 },
-  gamProgressTrack: { height: 8, backgroundColor: Colors.grayLight, borderRadius: 4, marginBottom: 4 },
-  gamProgressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
-  gamProgressLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'right' },
-  gamStatsGrid: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.grayLight },
+  gamLevelIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  gamLevelText: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text, marginBottom: 4 },
+  gamProgressTrack: { height: 8, backgroundColor: C.grayLight, borderRadius: 4, marginBottom: 4 },
+  gamProgressFill: { height: '100%', backgroundColor: C.primary, borderRadius: 4 },
+  gamProgressLabel: { fontSize: FontSizes.xs, color: C.textSecondary, textAlign: 'right' },
+  gamStatsGrid: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: C.grayLight },
   gamStatItem: { alignItems: 'center', gap: 4, flex: 1 },
-  gamStatValue: { fontSize: FontSizes.xl, fontWeight: '800', color: Colors.text },
-  gamStatLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary },
-  gamStatDivider: { width: 1, height: 50, backgroundColor: Colors.grayLight },
+  gamStatValue: { fontSize: FontSizes.xl, fontWeight: '800', color: C.text },
+  gamStatLabel: { fontSize: FontSizes.xs, color: C.textSecondary },
+  gamStatDivider: { width: 1, height: 50, backgroundColor: C.grayLight },
   achGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   achItem: { width: '30%', alignItems: 'center', padding: Spacing.sm, borderRadius: BorderRadius.md },
   achItemLocked: { opacity: 0.5 },
   achIconCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  achName: { fontSize: FontSizes.xs, fontWeight: '600', color: Colors.text, textAlign: 'center', marginBottom: 2 },
-  achBones: { fontSize: FontSizes.xs, color: Colors.accent, fontWeight: '600' },
-  emptyText: { textAlign: 'center', color: Colors.textSecondary, fontSize: FontSizes.sm, padding: Spacing.md },
-  inviteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.primary, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg },
-  inviteBtnText: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600' },
+  achName: { fontSize: FontSizes.xs, fontWeight: '600', color: C.text, textAlign: 'center', marginBottom: 2 },
+  achBones: { fontSize: FontSizes.xs, color: C.accent, fontWeight: '600' },
+  emptyText: { textAlign: 'center', color: C.textSecondary, fontSize: FontSizes.sm, padding: Spacing.md },
+  inviteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.primary, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg },
+  inviteBtnText: { fontSize: FontSizes.sm, color: C.white, fontWeight: '600' },
   packMember: { flexDirection: 'row', alignItems: 'center' },
   memberAvatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   memberInfo: { flex: 1, marginLeft: Spacing.md },
-  memberName: { fontSize: FontSizes.md, fontWeight: '600', color: Colors.text },
-  memberRole: { fontSize: FontSizes.sm, color: Colors.textSecondary },
-  ownerBadge: { width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.accent + '20', alignItems: 'center', justifyContent: 'center' },
+  memberName: { fontSize: FontSizes.md, fontWeight: '600', color: C.text },
+  memberRole: { fontSize: FontSizes.sm, color: C.textSecondary },
+  ownerBadge: { width: 28, height: 28, borderRadius: 14, backgroundColor: C.accent + '20', alignItems: 'center', justifyContent: 'center' },
   clinicalRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.sm, gap: Spacing.sm },
-  clinicalLabel: { fontSize: FontSizes.md, color: Colors.textSecondary, width: 100 },
-  clinicalValue: { flex: 1, fontSize: FontSizes.md, color: Colors.text, textAlign: 'right' },
-  clinicalEdit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: Spacing.md, marginTop: Spacing.sm, borderTopWidth: 1, borderTopColor: Colors.grayLight },
-  clinicalEditText: { fontSize: FontSizes.md, color: Colors.primary, fontWeight: '600' },
+  clinicalLabel: { fontSize: FontSizes.md, color: C.textSecondary, width: 100 },
+  clinicalValue: { flex: 1, fontSize: FontSizes.md, color: C.text, textAlign: 'right' },
+  clinicalEdit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: Spacing.md, marginTop: Spacing.sm, borderTopWidth: 1, borderTopColor: C.grayLight },
+  clinicalEditText: { fontSize: FontSizes.md, color: C.primary, fontWeight: '600' },
   menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, gap: Spacing.md },
-  menuItemBorder: { borderBottomWidth: 1, borderBottomColor: Colors.grayLight },
-  menuItemText: { flex: 1, fontSize: FontSizes.md, color: Colors.text },
-  menuItemValue: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginRight: Spacing.xs },
-  version: { fontSize: FontSizes.sm, color: Colors.textLight, textAlign: 'center', marginTop: Spacing.md },
+  menuItemBorder: { borderBottomWidth: 1, borderBottomColor: C.grayLight },
+  menuItemText: { flex: 1, fontSize: FontSizes.md, color: C.text },
+  menuItemValue: { fontSize: FontSizes.sm, color: C.textSecondary, marginRight: Spacing.xs },
+  version: { fontSize: FontSizes.sm, color: C.textLight, textAlign: 'center', marginTop: Spacing.md },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: Colors.white, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl, padding: Spacing.lg, paddingBottom: 40 },
+  modalContent: { backgroundColor: C.white, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl, padding: Spacing.lg, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
-  modalTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: Colors.text },
-  langOption: { flexDirection: 'row', alignItems: 'center', padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm, backgroundColor: Colors.background },
-  langOptionActive: { backgroundColor: Colors.primaryLight, borderWidth: 2, borderColor: Colors.primary },
+  modalTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text },
+  langOption: { flexDirection: 'row', alignItems: 'center', padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm, backgroundColor: C.background },
+  langOptionActive: { backgroundColor: C.primaryLight, borderWidth: 2, borderColor: C.primary },
   inputGroup: { marginBottom: Spacing.md },
-  inputLabel: { fontSize: FontSizes.sm, fontWeight: '600', color: Colors.textSecondary, marginBottom: Spacing.xs },
-  input: { backgroundColor: Colors.background, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: FontSizes.md, color: Colors.text, borderWidth: 1, borderColor: Colors.grayLight },
-  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.grayLight },
-  settingLabel: { fontSize: FontSizes.md, color: Colors.text },
-  unitBtn: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: Colors.grayLight },
-  unitBtnActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  unitBtnText: { fontSize: FontSizes.sm, fontWeight: '600', color: Colors.text },
+  inputLabel: { fontSize: FontSizes.sm, fontWeight: '600', color: C.textSecondary, marginBottom: Spacing.xs },
+  input: { backgroundColor: C.background, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: FontSizes.md, color: C.text, borderWidth: 1, borderColor: C.grayLight },
+  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: C.grayLight },
+  settingLabel: { fontSize: FontSizes.md, color: C.text },
+  unitBtn: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: C.grayLight },
+  unitBtnActive: { backgroundColor: C.primary, borderColor: C.primary },
+  unitBtnText: { fontSize: FontSizes.sm, fontWeight: '600', color: C.text },
 });

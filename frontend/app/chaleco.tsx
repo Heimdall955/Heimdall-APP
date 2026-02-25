@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,13 +6,13 @@ import { useRouter } from 'expo-router';
 import { useBluetooth } from '../contexts/BluetoothContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, Button } from '../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function ChalecoScreen() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const {
     isScanning,
     isConnected,
@@ -80,12 +80,14 @@ export default function ChalecoScreen() {
 
   const getMovementColor = (movement: string) => {
     switch (movement) {
-      case 'low': return Colors.info;
-      case 'medium': return Colors.accent;
-      case 'high': return Colors.error;
-      default: return Colors.gray;
+      case 'low': return colors.info;
+      case 'medium': return colors.accent;
+      case 'high': return colors.error;
+      default: return colors.gray;
     }
   };
+
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -93,7 +95,7 @@ export default function ChalecoScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerText}>
             <Text style={styles.title}>{t('heimdallVest')}</Text>
@@ -106,7 +108,7 @@ export default function ChalecoScreen() {
           <View style={styles.statusHeader}>
             <View style={[
               styles.statusIndicator,
-              { backgroundColor: isConnected ? Colors.success : Colors.gray }
+              { backgroundColor: isConnected ? colors.success : colors.gray }
             ]} />
             <Text style={styles.statusText}>
               {isConnected ? t('connected') : isScanning ? t('searching') : t('disconnected')}
@@ -131,14 +133,14 @@ export default function ChalecoScreen() {
                 onPress={isScanning ? stopScan : handleStartScan}
                 loading={isScanning}
                 style={styles.scanButton}
-                icon={<Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={20} color={Colors.white} />}
+                icon={<Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={20} color={colors.white} />}
               />
               <Button
                 title={t('useSimulator')}
                 onPress={startSimulation}
                 variant="secondary"
                 style={styles.simButton}
-                icon={<Ionicons name="pulse" size={20} color={Colors.white} />}
+                icon={<Ionicons name="pulse" size={20} color={colors.white} />}
               />
             </View>
           )}
@@ -155,7 +157,7 @@ export default function ChalecoScreen() {
                     <Ionicons 
                       name={device.isHeimdallVest ? "paw" : "bluetooth"} 
                       size={24} 
-                      color={device.isHeimdallVest ? Colors.white : Colors.primary} 
+                      color={device.isHeimdallVest ? colors.white : colors.primary} 
                     />
                   </View>
                   <View style={styles.deviceInfo}>
@@ -178,9 +180,9 @@ export default function ChalecoScreen() {
                     disabled={connectingDeviceId !== null}
                   >
                     {connectingDeviceId === device.id ? (
-                      <ActivityIndicator size="small" color={Colors.white} />
+                      <ActivityIndicator size="small" color={colors.white} />
                     ) : (
-                      <Ionicons name="link" size={20} color={Colors.white} />
+                      <Ionicons name="link" size={20} color={colors.white} />
                     )}
                   </TouchableOpacity>
                 </View>
@@ -192,7 +194,7 @@ export default function ChalecoScreen() {
         {/* Scanning indicator */}
         {isScanning && scannedDevices.length === 0 && (
           <Card style={styles.scanningCard}>
-            <ActivityIndicator size="large" color={Colors.primary} />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.scanningText}>{t('searching')}...</Text>
             <Text style={styles.scanningHint}>Asegúrate de que el chaleco esté encendido y cerca</Text>
           </Card>
@@ -202,7 +204,7 @@ export default function ChalecoScreen() {
         {!isConnected && !isScanning && scannedDevices.length === 0 && (
           <Card style={styles.infoCard}>
             <View style={styles.infoHeader}>
-              <Ionicons name="information-circle" size={24} color={Colors.primary} />
+              <Ionicons name="information-circle" size={24} color={colors.primary} />
               <Text style={styles.infoTitle}>{t('howToConnect')}</Text>
             </View>
             <View style={styles.infoStep}>
@@ -221,7 +223,7 @@ export default function ChalecoScreen() {
             <View style={styles.infoDivider} />
             
             <View style={styles.warningBox}>
-              <Ionicons name="warning" size={20} color={Colors.accent} />
+              <Ionicons name="warning" size={20} color={colors.accent} />
               <Text style={styles.warningText}>
                 {t('bleNotAvailableInExpoGo')}
               </Text>
@@ -237,15 +239,15 @@ export default function ChalecoScreen() {
             {/* Heart Rate */}
             <Card style={styles.biometricCard} variant="elevated">
               <View style={styles.biometricRow}>
-                <View style={[styles.biometricIcon, { backgroundColor: Colors.error + '20' }]}>
-                  <Ionicons name="heart" size={28} color={Colors.error} />
+                <View style={[styles.biometricIcon, { backgroundColor: colors.error + '20' }]}>
+                  <Ionicons name="heart" size={28} color={colors.error} />
                 </View>
                 <View style={styles.biometricInfo}>
                   <Text style={styles.biometricLabel}>{t('heartRate')}</Text>
                   <Text style={styles.biometricValue}>{biometricData.heartRate} {t('bpm').toUpperCase()}</Text>
                 </View>
                 <View style={styles.pulseIndicator}>
-                  <Ionicons name="pulse" size={24} color={Colors.error} />
+                  <Ionicons name="pulse" size={24} color={colors.error} />
                 </View>
               </View>
             </Card>
@@ -253,8 +255,8 @@ export default function ChalecoScreen() {
             {/* Temperature */}
             <Card style={styles.biometricCard} variant="elevated">
               <View style={styles.biometricRow}>
-                <View style={[styles.biometricIcon, { backgroundColor: Colors.accent + '20' }]}>
-                  <Ionicons name="thermometer" size={28} color={Colors.accent} />
+                <View style={[styles.biometricIcon, { backgroundColor: colors.accent + '20' }]}>
+                  <Ionicons name="thermometer" size={28} color={colors.accent} />
                 </View>
                 <View style={styles.biometricInfo}>
                   <Text style={styles.biometricLabel}>{t('temperature')}</Text>
@@ -286,12 +288,12 @@ export default function ChalecoScreen() {
             {/* Battery */}
             <Card style={styles.biometricCard} variant="elevated">
               <View style={styles.biometricRow}>
-                <View style={[styles.biometricIcon, { backgroundColor: Colors.success + '20' }]}>
+                <View style={[styles.biometricIcon, { backgroundColor: colors.success + '20' }]}>
                   <Ionicons 
                     name={biometricData.battery > 50 ? 'battery-full' : 
                           biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} 
                     size={28} 
-                    color={biometricData.battery > 20 ? Colors.success : Colors.error} 
+                    color={biometricData.battery > 20 ? colors.success : colors.error} 
                   />
                 </View>
                 <View style={styles.biometricInfo}>
@@ -301,7 +303,7 @@ export default function ChalecoScreen() {
                 <View style={styles.batteryBar}>
                   <View style={[styles.batteryFill, { 
                     width: `${biometricData.battery}%`,
-                    backgroundColor: biometricData.battery > 20 ? Colors.success : Colors.error
+                    backgroundColor: biometricData.battery > 20 ? colors.success : colors.error
                   }]} />
                 </View>
               </View>
@@ -314,10 +316,10 @@ export default function ChalecoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   scrollView: {
     flex: 1,
@@ -342,11 +344,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSizes.xxl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   subtitle: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   statusCard: {
     marginBottom: Spacing.lg,
@@ -365,11 +367,11 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: FontSizes.lg,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   deviceName: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginBottom: Spacing.md,
   },
   actionButton: {
@@ -392,7 +394,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.md,
   },
   deviceCard: {
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: C.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -417,29 +419,29 @@ const styles = StyleSheet.create({
   deviceCardName: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   deviceRssi: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   connectButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   heimdallCard: {
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: C.primary,
   },
   heimdallIcon: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
   },
   heimdallConnectButton: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: C.secondary,
   },
   deviceNameRow: {
     flexDirection: 'row',
@@ -447,7 +449,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   heimdallBadge: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
   heimdallBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   scanningCard: {
     alignItems: 'center',
@@ -465,12 +467,12 @@ const styles = StyleSheet.create({
   scanningText: {
     fontSize: FontSizes.lg,
     fontWeight: '600',
-    color: Colors.primary,
+    color: C.primary,
     marginTop: Spacing.md,
   },
   scanningHint: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginTop: Spacing.sm,
     textAlign: 'center',
   },
@@ -494,12 +496,12 @@ const styles = StyleSheet.create({
   },
   biometricLabel: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   biometricValue: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   pulseIndicator: {
     opacity: 0.8,
@@ -507,7 +509,7 @@ const styles = StyleSheet.create({
   tempStatus: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.success,
+    color: C.success,
   },
   movementBadge: {
     width: 32,
@@ -524,7 +526,7 @@ const styles = StyleSheet.create({
   batteryBar: {
     width: 60,
     height: 8,
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -533,14 +535,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   instructionsCard: {
-    backgroundColor: Colors.primary + '10',
+    backgroundColor: C.primary + '10',
     borderWidth: 1,
-    borderColor: Colors.primary + '30',
+    borderColor: C.primary + '30',
   },
   instructionsTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.md,
   },
   instruction: {
@@ -552,7 +554,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -560,23 +562,23 @@ const styles = StyleSheet.create({
   instructionNumberText: {
     fontSize: FontSizes.sm,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   instructionText: {
     flex: 1,
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
   },
   tipText: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     fontStyle: 'italic',
     marginTop: Spacing.md,
     textAlign: 'center',
   },
   infoCard: {
     marginTop: Spacing.md,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
   },
   infoHeader: {
     flexDirection: 'row',
@@ -587,7 +589,7 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   infoStep: {
     flexDirection: 'row',
@@ -599,7 +601,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -607,17 +609,17 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
   },
   infoDivider: {
     height: 1,
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
     marginVertical: Spacing.md,
   },
   warningBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: Colors.accent + '15',
+    backgroundColor: C.accent + '15',
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     gap: Spacing.sm,
@@ -625,7 +627,7 @@ const styles = StyleSheet.create({
   warningText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 20,
   },
 });

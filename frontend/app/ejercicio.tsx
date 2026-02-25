@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -21,7 +21,7 @@ const EJERCICIOS_DB: Record<string, Ejercicio> = {
     descripcion: 'Los comandos fundamentales que todo perro debería conocer. Estos forman la base de toda la educación canina.',
     huesos: 5,
     imagen: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800',
-    color: Colors.primary,
+    color: colors.primary,
     ejercicios: [
       {
         nombre: 'Sentado',
@@ -50,7 +50,7 @@ const EJERCICIOS_DB: Record<string, Ejercicio> = {
     descripcion: 'Ejercicios para que tu perro aprenda a controlar sus impulsos y pensar antes de actuar.',
     huesos: 10,
     imagen: 'https://images.unsplash.com/photo-1544568100-847a948585b9?w=800',
-    color: Colors.accentPurple,
+    color: colors.accentPurple,
     ejercicios: [
       {
         nombre: 'Espera la Comida',
@@ -79,7 +79,7 @@ const EJERCICIOS_DB: Record<string, Ejercicio> = {
     descripcion: 'Ejercicios para crear experiencias positivas con el mundo exterior y prevenir miedos.',
     huesos: 15,
     imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
-    color: Colors.accentMint,
+    color: colors.accentMint,
     ejercicios: [
       {
         nombre: 'Observar el Mundo',
@@ -108,7 +108,7 @@ const EJERCICIOS_DB: Record<string, Ejercicio> = {
     descripcion: 'Aprende a pasear con tu perro de forma relajada, sin que tire de la correa.',
     huesos: 12,
     imagen: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800',
-    color: Colors.info,
+    color: colors.info,
     ejercicios: [
       {
         nombre: 'Correa Floja = Premio',
@@ -137,7 +137,7 @@ const EJERCICIOS_DB: Record<string, Ejercicio> = {
     descripcion: 'Ejercicios para que tu perro aprenda a estar tranquilo en casa y gestionar la excitación.',
     huesos: 8,
     imagen: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
-    color: Colors.success,
+    color: colors.success,
     ejercicios: [
       {
         nombre: 'Captura la Calma',
@@ -183,7 +183,7 @@ export default function EjercicioScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [ejercicioActual, setEjercicioActual] = useState(0);
   const [completados, setCompletados] = useState<number[]>([]);
 
@@ -233,12 +233,14 @@ export default function EjercicioScreen() {
 
   const todosCompletados = completados.length === ejercicio.ejercicios.length;
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.white} />
+          <Ionicons name="arrow-back" size={24} color={colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{ejercicio.titulo}</Text>
         <View style={styles.huesosContainer}>
@@ -289,7 +291,7 @@ export default function EjercicioScreen() {
                   onPress={() => toggleCompletado(index)}
                 >
                   {completados.includes(index) && (
-                    <Ionicons name="checkmark" size={18} color={Colors.white} />
+                    <Ionicons name="checkmark" size={18} color={colors.white} />
                   )}
                 </TouchableOpacity>
                 <Text style={[
@@ -302,7 +304,7 @@ export default function EjercicioScreen() {
               <Ionicons 
                 name={ejercicioActual === index ? 'chevron-up' : 'chevron-down'} 
                 size={24} 
-                color={Colors.gray} 
+                color={colors.gray} 
               />
             </TouchableOpacity>
 
@@ -312,12 +314,12 @@ export default function EjercicioScreen() {
                 <Text style={styles.instruccionesText}>{ej.instrucciones}</Text>
                 
                 <View style={styles.repeticionesRow}>
-                  <Ionicons name="repeat" size={20} color={Colors.primary} />
+                  <Ionicons name="repeat" size={20} color={colors.primary} />
                   <Text style={styles.repeticionesText}>{ej.repeticiones}</Text>
                 </View>
 
                 <View style={styles.tipContainer}>
-                  <Ionicons name="bulb" size={20} color={Colors.accent} />
+                  <Ionicons name="bulb" size={20} color={colors.accent} />
                   <Text style={styles.tipText}>{ej.tip}</Text>
                 </View>
               </View>
@@ -342,7 +344,7 @@ export default function EjercicioScreen() {
               onPress={() => router.back()}
               data-testid="exercise-complete-button"
             >
-              <Ionicons name="checkmark-circle" size={24} color={Colors.white} />
+              <Ionicons name="checkmark-circle" size={24} color={colors.white} />
               <Text style={styles.completarButtonText}>
                 {rewardData ? t('backToEducation') : `${t('exercisesCompleted')} +${ejercicio.huesos} 🦴`}
               </Text>
@@ -356,10 +358,10 @@ export default function EjercicioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   header: {
     flexDirection: 'row',
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
   },
   backButton: {
     width: 40,
@@ -378,7 +380,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   huesosContainer: {
     flexDirection: 'row',
@@ -391,7 +393,7 @@ const styles = StyleSheet.create({
   huesosText: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
     marginRight: 4,
   },
   boneEmoji: {
@@ -413,7 +415,7 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     fontSize: FontSizes.xl,
     fontWeight: '800',
-    color: Colors.white,
+    color: C.white,
     marginBottom: 4,
   },
   heroDescription: {
@@ -434,7 +436,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginBottom: Spacing.sm,
   },
   progressDots: {
@@ -445,10 +447,10 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
   },
   progressDotComplete: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
   },
   ejercicioCard: {
     marginBottom: Spacing.md,
@@ -471,38 +473,38 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: Colors.grayLight,
+    borderColor: C.grayLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxComplete: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: C.primary,
+    borderColor: C.primary,
   },
   ejercicioNombre: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   ejercicioNombreComplete: {
-    color: Colors.primary,
+    color: C.primary,
   },
   ejercicioContent: {
     padding: Spacing.md,
     paddingTop: 0,
     borderTopWidth: 1,
-    borderTopColor: Colors.grayLight,
+    borderTopColor: C.grayLight,
   },
   instruccionesLabel: {
     fontSize: FontSizes.sm,
     fontWeight: '700',
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginBottom: Spacing.sm,
     marginTop: Spacing.md,
   },
   instruccionesText: {
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 24,
     marginBottom: Spacing.md,
   },
@@ -514,21 +516,21 @@ const styles = StyleSheet.create({
   },
   repeticionesText: {
     fontSize: FontSizes.md,
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '600',
   },
   tipContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Spacing.sm,
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
   },
   tipText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 20,
   },
   completarButton: {
@@ -536,7 +538,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     padding: Spacing.lg,
     borderRadius: BorderRadius.lg,
     marginTop: Spacing.md,
@@ -544,10 +546,10 @@ const styles = StyleSheet.create({
   completarButtonText: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   rewardBanner: {
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.md,
@@ -556,17 +558,17 @@ const styles = StyleSheet.create({
   rewardText: {
     fontSize: FontSizes.xl,
     fontWeight: '800',
-    color: Colors.accent,
+    color: C.accent,
   },
   rewardSubtext: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginTop: 4,
   },
   levelUpText: {
     fontSize: FontSizes.lg,
     fontWeight: '800',
-    color: Colors.primary,
+    color: C.primary,
     marginTop: Spacing.xs,
   },
 });

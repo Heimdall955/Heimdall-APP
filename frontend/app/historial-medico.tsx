@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Modal, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import axios from 'axios';
 import { SecureStore } from '../utils/secureStore';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, Button, Input } from '../components/ui';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -24,17 +24,17 @@ interface MedicalEvent {
 }
 
 const eventTypes = [
-  { type: 'vaccine', label: 'Vacuna', icon: 'medical', color: Colors.success },
-  { type: 'checkup', label: 'Revisión', icon: 'clipboard', color: Colors.info },
-  { type: 'deworming', label: 'Desparasitación', icon: 'bug', color: Colors.warning },
-  { type: 'medication', label: 'Medicación', icon: 'medkit', color: Colors.accentEducation },
-  { type: 'note', label: 'Nota', icon: 'document-text', color: Colors.gray },
+  { type: 'vaccine', label: 'Vacuna', icon: 'medical', color: colors.success },
+  { type: 'checkup', label: 'Revisión', icon: 'clipboard', color: colors.info },
+  { type: 'deworming', label: 'Desparasitación', icon: 'bug', color: colors.warning },
+  { type: 'medication', label: 'Medicación', icon: 'medkit', color: colors.accentEducation },
+  { type: 'note', label: 'Nota', icon: 'document-text', color: colors.gray },
 ];
 
 export default function HistorialMedicoScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [events, setEvents] = useState<MedicalEvent[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -173,14 +173,14 @@ export default function HistorialMedicoScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.headerText}>
           <Text style={styles.title}>Historial Médico</Text>
           <Text style={styles.subtitle}>{currentDog?.name}</Text>
         </View>
         <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-          <Ionicons name="add" size={24} color={Colors.white} />
+          <Ionicons name="add" size={24} color={colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -201,7 +201,7 @@ export default function HistorialMedicoScreen() {
             <Ionicons
               name={type.icon as any}
               size={16}
-              color={filterType === type.type ? Colors.white : type.color}
+              color={filterType === type.type ? colors.white : type.color}
             />
             <Text style={[styles.filterText, filterType === type.type && styles.filterTextActive]}>
               {type.label}
@@ -215,12 +215,12 @@ export default function HistorialMedicoScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }
       >
         {filteredEvents.length === 0 ? (
           <Card style={styles.emptyCard}>
-            <Ionicons name="medical" size={48} color={Colors.gray} />
+            <Ionicons name="medical" size={48} color={colors.gray} />
             <Text style={styles.emptyTitle}>Sin registros</Text>
             <Text style={styles.emptyText}>
               Añade el primer evento médico de {currentDog?.name}
@@ -234,7 +234,9 @@ export default function HistorialMedicoScreen() {
         ) : (
           filteredEvents.map((event) => {
             const config = getEventConfig(event.type);
-            return (
+            const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
+  return (
               <Card key={event.id} style={styles.eventCard} variant="elevated">
                 <View style={styles.eventHeader}>
                   <View style={[styles.eventIcon, { backgroundColor: config.color + '20' }]}>
@@ -245,7 +247,7 @@ export default function HistorialMedicoScreen() {
                     <Text style={styles.eventType}>{config.label}</Text>
                   </View>
                   <TouchableOpacity onPress={() => handleDeleteEvent(event.id)}>
-                    <Ionicons name="trash-outline" size={20} color={Colors.error} />
+                    <Ionicons name="trash-outline" size={20} color={colors.error} />
                   </TouchableOpacity>
                 </View>
                 {event.description && (
@@ -253,13 +255,13 @@ export default function HistorialMedicoScreen() {
                 )}
                 <View style={styles.eventDates}>
                   <View style={styles.dateRow}>
-                    <Ionicons name="calendar" size={16} color={Colors.textSecondary} />
+                    <Ionicons name="calendar" size={16} color={colors.textSecondary} />
                     <Text style={styles.dateText}>Fecha: {formatDate(event.date)}</Text>
                   </View>
                   {event.next_date && (
                     <View style={styles.dateRow}>
-                      <Ionicons name="alarm" size={16} color={Colors.primary} />
-                      <Text style={[styles.dateText, { color: Colors.primary }]}>
+                      <Ionicons name="alarm" size={16} color={colors.primary} />
+                      <Text style={[styles.dateText, { color: colors.primary }]}>
                         Próxima: {formatDate(event.next_date)}
                       </Text>
                     </View>
@@ -281,7 +283,7 @@ export default function HistorialMedicoScreen() {
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={28} color={Colors.text} />
+              <Ionicons name="close" size={28} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Nuevo Evento</Text>
             <View style={{ width: 28 }} />
@@ -302,12 +304,12 @@ export default function HistorialMedicoScreen() {
                   <Ionicons
                     name={type.icon as any}
                     size={24}
-                    color={selectedType === type.type ? Colors.white : type.color}
+                    color={selectedType === type.type ? colors.white : type.color}
                   />
                   <Text
                     style={[
                       styles.typeButtonText,
-                      selectedType === type.type && { color: Colors.white },
+                      selectedType === type.type && { color: colors.white },
                     ]}
                   >
                     {type.label}
@@ -358,10 +360,10 @@ export default function HistorialMedicoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   header: {
     flexDirection: 'row',
@@ -379,17 +381,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   subtitle: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   addButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -404,23 +406,23 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: BorderRadius.full,
     marginRight: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.grayLight,
+    borderColor: C.grayLight,
   },
   filterChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: C.primary,
+    borderColor: C.primary,
   },
   filterText: {
     fontSize: FontSizes.sm,
-    color: Colors.text,
+    color: C.text,
     fontWeight: '500',
   },
   filterTextActive: {
-    color: Colors.white,
+    color: C.white,
   },
   scrollView: {
     flex: 1,
@@ -436,12 +438,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginTop: Spacing.md,
   },
   emptyText: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     textAlign: 'center',
     marginTop: Spacing.xs,
     marginBottom: Spacing.lg,
@@ -470,15 +472,15 @@ const styles = StyleSheet.create({
   eventTitle: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   eventType: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   eventDescription: {
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
     marginTop: Spacing.md,
     lineHeight: 22,
   },
@@ -486,7 +488,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     paddingTop: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.grayLight,
+    borderTopColor: C.grayLight,
     gap: Spacing.xs,
   },
   dateRow: {
@@ -496,11 +498,11 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -508,12 +510,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.grayLight,
+    borderBottomColor: C.grayLight,
   },
   modalTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   modalContent: {
     flex: 1,
@@ -522,7 +524,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.sm,
   },
   typeGrid: {
@@ -535,15 +537,15 @@ const styles = StyleSheet.create({
     width: '31%',
     alignItems: 'center',
     padding: Spacing.md,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: BorderRadius.md,
     borderWidth: 2,
-    borderColor: Colors.grayLight,
+    borderColor: C.grayLight,
   },
   typeButtonText: {
     fontSize: FontSizes.xs,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
     marginTop: Spacing.xs,
   },
   saveButton: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { SecureStore } from '../utils/secureStore';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -30,7 +30,7 @@ const MEDAL_ICONS = ['trophy', 'medal', 'ribbon'];
 export default function LeaderboardScreen() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,12 +96,14 @@ export default function LeaderboardScreen() {
     );
   };
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton} data-testid="leaderboard-back">
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('leaderboardTitle')}</Text>
         <View style={{ width: 44 }} />
@@ -109,7 +111,7 @@ export default function LeaderboardScreen() {
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
       >
         {/* Podium */}
         {renderPodium()}
@@ -117,7 +119,7 @@ export default function LeaderboardScreen() {
         {/* Current user rank if not in top */}
         {currentUserRank && currentUserRank > 3 && (
           <View style={styles.myRankCard} data-testid="leaderboard-my-rank">
-            <Ionicons name="person" size={20} color={Colors.primary} />
+            <Ionicons name="person" size={20} color={colors.primary} />
             <Text style={styles.myRankText}>{t('yourPosition')}: </Text>
             <Text style={styles.myRankNumber}>#{currentUserRank}</Text>
           </View>
@@ -156,7 +158,7 @@ export default function LeaderboardScreen() {
 
           {leaderboard.length === 0 && !loading && (
             <View style={styles.emptyState}>
-              <Ionicons name="trophy-outline" size={48} color={Colors.gray} />
+              <Ionicons name="trophy-outline" size={48} color={colors.gray} />
               <Text style={styles.emptyText}>{t('noRankYet')}</Text>
             </View>
           )}
@@ -168,14 +170,14 @@ export default function LeaderboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (C: any, S: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
   },
   backButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: Colors.text },
+  headerTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text },
   scrollContent: { padding: Spacing.md },
   podiumContainer: {
     flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center',
@@ -183,45 +185,45 @@ const styles = StyleSheet.create({
   },
   podiumItem: { alignItems: 'center', marginHorizontal: 4 },
   podiumAvatar: {
-    width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.grayLight,
+    width: 52, height: 52, borderRadius: 26, backgroundColor: C.grayLight,
     alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xs,
-    borderWidth: 2, borderColor: Colors.grayLight,
+    borderWidth: 2, borderColor: C.grayLight,
   },
   podiumAvatarFirst: { width: 64, height: 64, borderRadius: 32, borderColor: '#FFD700', borderWidth: 3 },
-  podiumAvatarMe: { borderColor: Colors.primary, borderWidth: 3 },
-  podiumName: { fontSize: FontSizes.sm, fontWeight: '600', color: Colors.text, textAlign: 'center' },
+  podiumAvatarMe: { borderColor: C.primary, borderWidth: 3 },
+  podiumName: { fontSize: FontSizes.sm, fontWeight: '600', color: C.text, textAlign: 'center' },
   podiumNameFirst: { fontSize: FontSizes.md, fontWeight: '700' },
-  podiumDog: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 4 },
+  podiumDog: { fontSize: FontSizes.xs, color: C.textSecondary, marginBottom: 4 },
   podiumBar: {
     width: '100%', borderTopLeftRadius: BorderRadius.lg, borderTopRightRadius: BorderRadius.lg,
     alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.sm, marginTop: 4,
   },
   podiumRank: { fontSize: FontSizes.xl, fontWeight: '800' },
-  podiumBones: { fontSize: FontSizes.lg, fontWeight: '700', color: Colors.text },
+  podiumBones: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text },
   podiumBonesLabel: { fontSize: 16 },
   myRankCard: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: Colors.primaryLight, padding: Spacing.md, borderRadius: BorderRadius.lg,
+    backgroundColor: C.primaryLight, padding: Spacing.md, borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
   },
-  myRankText: { fontSize: FontSizes.md, color: Colors.text, marginLeft: Spacing.sm },
-  myRankNumber: { fontSize: FontSizes.lg, fontWeight: '800', color: Colors.primary },
+  myRankText: { fontSize: FontSizes.md, color: C.text, marginLeft: Spacing.sm },
+  myRankNumber: { fontSize: FontSizes.lg, fontWeight: '800', color: C.primary },
   listContainer: { marginTop: Spacing.sm },
-  listTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: Colors.text, marginBottom: Spacing.md },
+  listTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text, marginBottom: Spacing.md },
   listItem: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.white,
-    padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm, ...Shadows.sm,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: C.white,
+    padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm, ...S.sm,
   },
-  listItemMe: { backgroundColor: Colors.primaryLight, borderWidth: 1, borderColor: Colors.primary },
-  rankBadge: { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.grayLight, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
-  rankNumber: { fontSize: FontSizes.md, fontWeight: '700', color: Colors.textSecondary },
+  listItemMe: { backgroundColor: C.primaryLight, borderWidth: 1, borderColor: C.primary },
+  rankBadge: { width: 36, height: 36, borderRadius: 18, backgroundColor: C.grayLight, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  rankNumber: { fontSize: FontSizes.md, fontWeight: '700', color: C.textSecondary },
   listItemInfo: { flex: 1 },
-  listItemName: { fontSize: FontSizes.md, fontWeight: '600', color: Colors.text },
-  listItemNameMe: { color: Colors.primary, fontWeight: '700' },
-  listItemSub: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginTop: 2 },
+  listItemName: { fontSize: FontSizes.md, fontWeight: '600', color: C.text },
+  listItemNameMe: { color: C.primary, fontWeight: '700' },
+  listItemSub: { fontSize: FontSizes.sm, color: C.textSecondary, marginTop: 2 },
   listItemBones: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  listItemBonesText: { fontSize: FontSizes.lg, fontWeight: '700', color: Colors.text },
+  listItemBonesText: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text },
   listItemBonesEmoji: { fontSize: 16 },
   emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl },
-  emptyText: { fontSize: FontSizes.md, color: Colors.textSecondary, marginTop: Spacing.md },
+  emptyText: { fontSize: FontSizes.md, color: C.textSecondary, marginTop: Spacing.md },
 });

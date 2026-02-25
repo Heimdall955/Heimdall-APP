@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage, Language } from '../contexts/LanguageContext';
@@ -749,7 +749,7 @@ export default function LeccionScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, language } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [pasoActual, setPasoActual] = useState(0);
   const [completado, setCompletado] = useState(false);
   const [rewardData, setRewardData] = useState<any>(null);
@@ -807,14 +807,14 @@ export default function LeccionScreen() {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.completadoContainer}>
           <View style={styles.completadoIcon}>
-            <Ionicons name="checkmark-circle" size={80} color={Colors.primary} />
+            <Ionicons name="checkmark-circle" size={80} color={colors.primary} />
           </View>
           <Text style={styles.completadoTitulo}>{t('lessonCompleted')}</Text>
           <Text style={styles.completadoSubtitulo}>{leccion.titulo}</Text>
           
           <View style={styles.recompensasRow}>
             <View style={styles.recompensaItem}>
-              <Ionicons name="flash" size={32} color={Colors.accent} />
+              <Ionicons name="flash" size={32} color={colors.accent} />
               <Text style={styles.recompensaValor}>+{rewardData?.xp_added || leccion.xp} XP</Text>
             </View>
             <View style={styles.recompensaItem}>
@@ -826,7 +826,7 @@ export default function LeccionScreen() {
           {/* Level Up notification */}
           {rewardData?.leveled_up && (
             <View style={styles.levelUpBanner} data-testid="level-up-banner">
-              <Ionicons name="arrow-up-circle" size={28} color={Colors.accent} />
+              <Ionicons name="arrow-up-circle" size={28} color={colors.accent} />
               <Text style={styles.levelUpText}>{t('levelUp')} {rewardData.level}!</Text>
             </View>
           )}
@@ -837,7 +837,7 @@ export default function LeccionScreen() {
               <Text style={styles.newAchievementsTitle}>{t('newAchievement')}</Text>
               {rewardData.new_achievements.map((ach: any) => (
                 <View key={ach.id} style={styles.achievementItem}>
-                  <Ionicons name={ach.icon as any} size={24} color={Colors.accent} />
+                  <Ionicons name={ach.icon as any} size={24} color={colors.accent} />
                   <View style={styles.achievementInfo}>
                     <Text style={styles.achievementName}>{ach.name}</Text>
                     <Text style={styles.achievementDesc}>{ach.description}</Text>
@@ -860,7 +860,7 @@ export default function LeccionScreen() {
                 <Text style={styles.totalStatLabel}>{rewardData.xp} XP</Text>
               </View>
               <View style={styles.totalStatItem}>
-                <Ionicons name="flame" size={20} color={Colors.accentOrange} />
+                <Ionicons name="flame" size={20} color={colors.accentOrange} />
                 <Text style={styles.totalStatValue}>{rewardData.streak_days}</Text>
                 <Text style={styles.totalStatLabel}>{t('days')}</Text>
               </View>
@@ -869,7 +869,7 @@ export default function LeccionScreen() {
 
           <Card style={styles.ejercicioCard}>
             <View style={styles.ejercicioHeader}>
-              <Ionicons name="fitness" size={24} color={Colors.primary} />
+              <Ionicons name="fitness" size={24} color={colors.primary} />
               <Text style={styles.ejercicioTitulo}>{t('practicalExercise')}</Text>
             </View>
             <Text style={styles.ejercicioTexto}>{leccion.ejercicioPractico}</Text>
@@ -885,12 +885,14 @@ export default function LeccionScreen() {
 
   const pasoActualData = leccion.pasos[pasoActual];
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.headerProgress}>
           <Text style={styles.headerProgressText}>
@@ -898,7 +900,7 @@ export default function LeccionScreen() {
           </Text>
         </View>
         <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-          <Ionicons name="close" size={24} color={Colors.text} />
+          <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -923,7 +925,7 @@ export default function LeccionScreen() {
         {/* Título del paso */}
         <Text style={styles.pasoTitulo}>{pasoActualData.titulo}</Text>
         <View style={styles.pasoDuracion}>
-          <Ionicons name="time-outline" size={16} color={Colors.textSecondary} />
+          <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
           <Text style={styles.pasoDuracionText}>{pasoActualData.duracion}</Text>
         </View>
 
@@ -935,7 +937,7 @@ export default function LeccionScreen() {
         {/* Tip */}
         <View style={styles.tipContainer}>
           <View style={styles.tipIcon}>
-            <Ionicons name="bulb" size={24} color={Colors.accent} />
+            <Ionicons name="bulb" size={24} color={colors.accent} />
           </View>
           <View style={styles.tipContent}>
             <Text style={styles.tipLabel}>{t('proTip')}</Text>
@@ -949,7 +951,7 @@ export default function LeccionScreen() {
             <Text style={styles.objetivosTitulo}>{t('whatYouWillLearn')}</Text>
             {leccion.objetivos.map((objetivo, index) => (
               <View key={index} style={styles.objetivoItem}>
-                <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+                <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
                 <Text style={styles.objetivoTexto}>{objetivo}</Text>
               </View>
             ))}
@@ -962,7 +964,7 @@ export default function LeccionScreen() {
             <Text style={styles.erroresTitulo}>{t('commonMistakes')}</Text>
             {leccion.erroresComunes.map((error, index) => (
               <View key={index} style={styles.errorItem}>
-                <Ionicons name="close-circle" size={20} color={Colors.error} />
+                <Ionicons name="close-circle" size={20} color={colors.error} />
                 <Text style={styles.errorTexto}>{error}</Text>
               </View>
             ))}
@@ -974,7 +976,7 @@ export default function LeccionScreen() {
       <View style={styles.navigationContainer}>
         {pasoActual > 0 ? (
           <TouchableOpacity style={styles.anteriorButton} onPress={handleAnterior}>
-            <Ionicons name="arrow-back" size={20} color={Colors.primary} />
+            <Ionicons name="arrow-back" size={20} color={colors.primary} />
             <Text style={styles.anteriorButtonText}>{t('previous')}</Text>
           </TouchableOpacity>
         ) : (
@@ -988,7 +990,7 @@ export default function LeccionScreen() {
           <Ionicons 
             name={pasoActual === leccion.pasos.length - 1 ? 'checkmark' : 'arrow-forward'} 
             size={20} 
-            color={Colors.white} 
+            color={colors.white} 
           />
         </TouchableOpacity>
       </View>
@@ -996,10 +998,10 @@ export default function LeccionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   header: {
     flexDirection: 'row',
@@ -1015,7 +1017,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerProgress: {
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: C.primaryLight,
     paddingVertical: 6,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
@@ -1023,7 +1025,7 @@ const styles = StyleSheet.create({
   headerProgressText: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.primary,
+    color: C.primary,
   },
   closeButton: {
     width: 40,
@@ -1037,12 +1039,12 @@ const styles = StyleSheet.create({
   },
   progressBarTrack: {
     height: 6,
-    backgroundColor: Colors.grayLight,
+    backgroundColor: C.grayLight,
     borderRadius: 3,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     borderRadius: 3,
   },
   scrollView: {
@@ -1061,7 +1063,7 @@ const styles = StyleSheet.create({
   pasoTitulo: {
     fontSize: FontSizes.xxl,
     fontWeight: '800',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.xs,
   },
   pasoDuracion: {
@@ -1072,19 +1074,19 @@ const styles = StyleSheet.create({
   },
   pasoDuracionText: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   contenidoCard: {
     marginBottom: Spacing.lg,
   },
   contenidoTexto: {
     fontSize: FontSizes.lg,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 26,
   },
   tipContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
@@ -1094,7 +1096,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1104,12 +1106,12 @@ const styles = StyleSheet.create({
   tipLabel: {
     fontSize: FontSizes.sm,
     fontWeight: '700',
-    color: Colors.accent,
+    color: C.accent,
     marginBottom: 4,
   },
   tipTexto: {
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 22,
   },
   objetivosSection: {
@@ -1118,7 +1120,7 @@ const styles = StyleSheet.create({
   objetivosTitulo: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.md,
   },
   objetivoItem: {
@@ -1130,7 +1132,7 @@ const styles = StyleSheet.create({
   objetivoTexto: {
     flex: 1,
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 22,
   },
   erroresSection: {
@@ -1142,7 +1144,7 @@ const styles = StyleSheet.create({
   erroresTitulo: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.error,
+    color: C.error,
     marginBottom: Spacing.md,
   },
   errorItem: {
@@ -1154,16 +1156,16 @@ const styles = StyleSheet.create({
   errorTexto: {
     flex: 1,
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 22,
   },
   navigationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: Spacing.md,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderTopWidth: 1,
-    borderTopColor: Colors.grayLight,
+    borderTopColor: C.grayLight,
   },
   placeholder: {
     width: 100,
@@ -1178,13 +1180,13 @@ const styles = StyleSheet.create({
   anteriorButtonText: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.primary,
+    color: C.primary,
   },
   siguienteButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.lg,
@@ -1192,7 +1194,7 @@ const styles = StyleSheet.create({
   siguienteButtonText: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   completadoContainer: {
     padding: Spacing.xl,
@@ -1204,12 +1206,12 @@ const styles = StyleSheet.create({
   completadoTitulo: {
     fontSize: FontSizes.title,
     fontWeight: '800',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.xs,
   },
   completadoSubtitulo: {
     fontSize: FontSizes.lg,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginBottom: Spacing.xl,
   },
   recompensasRow: {
@@ -1227,7 +1229,7 @@ const styles = StyleSheet.create({
   recompensaValor: {
     fontSize: FontSizes.xl,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   ejercicioCard: {
     width: '100%',
@@ -1242,15 +1244,15 @@ const styles = StyleSheet.create({
   ejercicioTitulo: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.primary,
+    color: C.primary,
   },
   ejercicioTexto: {
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
     lineHeight: 24,
   },
   volverButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
     borderRadius: BorderRadius.lg,
@@ -1258,13 +1260,13 @@ const styles = StyleSheet.create({
   volverButtonText: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.white,
+    color: C.white,
   },
   levelUpBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.lg,
@@ -1275,7 +1277,7 @@ const styles = StyleSheet.create({
   levelUpText: {
     fontSize: FontSizes.xl,
     fontWeight: '800',
-    color: Colors.accent,
+    color: C.accent,
   },
   newAchievementsContainer: {
     width: '100%',
@@ -1284,14 +1286,14 @@ const styles = StyleSheet.create({
   newAchievementsTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.sm,
     textAlign: 'center',
   },
   achievementItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.accentLight,
+    backgroundColor: C.accentLight,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.sm,
@@ -1303,26 +1305,26 @@ const styles = StyleSheet.create({
   achievementName: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.text,
+    color: C.text,
   },
   achievementDesc: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   achievementBones: {
     fontSize: FontSizes.md,
     fontWeight: '700',
-    color: Colors.accent,
+    color: C.accent,
   },
   totalStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.lg,
-    ...Shadows.sm,
+    ...S.sm,
   },
   totalStatItem: {
     alignItems: 'center',
@@ -1331,10 +1333,10 @@ const styles = StyleSheet.create({
   totalStatValue: {
     fontSize: FontSizes.lg,
     fontWeight: '800',
-    color: Colors.text,
+    color: C.text,
   },
   totalStatLabel: {
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
 });

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -106,7 +106,7 @@ export default function JuegoScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [pasoActual, setPasoActual] = useState(0);
   const [juegoCompletado, setJuegoCompletado] = useState(false);
   const [rewardData, setRewardData] = useState<any>(null);
@@ -156,7 +156,7 @@ export default function JuegoScreen() {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <ScrollView contentContainerStyle={styles.completadoContainer}>
           <View style={styles.completadoIcon}>
-            <Ionicons name="game-controller" size={80} color={Colors.primary} />
+            <Ionicons name="game-controller" size={80} color={colors.primary} />
           </View>
           <Text style={styles.completadoTitulo}>{t('exercisesCompleted')}</Text>
           <Text style={styles.completadoSubtitulo}>{juego.titulo}</Text>
@@ -182,6 +182,8 @@ export default function JuegoScreen() {
     );
   }
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header Image */}
@@ -189,7 +191,7 @@ export default function JuegoScreen() {
         <Image source={{ uri: juego.imagen }} style={styles.heroImage} />
         <View style={styles.heroOverlay} />
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={Colors.white} />
+          <Ionicons name="arrow-back" size={24} color={colors.white} />
         </TouchableOpacity>
         <View style={styles.heroContent}>
           <View style={styles.difficultyBadge}>
@@ -198,7 +200,7 @@ export default function JuegoScreen() {
           <Text style={styles.heroTitle}>{juego.titulo}</Text>
           <View style={styles.heroMeta}>
             <View style={styles.metaItem}>
-              <Ionicons name="time-outline" size={16} color={Colors.white} />
+              <Ionicons name="time-outline" size={16} color={colors.white} />
               <Text style={styles.metaText}>{juego.duracion}</Text>
             </View>
             <View style={styles.metaItem}>
@@ -244,7 +246,7 @@ export default function JuegoScreen() {
             <Text style={styles.sectionTitle}>{t('benefits')}</Text>
             {juego.beneficios.map((beneficio, index) => (
               <View key={index} style={styles.beneficioItem}>
-                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                <Ionicons name="checkmark-circle" size={20} color={colors.success} />
                 <Text style={styles.beneficioText}>{beneficio}</Text>
               </View>
             ))}
@@ -257,7 +259,7 @@ export default function JuegoScreen() {
             <Text style={styles.sectionTitle}>{t('materials')}</Text>
             {juego.materialesNecesarios.map((material, index) => (
               <View key={index} style={styles.materialItem}>
-                <Ionicons name="ellipse" size={8} color={Colors.primary} />
+                <Ionicons name="ellipse" size={8} color={colors.primary} />
                 <Text style={styles.materialText}>{material}</Text>
               </View>
             ))}
@@ -270,7 +272,7 @@ export default function JuegoScreen() {
             <Text style={styles.sectionTitle}>{t('proTip')}</Text>
             {juego.consejos.map((consejo, index) => (
               <View key={index} style={styles.consejoItem}>
-                <Ionicons name="bulb" size={20} color={Colors.accent} />
+                <Ionicons name="bulb" size={20} color={colors.accent} />
                 <Text style={styles.consejoText}>{consejo}</Text>
               </View>
             ))}
@@ -282,7 +284,7 @@ export default function JuegoScreen() {
       <View style={styles.navigationContainer}>
         {pasoActual > 0 ? (
           <TouchableOpacity style={styles.anteriorButton} onPress={handleAnteriorPaso}>
-            <Ionicons name="arrow-back" size={20} color={Colors.primary} />
+            <Ionicons name="arrow-back" size={20} color={colors.primary} />
             <Text style={styles.anteriorButtonText}>{t('previous')}</Text>
           </TouchableOpacity>
         ) : (
@@ -296,7 +298,7 @@ export default function JuegoScreen() {
           <Ionicons 
             name={pasoActual === juego.pasos.length - 1 ? 'checkmark' : 'arrow-forward'} 
             size={20} 
-            color={Colors.white} 
+            color={colors.white} 
           />
         </TouchableOpacity>
       </View>
@@ -304,10 +306,10 @@ export default function JuegoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   heroContainer: {
     height: 220,
@@ -340,21 +342,21 @@ const styles = StyleSheet.create({
   },
   difficultyBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.accent,
+    backgroundColor: C.accent,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: BorderRadius.sm,
     marginBottom: Spacing.xs,
   },
   difficultyText: {
-    color: Colors.white,
+    color: C.white,
     fontSize: FontSizes.xs,
     fontWeight: '600',
   },
   heroTitle: {
     fontSize: FontSizes.xxl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: C.white,
     marginBottom: Spacing.xs,
   },
   heroMeta: {
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   metaText: {
-    color: Colors.white,
+    color: C.white,
     fontSize: FontSizes.sm,
   },
   scrollView: {
@@ -383,7 +385,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: FontSizes.sm,
-    color: Colors.gray,
+    color: C.gray,
     marginBottom: Spacing.xs,
   },
   progressDots: {
@@ -394,10 +396,10 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: C.lightGray,
   },
   progressDotActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
   },
   pasoCard: {
     padding: Spacing.lg,
@@ -413,24 +415,24 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   pasoNumberText: {
     fontSize: FontSizes.lg,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: C.white,
   },
   pasoTitulo: {
     fontSize: FontSizes.lg,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
     flex: 1,
   },
   pasoInstrucciones: {
     fontSize: FontSizes.md,
-    color: Colors.darkGray,
+    color: C.darkGray,
     lineHeight: 24,
   },
   section: {
@@ -439,7 +441,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.sm,
   },
   beneficioItem: {
@@ -451,7 +453,7 @@ const styles = StyleSheet.create({
   beneficioText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: Colors.text,
+    color: C.text,
   },
   materialItem: {
     flexDirection: 'row',
@@ -462,7 +464,7 @@ const styles = StyleSheet.create({
   materialText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: Colors.text,
+    color: C.text,
   },
   consejoItem: {
     flexDirection: 'row',
@@ -473,16 +475,16 @@ const styles = StyleSheet.create({
   consejoText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: Colors.text,
+    color: C.text,
   },
   navigationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: Spacing.md,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
+    borderTopColor: C.lightGray,
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -499,21 +501,21 @@ const styles = StyleSheet.create({
   },
   anteriorButtonText: {
     fontSize: FontSizes.md,
-    color: Colors.primary,
+    color: C.primary,
     fontWeight: '500',
   },
   siguienteButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.full,
   },
   siguienteButtonText: {
     fontSize: FontSizes.md,
-    color: Colors.white,
+    color: C.white,
     fontWeight: '600',
   },
   completadoContainer: {
@@ -528,16 +530,16 @@ const styles = StyleSheet.create({
   completadoTitulo: {
     fontSize: FontSizes.xxl,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.xs,
   },
   completadoSubtitulo: {
     fontSize: FontSizes.lg,
-    color: Colors.gray,
+    color: C.gray,
     marginBottom: Spacing.xl,
   },
   recompensaCard: {
-    backgroundColor: Colors.accent + '20',
+    backgroundColor: C.accent + '20',
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
     borderRadius: BorderRadius.lg,
@@ -546,17 +548,17 @@ const styles = StyleSheet.create({
   recompensaTexto: {
     fontSize: FontSizes.xl,
     fontWeight: 'bold',
-    color: Colors.accent,
+    color: C.accent,
   },
   volverButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
     borderRadius: BorderRadius.full,
   },
   volverButtonText: {
     fontSize: FontSizes.md,
-    color: Colors.white,
+    color: C.white,
     fontWeight: '600',
   },
   statsRow: {
@@ -565,12 +567,12 @@ const styles = StyleSheet.create({
   },
   statsText: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   levelUpText: {
     fontSize: FontSizes.lg,
     fontWeight: '800',
-    color: Colors.primary,
+    color: C.primary,
     marginTop: Spacing.xs,
   },
 });

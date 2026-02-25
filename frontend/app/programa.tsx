@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Shadows } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -134,7 +134,7 @@ export default function ProgramaScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const [leccionesCompletadas, setLeccionesCompletadas] = useState<string[]>([]);
 
   const programa = PROGRAMAS_DB[id || 'educacion-basica'];
@@ -163,6 +163,8 @@ export default function ProgramaScreen() {
     );
   };
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header Image */}
@@ -170,7 +172,7 @@ export default function ProgramaScreen() {
         <Image source={{ uri: programa.imagen }} style={styles.heroImage} />
         <View style={styles.heroOverlay} />
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={Colors.white} />
+          <Ionicons name="arrow-back" size={24} color={colors.white} />
         </TouchableOpacity>
         <View style={styles.heroContent}>
           <View style={[styles.categoryBadge, { backgroundColor: programa.categoriaColor }]}>
@@ -180,11 +182,11 @@ export default function ProgramaScreen() {
           <Text style={styles.heroSubtitle}>{programa.subtitulo}</Text>
           <View style={styles.heroMeta}>
             <View style={styles.metaItem}>
-              <Ionicons name="time-outline" size={16} color={Colors.white} />
+              <Ionicons name="time-outline" size={16} color={colors.white} />
               <Text style={styles.metaText}>{programa.duracionTotal}</Text>
             </View>
             <View style={styles.metaItem}>
-              <Ionicons name="book-outline" size={16} color={Colors.white} />
+              <Ionicons name="book-outline" size={16} color={colors.white} />
               <Text style={styles.metaText}>{programa.lecciones.length} {t('lessons')}</Text>
             </View>
             <View style={styles.metaItem}>
@@ -222,7 +224,7 @@ export default function ProgramaScreen() {
           <Text style={styles.sectionTitle}>{t('whatYouWillLearn')}</Text>
           {programa.objetivos.map((objetivo, index) => (
             <View key={index} style={styles.objetivoItem}>
-              <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
               <Text style={styles.objetivoText}>{objetivo}</Text>
             </View>
           ))}
@@ -245,7 +247,7 @@ export default function ProgramaScreen() {
                 onPress={() => toggleLeccionCompletada(leccion.id)}
               >
                 {leccionesCompletadas.includes(leccion.id) && (
-                  <Ionicons name="checkmark" size={16} color={Colors.white} />
+                  <Ionicons name="checkmark" size={16} color={colors.white} />
                 )}
               </TouchableOpacity>
               <View style={styles.leccionNumber}>
@@ -261,7 +263,7 @@ export default function ProgramaScreen() {
                 <Text style={styles.leccionSubtitle}>{leccion.descripcion}</Text>
                 <View style={styles.leccionMeta}>
                   <View style={styles.leccionMetaItem}>
-                    <Ionicons name="time-outline" size={14} color={Colors.gray} />
+                    <Ionicons name="time-outline" size={14} color={colors.gray} />
                     <Text style={styles.leccionMetaText}>{leccion.duracion}</Text>
                   </View>
                   <View style={styles.leccionMetaItem}>
@@ -269,7 +271,7 @@ export default function ProgramaScreen() {
                   </View>
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+              <Ionicons name="chevron-forward" size={20} color={colors.gray} />
             </TouchableOpacity>
           ))}
         </View>
@@ -280,10 +282,10 @@ export default function ProgramaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (C: any, S: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: C.background,
   },
   heroContainer: {
     height: 280,
@@ -322,19 +324,19 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   categoryText: {
-    color: Colors.white,
+    color: C.white,
     fontSize: FontSizes.xs,
     fontWeight: '600',
   },
   heroTitle: {
     fontSize: FontSizes.xxl,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: C.white,
     marginBottom: 4,
   },
   heroSubtitle: {
     fontSize: FontSizes.md,
-    color: Colors.white,
+    color: C.white,
     opacity: 0.9,
     marginBottom: Spacing.sm,
   },
@@ -348,7 +350,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   metaText: {
-    color: Colors.white,
+    color: C.white,
     fontSize: FontSizes.sm,
   },
   scrollView: {
@@ -370,30 +372,30 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   progressPercent: {
     fontSize: FontSizes.lg,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: C.primary,
   },
   progressBarContainer: {
     marginBottom: Spacing.xs,
   },
   progressBar: {
     height: 8,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: C.lightGray,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     borderRadius: 4,
   },
   progressSubtext: {
     fontSize: FontSizes.sm,
-    color: Colors.gray,
+    color: C.gray,
   },
   section: {
     marginBottom: Spacing.lg,
@@ -401,12 +403,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.lg,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
     marginBottom: Spacing.sm,
   },
   descriptionText: {
     fontSize: FontSizes.md,
-    color: Colors.darkGray,
+    color: C.darkGray,
     lineHeight: 24,
   },
   objetivoItem: {
@@ -418,36 +420,36 @@ const styles = StyleSheet.create({
   objetivoText: {
     flex: 1,
     fontSize: FontSizes.md,
-    color: Colors.text,
+    color: C.text,
   },
   leccionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     marginBottom: Spacing.sm,
-    ...Shadows.sm,
+    ...S.sm,
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: Colors.gray,
+    borderColor: C.gray,
     marginRight: Spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxComplete: {
-    backgroundColor: Colors.success,
-    borderColor: Colors.success,
+    backgroundColor: C.success,
+    borderColor: C.success,
   },
   leccionNumber: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: C.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.sm,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
   leccionNumberText: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: Colors.primary,
+    color: C.primary,
   },
   leccionContent: {
     flex: 1,
@@ -463,15 +465,15 @@ const styles = StyleSheet.create({
   leccionTitle: {
     fontSize: FontSizes.md,
     fontWeight: '600',
-    color: Colors.text,
+    color: C.text,
   },
   leccionTitleComplete: {
     textDecorationLine: 'line-through',
-    color: Colors.gray,
+    color: C.gray,
   },
   leccionSubtitle: {
     fontSize: FontSizes.sm,
-    color: Colors.gray,
+    color: C.gray,
     marginTop: 2,
   },
   leccionMeta: {
@@ -486,6 +488,6 @@ const styles = StyleSheet.create({
   },
   leccionMetaText: {
     fontSize: FontSizes.xs,
-    color: Colors.gray,
+    color: C.gray,
   },
 });
