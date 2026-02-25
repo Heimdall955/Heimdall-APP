@@ -339,6 +339,24 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </Modal>
 
+        {/* Quick Actions Bar - Always visible */}
+        {!isLoading && (
+          <View style={styles.quickBar} data-testid="quick-bar">
+            <TouchableOpacity style={styles.quickBarBtn} onPress={pickImage} data-testid="quick-photo-btn">
+              <Ionicons name="camera" size={20} color={Colors.primary} />
+              <Text style={styles.quickBarLabel}>{attachLabels.photo}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickBarBtn} onPress={pickVideo} data-testid="quick-video-btn">
+              <Ionicons name="videocam" size={20} color={Colors.accentOrange} />
+              <Text style={styles.quickBarLabel}>{attachLabels.video}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickBarBtn} onPress={pickPDF} data-testid="quick-pdf-btn">
+              <Ionicons name="document-text" size={20} color={Colors.accentPurple} />
+              <Text style={styles.quickBarLabel}>{attachLabels.bloodTest}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Input Area */}
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
