@@ -558,6 +558,166 @@ const LECCIONES_DB: Record<string, Leccion> = {
     ],
     erroresComunes: ['Esperar a tener todas las vacunas para salir', 'Forzar interacciones', 'Exponer a demasiadas cosas', 'No premiar durante las experiencias'],
     ejercicioPractico: 'Haz una lista de 5 cosas que tu cachorro aún no ha experimentado positivamente.'
+  },
+  'presentaciones-perros': {
+    id: 'presentaciones-perros',
+    titulo: 'Presentaciones Seguras',
+    subtitulo: 'Conocer otros perros correctamente',
+    nivel: 'Intermedio',
+    duracion: '25 min',
+    xp: 30,
+    huesos: 12,
+    imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+    descripcion: 'Aprende a presentar a tu perro con otros perros de forma segura y positiva.',
+    objetivos: ['Leer el lenguaje corporal canino', 'Hacer presentaciones en paralelo', 'Identificar señales de estrés', 'Saber cuándo separar'],
+    pasos: [
+      { titulo: 'Antes del Encuentro', contenido: 'Elige un espacio neutral (no el parque habitual). Ambos perros con correa floja. Mantén distancia inicial de 5-10 metros.', tip: 'Nunca presentes perros en casa de uno de ellos. El territorio genera conflicto.', duracion: '6 min' },
+      { titulo: 'Caminata Paralela', contenido: 'Camina en la misma dirección con el otro perro a 3-4 metros de distancia. Premia la calma. Gradualmente reduce distancia.', tip: 'Caminar juntos crea vínculo sin la presión del cara a cara.', duracion: '7 min' },
+      { titulo: 'El Primer Contacto', contenido: 'Cuando ambos estén relajados, permite un olfateo breve (3 segundos). Llama a tu perro y prémialo. Repite.', tip: 'Los olfateos deben ser cortos. Los largos generan tensión.', duracion: '6 min' },
+      { titulo: 'Señales de Alerta', contenido: 'Pelo erizado, cola rígida, mirada fija, gruñido, labios tensos. Si ves estas señales, aumenta distancia inmediatamente.', tip: 'Mejor prevenir que lamentar. Separa antes de que escale.', duracion: '6 min' }
+    ],
+    erroresComunes: ['Presentar cara a cara', 'Correa tensa (transmite tu estrés)', 'Dejar que un perro acose al otro', 'No intervenir ante señales de estrés'],
+    ejercicioPractico: 'Practica una caminata paralela con un perro conocido y tranquilo.'
+  },
+  'interaccion-humanos': {
+    id: 'interaccion-humanos',
+    titulo: 'Interacción con Humanos',
+    subtitulo: 'Saludos apropiados con personas',
+    nivel: 'Básico',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    descripcion: 'Enseña a tu perro a saludar personas de forma educada sin saltar ni abalanzarse.',
+    objetivos: ['Saludar sin saltar', 'Aceptar caricias correctamente', 'Respetar el espacio personal', 'Manejar la excitación'],
+    pasos: [
+      { titulo: 'La Regla de Oro', contenido: 'Tu perro solo recibe atención cuando tiene las 4 patas en el suelo. Si salta, la persona se da la vuelta e ignora.', tip: 'Toda la familia y visitantes deben seguir esta regla.', duracion: '5 min' },
+      { titulo: 'El Sentado Automático', contenido: 'Practica: cuando alguien se acerca, pide sentado. La persona solo saluda si está sentado. Si se levanta, la persona se aleja.', tip: 'Haz que sentarse sea más rentable que saltar.', duracion: '5 min' },
+      { titulo: 'Caricias Correctas', contenido: 'Enseña a las personas a acariciar por el pecho o lateral, no por encima de la cabeza. Deja que el perro inicie el contacto.', tip: 'La regla de los 3 segundos: acaricia 3 segundos, para, y ve si pide más.', duracion: '5 min' },
+      { titulo: 'Niños y Personas Especiales', contenido: 'Con niños, siempre supervisión directa. Enseña a los niños a ser suaves. Con personas con miedo, mantén distancia y no fuerces.', tip: 'Los niños nunca deben acercarse a un perro dormido o comiendo.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Permitir que salte "porque es cariñoso"', 'Dejar que extraños lo acaricien sin consentimiento del perro', 'No supervisar con niños', 'Gritar cuando salta (le excita más)'],
+    ejercicioPractico: 'Practica el saludo sentado con 3 personas diferentes hoy.'
+  },
+  'nuevos-entornos': {
+    id: 'nuevos-entornos',
+    titulo: 'Nuevos Entornos',
+    subtitulo: 'Explorar con confianza',
+    nivel: 'Intermedio',
+    duracion: '25 min',
+    xp: 30,
+    huesos: 12,
+    imagen: 'https://images.unsplash.com/photo-1558929996-da64ba858215?w=800',
+    descripcion: 'Cómo introducir a tu perro a nuevos lugares de forma gradual y positiva.',
+    objetivos: ['Preparar salidas a nuevos lugares', 'Leer las señales de tu perro', 'Usar premios estratégicamente', 'Crear experiencias positivas'],
+    pasos: [
+      { titulo: 'Planificación', contenido: 'Elige un lugar nuevo pero no abrumador. Ve en horario tranquilo. Lleva premios de alto valor y agua.', tip: 'Mejor un paseo corto positivo que uno largo estresante.', duracion: '6 min' },
+      { titulo: 'Llegada al Lugar', contenido: 'Aparca lejos y camina hacia el lugar. Observa a tu perro. Si muestra estrés, mantén distancia y premia la calma.', tip: 'Deja que tu perro observe antes de entrar.', duracion: '7 min' },
+      { titulo: 'Exploración Guiada', contenido: 'Deja que olfatee libremente (con correa larga). Premia cada interacción positiva con el entorno. No le arrastres hacia nada.', tip: 'Olfatear es la forma natural del perro de procesar información.', duracion: '7 min' },
+      { titulo: 'Salida Positiva', contenido: 'Sal del lugar ANTES de que tu perro se estrese. Termina siempre en positivo. La última experiencia es la que más recuerda.', tip: 'Mejor salir con ganas de más que agotado y estresado.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Ir a lugares muy estimulantes al principio', 'Forzar al perro a acercarse', 'Sesiones demasiado largas', 'No llevar premios suficientes'],
+    ejercicioPractico: 'Visita un lugar nuevo con tu perro por 10 minutos, premiando toda interacción positiva.'
+  },
+  'sonidos-estimulos': {
+    id: 'sonidos-estimulos',
+    titulo: 'Sonidos y Estímulos',
+    subtitulo: 'Habituación gradual al ruido',
+    nivel: 'Intermedio',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=800',
+    descripcion: 'Ayuda a tu perro a acostumbrarse a sonidos cotidianos y reducir el miedo al ruido.',
+    objetivos: ['Identificar sonidos problemáticos', 'Aplicar desensibilización', 'Crear asociaciones positivas', 'Manejar tormentas y petardos'],
+    pasos: [
+      { titulo: 'Identifica los Miedos', contenido: 'Haz una lista de sonidos que asustan a tu perro: truenos, petardos, aspiradora, timbre, coches, etc.', tip: 'Observa su reacción: orejas atrás, temblar, esconderse, jadear.', duracion: '5 min' },
+      { titulo: 'Grabaciones a Bajo Volumen', contenido: 'Busca en YouTube grabaciones del sonido. Ponlo a volumen MUY bajo mientras tu perro come o juega con su juguete favorito.', tip: 'Si deja de comer, el volumen es demasiado alto.', duracion: '5 min' },
+      { titulo: 'Sube Gradualmente', contenido: 'Cada sesión sube ligeramente el volumen. Solo aumenta si en el nivel actual está completamente relajado.', tip: 'Este proceso puede llevar semanas. La paciencia es clave.', duracion: '5 min' },
+      { titulo: 'En la Vida Real', contenido: 'Cuando escuche el sonido real, actúa normal. Dale premios calmadamente. Nunca lo consueles con voz aguda (confirma que hay peligro).', tip: 'Tu calma es contagiosa. Si estás tranquilo, él aprenderá que no hay peligro.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Empezar con volumen alto', 'Forzar la exposición', 'Consolar con voz aguda y ansiosa', 'No ser consistente con las sesiones'],
+    ejercicioPractico: 'Pon una grabación de truenos a volumen bajo durante 5 minutos mientras tu perro come.'
+  },
+  'parque-canino': {
+    id: 'parque-canino',
+    titulo: 'El Parque Canino',
+    subtitulo: 'Juego social seguro',
+    nivel: 'Avanzado',
+    duracion: '30 min',
+    xp: 35,
+    huesos: 15,
+    imagen: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800',
+    descripcion: 'Guía completa para usar parques caninos de forma segura y beneficiosa.',
+    objetivos: ['Evaluar si el parque es seguro', 'Supervisar el juego activamente', 'Intervenir cuando sea necesario', 'Saber cuándo irse'],
+    pasos: [
+      { titulo: 'Antes de Entrar', contenido: 'Observa desde fuera: ¿cuántos perros hay? ¿Están jugando bien? ¿Los dueños están atentos? Si algo no te convence, no entres.', tip: 'Mejor ir cuando hay pocos perros, especialmente las primeras veces.', duracion: '7 min' },
+      { titulo: 'La Entrada', contenido: 'Entra con correa puesta. Suelta cuando estés dentro y el ambiente sea calmado. Quédate cerca para intervenir si es necesario.', tip: 'No entres si tu perro está sobre-excitado. Espera a que se calme.', duracion: '8 min' },
+      { titulo: 'Supervisión Activa', contenido: 'NO uses el móvil. Observa constantemente. Juego sano: se turnan persiguiéndose, pausas voluntarias, lenguaje corporal relajado.', tip: 'Si un perro siempre persigue y el otro siempre huye, no es buen juego.', duracion: '8 min' },
+      { titulo: 'Cuándo Irse', contenido: 'Sal si: hay un perro agresivo, tu perro está estresado, la energía del grupo es caótica, o después de 20-30 minutos máximo.', tip: 'Es mejor irse pronto y que quiera volver que quedarse demasiado.', duracion: '7 min' }
+    ],
+    erroresComunes: ['No supervisar activamente', 'Llevar comida al parque (causa peleas)', 'Dejar que un perro acose al tuyo', 'Quedarse demasiado tiempo'],
+    ejercicioPractico: 'Visita un parque canino y observa desde fuera 10 minutos. Identifica juego sano vs juego problemático.'
+  },
+  'rutina-cachorro': {
+    id: 'rutina-cachorro',
+    titulo: 'Rutina del Cachorro',
+    subtitulo: 'Horarios y hábitos saludables',
+    nivel: 'Cachorros',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=800',
+    descripcion: 'Establece una rutina diaria que ayude a tu cachorro a sentirse seguro y aprender rápido.',
+    objetivos: ['Crear un horario diario', 'Equilibrar actividad y descanso', 'Establecer hábitos de alimentación', 'Planificar tiempo de juego y entrenamiento'],
+    pasos: [
+      { titulo: 'El Horario Básico', contenido: 'Mañana: baño, comida, juego corto, siesta. Mediodía: baño, comida, paseo, siesta. Tarde: juego, entrenamiento, comida, rutina nocturna.', tip: 'Los cachorros necesitan 18-20 horas de sueño al día.', duracion: '5 min' },
+      { titulo: 'Alimentación', contenido: 'Cachorros de 2-4 meses: 4 comidas/día. De 4-6 meses: 3 comidas/día. De 6+ meses: 2 comidas/día. Siempre a las mismas horas.', tip: 'Retira la comida después de 15 minutos si no la come. Aprenderá a comer cuando toca.', duracion: '5 min' },
+      { titulo: 'Siestas Programadas', contenido: 'Después de cada periodo de actividad (20-30 min), guía al cachorro a su cama o transportín para una siesta obligatoria.', tip: 'Un cachorro sobre-estimulado muerde más y aprende peor.', duracion: '5 min' },
+      { titulo: 'Sesiones de Entrenamiento', contenido: '3-5 sesiones de 5 minutos al día. Cortas, divertidas y con muchos premios. Mejor antes de comer (más motivación).', tip: 'Termina siempre con éxito. Si no sale bien, pide algo fácil y premia.', duracion: '5 min' }
+    ],
+    erroresComunes: ['No dar suficiente descanso', 'Horarios caóticos', 'Sesiones de entrenamiento muy largas', 'No adaptar la rutina a la edad'],
+    ejercicioPractico: 'Escribe la rutina diaria de tu cachorro con horarios específicos y cúmplela 3 días.'
+  },
+  'socializacion-temprana': {
+    id: 'socializacion-temprana',
+    titulo: 'Socialización Temprana',
+    subtitulo: 'Experiencias positivas para cachorros',
+    nivel: 'Cachorros',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
+    descripcion: 'Cómo socializar a tu cachorro de forma segura durante la ventana crítica de desarrollo.',
+    objetivos: ['Planificar experiencias positivas', 'Socializar antes de completar vacunas', 'Crear una lista de exposiciones', 'Reconocer señales de estrés en cachorros'],
+    pasos: [
+      { titulo: 'La Regla 100', contenido: 'En sus primeros 100 días contigo, intenta que conozca: 100 personas diferentes, 100 superficies, 100 experiencias nuevas. Todo POSITIVO.', tip: 'Calidad sobre cantidad. 10 experiencias positivas > 100 estresantes.', duracion: '5 min' },
+      { titulo: 'Antes de las Vacunas', contenido: 'Puedes llevarlo en brazos a ver el mundo, invitar personas a casa, exponerle a sonidos, y llevarlo a casas con perros vacunados.', tip: 'Evita suelos donde pasan muchos perros desconocidos hasta completar vacunas.', duracion: '5 min' },
+      { titulo: 'Clases de Cachorro', contenido: 'Busca clases de socialización para cachorros (puppy classes). Son supervisadas, con perros de edad similar, y en entorno controlado.', tip: 'Las buenas clases incluyen tiempo de juego supervisado y ejercicios básicos.', duracion: '5 min' },
+      { titulo: 'Diario de Socialización', contenido: 'Lleva un diario: anota qué experimentó, su reacción, y si necesita más exposición a algo. Esto te ayuda a planificar.', tip: 'Usa la app para registrar estas experiencias y hacer seguimiento.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Esperar a tener todas las vacunas', 'Exponer a demasiadas cosas en un día', 'No observar señales de estrés', 'Forzar interacciones'],
+    ejercicioPractico: 'Lleva a tu cachorro (en brazos si no tiene vacunas completas) a observar un parque durante 10 minutos.'
+  },
+  'juego-apropiado': {
+    id: 'juego-apropiado',
+    titulo: 'Juego Apropiado',
+    subtitulo: 'Diversión segura y educativa',
+    nivel: 'Cachorros',
+    duracion: '20 min',
+    xp: 25,
+    huesos: 10,
+    imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    descripcion: 'Aprende qué tipos de juego son beneficiosos y cómo jugar de forma que eduque.',
+    objetivos: ['Elegir juguetes seguros', 'Juegos que enseñan autocontrol', 'Evitar juegos que fomenten malos hábitos', 'Usar el juego como entrenamiento'],
+    pasos: [
+      { titulo: 'Juguetes Seguros', contenido: 'Tamaño adecuado (no puede tragarlo), material resistente, sin piezas pequeñas. Rota juguetes para mantener el interés.', tip: 'Los juguetes de morder son para el cachorro. Tus manos NO son juguetes.', duracion: '5 min' },
+      { titulo: 'Juegos de Olfato', contenido: 'Esconde premios por la casa o jardín. El olfateo cansa mentalmente y es la forma natural del perro de explorar.', tip: 'Empieza fácil (premios visibles) y aumenta la dificultad.', duracion: '5 min' },
+      { titulo: 'Tira y Afloja con Reglas', contenido: 'Tú inicias el juego y tú lo terminas. Practica "suelta" cada 30 segundos. Si los dientes tocan tu piel, el juego para.', tip: 'Este juego enseña autocontrol si se juega con reglas claras.', duracion: '5 min' },
+      { titulo: 'Juegos Prohibidos', contenido: 'No juegues a perseguirle (enseña a huir de ti), no animes a morder manos/pies, no juegues brusco (enseña agresividad).', tip: 'Si el juego se descontrola, haz una pausa de 30 segundos.', duracion: '5 min' }
+    ],
+    erroresComunes: ['Usar manos como juguetes', 'Jugar a perseguir al cachorro', 'No poner límites en el juego', 'Juguetes peligrosos o demasiado pequeños'],
+    ejercicioPractico: 'Haz un juego de olfato escondiendo 10 premios por tu casa y deja que tu cachorro los busque.'
   }
 };
 
