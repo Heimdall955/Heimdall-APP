@@ -48,6 +48,63 @@ security = HTTPBearer(auto_error=False)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ==================== SECURITY: Rate Limiter ====================
+class RateLimiter:
+    """In-memory rate limiter per IP"""
+    def __init__(self):
+        self.requests = defaultdict(list)  # ip -> [timestamps]
+    
+    def is_limited(self, ip: str, max_requests: int, window_seconds: int) -> bool:
+        now = time.time()
+        # Clean old entries
+        self.requests[ip] = [t for t in self.requests[ip] if now - t < window_seconds]
+        if len(self.requests[ip]) >= max_requests:
+            return True
+        self.requests[ip].append(now)
+        return False
+
+rate_limiter = RateLimiter()
+
+# Brute force tracker (login attempts)
+login_attempts = defaultdict(list)  # email -> [timestamps]
+
+def check_login_rate(email: str, ip: str) -> None:
+    """Block after 5 failed attempts per email or 20 per IP in 15 min"""
+    now = time.time()
+    window = 900  # 15 minutes
+    
+    # Per email
+    login_attempts[email] = [t for t in login_attempts[email] if now - t < window]
+    if len(login_attempts[email]) >= 5:
+        raise HTTPException(status_code=429, detail="Demasiados intentos. Espera 15 minutos.")
+    
+    # Per IP
+    login_attempts[ip] = [t for t in login_attempts[ip] if now - t < window]
+    if len(login_attempts[ip]) >= 20:
+        raise HTTPException(status_code=429, detail="Demasiados intentos desde esta IP.")
+
+def record_failed_login(email: str, ip: str):
+    login_attempts[email].append(time.time())
+    login_attempts[ip].append(time.time())
+
+def clear_login_attempts(email: str):
+    login_attempts.pop(email, None)
+
+def sanitize_input(text: str) -> str:
+    """Sanitize user input to prevent XSS"""
+    if not text:
+        return text
+    return html.escape(text.strip())
+
+def validate_email(email: str) -> bool:
+    """Basic email validation"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+def validate_password(password: str) -> bool:
+    """Password must be at least 6 characters"""
+    return len(password) >= 6
+
 # ==================== MODELS ====================
 
 class UserCreate(BaseModel):
