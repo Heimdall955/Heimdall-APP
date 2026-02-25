@@ -788,7 +788,7 @@ async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
     # Save user message
     user_message = {
         "user_id": user.user_id,
-        "dog_id": data.dog_id,
+        "dog_id": data.dog_id if data.dog_id else None,
         "role": "user",
         "content": data.content,
         "created_at": now
