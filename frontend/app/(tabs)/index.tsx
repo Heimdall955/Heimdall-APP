@@ -58,21 +58,25 @@ export default function HomeScreen() {
       const token = await SecureStore.getItemAsync('session_token');
       if (!token) return;
       
-      const response = await axios.get(
-        `${BACKEND_URL}/api/gamification/stats`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const [statsRes, weeklyRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/gamification/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${BACKEND_URL}/api/gamification/weekly-summary`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+      ]);
       
       setDogStatus(prev => ({
         ...prev,
-        bones: response.data.bones,
-        level: response.data.level || 1,
-        level_progress: response.data.level_progress,
-        level_target: response.data.level_target,
-        streak_days: response.data.streak_days || 0,
-        exercises_completed: response.data.exercises_completed || 0,
-        practice_minutes: response.data.practice_minutes || 0,
+        bones: statsRes.data.bones,
+        level: statsRes.data.level || 1,
+        level_progress: statsRes.data.level_progress,
+        level_target: statsRes.data.level_target,
+        streak_days: statsRes.data.streak_days || 0,
+        exercises_completed: statsRes.data.exercises_completed || 0,
+        practice_minutes: statsRes.data.practice_minutes || 0,
       }));
+
+      if (weeklyRes?.data) {
+        setWeeklySummary(weeklyRes.data);
+      }
     } catch (error) {
       console.log('Error loading gamification stats');
     }
