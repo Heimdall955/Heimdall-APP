@@ -807,4 +807,98 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
   },
+  // Weekly Summary styles
+  weekLabel: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  weeklyCard: {
+    padding: Spacing.md,
+  },
+  weeklyStatsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.md,
+  },
+  weeklyStat: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  weeklyStatIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xs,
+  },
+  weeklyStatValue: {
+    fontSize: FontSizes.xl,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  weeklyStatLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  weeklyLevelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.grayLight,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+  },
+  weeklyLevelText: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+    color: Colors.text,
+    marginRight: Spacing.sm,
+  },
+  weeklyProgressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: Colors.grayLight,
+    borderRadius: 4,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.gray + '30',
+  },
+  weeklyProgressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 4,
+  },
+  weeklyLevelXP: {
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+    marginLeft: Spacing.sm,
+    fontWeight: '600',
+  },
+  // Leaderboard Preview styles
+  leaderboardCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    ...Shadows.sm,
+  },
+  leaderboardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  leaderboardInfo: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  leaderboardTitle: {
+    fontSize: FontSizes.lg,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  leaderboardSub: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
 });
