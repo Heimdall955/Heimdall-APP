@@ -61,13 +61,20 @@ Premium mobile app for monitoring dog health, providing education, and connectin
   - All save to Supabase tables: clinical_files, pack_friends, user_settings
   - **REQUIRES**: User to create 3 tables in Supabase SQL Editor (SQL provided)
 
+## P0 - Google Wallet Fix (Feb 2026)
+- ✅ Fixed `get_wallet_pass` endpoint: corrected `age` → `age_months` DB column mapping
+- ✅ Added clinical data fetch from `clinical_files` table (resilient if table doesn't exist)
+- ✅ Fixed `create_wallet_pass_jwt`: now uses dynamic `text_modules` list (includes clinical data) instead of hardcoded list
+- ✅ Backend tested via curl: JWT generated correctly with all dog data
+- ⚠️ Final verification on real device pending (user must test "Add to Google Wallet" button)
+
 ## P1 - Pending
 - Translate detailed education content (lesson internals still in Spanish)
 
 ## P2 - Pending  
 - Refine chat multilingual detection (English detection weak)
-- Test Google Wallet flow end-to-end
 - Guide user through EAS Development Build for real BLE
+- Social leaderboard for gamification system
 
 ## Future/Backlog
 - Push notifications for level-ups
