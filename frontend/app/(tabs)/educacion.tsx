@@ -14,48 +14,17 @@ import { getTrainingPrograms, getExercises, getGames } from '../../data/educatio
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 const { width } = Dimensions.get('window');
 
-interface TrainingProgram {
-  id: string;
-  title: string;
-  subtitle: string;
-  category: string;
-  categoryColor: string;
-  xpReward: number;
-  image: string;
-}
-
-interface Exercise {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: string;
-  iconColor: string;
-  xpReward: number;
-}
-
-const trainingPrograms: TrainingProgram[] = [
-  { id: 'educacion-basica', title: 'Educación Básica', subtitle: 'Fundamentos sólidos', category: 'Básico', categoryColor: '#4CAF50', xpReward: 100, image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400' },
-  { id: 'calma-control', title: 'Calma y Control', subtitle: 'Gestión del estrés', category: 'Emocional', categoryColor: '#FF9800', xpReward: 120, image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400' },
-  { id: 'socializacion', title: 'Socialización', subtitle: 'Amigos caninos', category: 'Social', categoryColor: '#2196F3', xpReward: 150, image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400' },
-  { id: 'mundo-cachorro', title: 'Mundo Cachorro', subtitle: 'Primeros pasos', category: 'Cachorros', categoryColor: '#E91E63', xpReward: 80, image: 'https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=400' },
-];
-
-const exercises: Exercise[] = [
-  { id: 'senales-basicas', title: 'Señales Básicas', subtitle: 'Sentado, Tumbado, Quieto', icon: 'paw', iconColor: '#2196F3', xpReward: 5 },
-  { id: 'clicker', title: 'Entrenamiento con Clicker', subtitle: 'Precisión y timing', icon: 'radio-button-on', iconColor: '#9C27B0', xpReward: 10 },
-  { id: 'olfato', title: 'Juegos de Olfato', subtitle: 'Estimulación mental natural', icon: 'search', iconColor: '#00BCD4', xpReward: 15 },
-];
-
-const games = [
-  { id: 'puzzle-mental', title: 'Puzzle Mental', difficulty: 'Media', xpReward: 5, image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200' },
-  { id: 'tira-afloja', title: 'Tira y Afloja', difficulty: 'Fácil', xpReward: 3, image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=200' },
-];
-
 export default function EducacionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  
+  // Get translated content
+  const trainingPrograms = getTrainingPrograms(language as 'es' | 'en' | 'it');
+  const exercises = getExercises(language as 'es' | 'en' | 'it');
+  const games = getGames(language as 'es' | 'en' | 'it');
+  
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     bones: 240,
