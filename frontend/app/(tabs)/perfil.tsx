@@ -104,7 +104,7 @@ export default function PerfilScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refreshDogs();
+    await Promise.all([refreshDogs(), loadGamification()]);
     setRefreshing(false);
   };
 
