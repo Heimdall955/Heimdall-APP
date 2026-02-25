@@ -1054,8 +1054,11 @@ async def get_gamification_stats(user: User = Depends(require_auth)):
             stats = result.data[0]
             current_xp = stats.get("xp", 0)
             current_level = stats.get("level", 1)
-            xp_for_next = current_level * 500  # Each level needs level * 500 XP
             level_progress = current_xp % 500
+            
+            # Get unlocked achievements from separate table
+            ach_result = supabase.table("user_achievements").select("achievement_id").eq("user_id", user.user_id).execute()
+            unlocked = [a["achievement_id"] for a in ach_result.data] if ach_result.data else []
             
             return {
                 "bones": stats.get("bones", 0),
@@ -1066,8 +1069,8 @@ async def get_gamification_stats(user: User = Depends(require_auth)):
                 "streak_days": stats.get("streak_days", 0),
                 "exercises_completed": stats.get("exercises_completed", 0),
                 "practice_minutes": stats.get("practice_minutes", 0),
-                "achievements_unlocked": stats.get("achievements_unlocked", []),
-                "last_activity": stats.get("last_activity_date")
+                "achievements_unlocked": unlocked,
+                "last_activity": stats.get("updated_at")
             }
         
         # Create default stats
@@ -1080,7 +1083,6 @@ async def get_gamification_stats(user: User = Depends(require_auth)):
             "streak_days": 0,
             "exercises_completed": 0,
             "practice_minutes": 0,
-            "achievements_unlocked": [],
             "created_at": now,
             "updated_at": now
         }).execute()
@@ -1120,9 +1122,12 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
         
         now = datetime.now(timezone.utc)
         now_str = now.isoformat()
-        today = now.date().isoformat()
         
         new_achievements = []
+        
+        # Get currently unlocked achievements
+        ach_result = supabase.table("user_achievements").select("achievement_id").eq("user_id", user.user_id).execute()
+        unlocked = [a["achievement_id"] for a in ach_result.data] if ach_result.data else []
         
         if result.data and len(result.data) > 0:
             current = result.data[0]
@@ -1131,8 +1136,7 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             old_level = current.get("level", 1)
             old_exercises = current.get("exercises_completed", 0)
             old_streak = current.get("streak_days", 0)
-            last_activity = current.get("last_activity_date")
-            unlocked = current.get("achievements_unlocked", []) or []
+            last_activity = current.get("updated_at")
             
             # Calculate new values
             new_bones = old_bones + data.amount
@@ -1144,13 +1148,15 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             # Check streak
             new_streak = old_streak
             if last_activity:
-                last_date = datetime.fromisoformat(last_activity.replace("Z", "+00:00")).date()
-                days_diff = (now.date() - last_date).days
-                if days_diff == 1:
-                    new_streak = old_streak + 1
-                elif days_diff > 1:
+                try:
+                    last_date = datetime.fromisoformat(last_activity.replace("Z", "+00:00")).date()
+                    days_diff = (now.date() - last_date).days
+                    if days_diff == 1:
+                        new_streak = old_streak + 1
+                    elif days_diff > 1:
+                        new_streak = 1
+                except:
                     new_streak = 1
-                # Same day = keep streak
             else:
                 new_streak = 1
             
@@ -1166,6 +1172,15 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                         "icon": ach["icon"],
                         "bones_reward": ach["bones"]
                     })
+                    # Save to user_achievements table
+                    try:
+                        supabase.table("user_achievements").insert({
+                            "user_id": user.user_id,
+                            "achievement_id": ach_id,
+                            "unlocked_at": now_str
+                        }).execute()
+                    except Exception as e:
+                        logger.error(f"Error saving achievement: {e}")
                     return ach["bones"]
                 return 0
             
@@ -1204,8 +1219,6 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                 "level": new_level,
                 "exercises_completed": new_exercises,
                 "streak_days": new_streak,
-                "achievements_unlocked": unlocked,
-                "last_activity_date": today,
                 "updated_at": now_str
             }).eq("user_id", user.user_id).execute()
             
@@ -1223,14 +1236,9 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             }
         else:
             # Create new record
-            initial_bones = data.amount + ACHIEVEMENTS["first_lesson"]["bones"]
-            new_achievements.append({
-                "id": "first_lesson",
-                "name": ACHIEVEMENTS["first_lesson"]["name"],
-                "description": ACHIEVEMENTS["first_lesson"]["description"],
-                "icon": ACHIEVEMENTS["first_lesson"]["icon"],
-                "bones_reward": ACHIEVEMENTS["first_lesson"]["bones"]
-            })
+            initial_bones = data.amount
+            bonus = check_achievement("first_lesson")
+            initial_bones += bonus
             
             supabase.table("gamification").insert({
                 "user_id": user.user_id,
@@ -1239,8 +1247,6 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                 "level": 1,
                 "exercises_completed": 1,
                 "streak_days": 1,
-                "achievements_unlocked": ["first_lesson"],
-                "last_activity_date": today,
                 "created_at": now_str,
                 "updated_at": now_str
             }).execute()
@@ -1265,11 +1271,8 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
 async def get_achievements(user: User = Depends(require_auth)):
     """Get all achievements and their unlock status"""
     try:
-        result = supabase.table("gamification").select("achievements_unlocked").eq("user_id", user.user_id).execute()
-        
-        unlocked = []
-        if result.data and len(result.data) > 0:
-            unlocked = result.data[0].get("achievements_unlocked", []) or []
+        ach_result = supabase.table("user_achievements").select("achievement_id").eq("user_id", user.user_id).execute()
+        unlocked = [a["achievement_id"] for a in ach_result.data] if ach_result.data else []
         
         all_achievements = []
         for ach_id, ach_data in ACHIEVEMENTS.items():
