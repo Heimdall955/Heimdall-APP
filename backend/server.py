@@ -1045,6 +1045,32 @@ ACHIEVEMENTS = {
     "first_chat": {"name": "Primer Contacto", "description": "Hablaste con Heimdall por primera vez", "icon": "chatbubbles", "bones": 5},
 }
 
+def derive_unlocked_achievements(stats: dict) -> list:
+    """Derive which achievements are unlocked based on current stats."""
+    unlocked = []
+    exercises = stats.get("exercises_completed", 0)
+    level = stats.get("level", 1)
+    streak = stats.get("streak_days", 0)
+    bones = stats.get("bones", 0)
+    
+    if exercises >= 1:
+        unlocked.append("first_lesson")
+    if exercises >= 10:
+        unlocked.append("10_lessons")
+    if exercises >= 25:
+        unlocked.append("25_lessons")
+    if level >= 5:
+        unlocked.append("level_5")
+    if level >= 10:
+        unlocked.append("level_10")
+    if streak >= 3:
+        unlocked.append("streak_3")
+    if streak >= 7:
+        unlocked.append("streak_7")
+    if bones >= 100:
+        unlocked.append("100_bones")
+    return unlocked
+
 @api_router.get("/gamification/stats")
 async def get_gamification_stats(user: User = Depends(require_auth)):
     try:
