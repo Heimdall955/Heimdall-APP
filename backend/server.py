@@ -1667,32 +1667,38 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
             
             leveled_up = new_level > old_level
             
-            # Weekly tracking
-            week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-            week_start_str = week_start.strftime("%Y-%m-%d")
-            stored_week_start = current.get("week_start", "")
-            
-            if stored_week_start == week_start_str:
-                bones_this_week = current.get("bones_this_week", 0) + data.amount
-                exercises_this_week = current.get("exercises_this_week", 0) + 1
-                xp_this_week = current.get("xp_this_week", 0) + xp_gained
-            else:
-                bones_this_week = data.amount
-                exercises_this_week = 1
-                xp_this_week = xp_gained
-            
-            supabase.table("gamification").update({
+            # Core update
+            update_data = {
                 "bones": new_bones,
                 "xp": new_xp,
                 "level": new_level,
                 "exercises_completed": new_exercises,
                 "streak_days": new_streak,
                 "updated_at": now_str,
-                "bones_this_week": bones_this_week,
-                "exercises_this_week": exercises_this_week,
-                "xp_this_week": xp_this_week,
-                "week_start": week_start_str,
-            }).eq("user_id", user.user_id).execute()
+            }
+            
+            # Weekly tracking (best-effort, won't break if columns don't exist)
+            week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+            week_start_str = week_start.strftime("%Y-%m-%d")
+            stored_week_start = current.get("week_start", "")
+            
+            if stored_week_start == week_start_str:
+                update_data["bones_this_week"] = current.get("bones_this_week", 0) + data.amount
+                update_data["exercises_this_week"] = current.get("exercises_this_week", 0) + 1
+                update_data["xp_this_week"] = current.get("xp_this_week", 0) + xp_gained
+            else:
+                update_data["bones_this_week"] = data.amount
+                update_data["exercises_this_week"] = 1
+                update_data["xp_this_week"] = xp_gained
+            update_data["week_start"] = week_start_str
+            
+            try:
+                supabase.table("gamification").update(update_data).eq("user_id", user.user_id).execute()
+            except Exception as update_err:
+                # Fallback: update without weekly fields if columns don't exist
+                logger.warning(f"Weekly columns may not exist, falling back: {update_err}")
+                core_data = {k: v for k, v in update_data.items() if k not in ("bones_this_week", "exercises_this_week", "xp_this_week", "week_start")}
+                supabase.table("gamification").update(core_data).eq("user_id", user.user_id).execute()
             
             # Check for newly unlocked achievements
             new_stats = {
