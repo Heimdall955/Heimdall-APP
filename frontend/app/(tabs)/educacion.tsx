@@ -64,6 +64,13 @@ export default function EducacionScreen() {
     loadStats();
   }, [loadStats]);
 
+  // Reload stats when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [loadStats])
+  );
+
   const onRefresh = async () => {
     setRefreshing(true);
     await loadStats();
