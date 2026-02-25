@@ -1794,31 +1794,137 @@ async def get_achievements(user: User = Depends(require_auth)):
 
 @api_router.get("/gamification/leaderboard")
 async def get_leaderboard(limit: int = 10, user: User = Depends(require_auth)):
-    """Get top users by bones"""
+    """Get top users by bones with dog info"""
     try:
-        result = supabase.table("gamification").select("user_id, bones, level, streak_days").order("bones", desc=True).limit(limit).execute()
+        result = supabase.table("gamification").select("user_id, bones, level, streak_days, xp, exercises_completed").order("bones", desc=True).limit(limit).execute()
         
         leaderboard = []
         for i, entry in enumerate(result.data):
             # Get user name
-            user_result = supabase.table("users").select("name").eq("id", entry["user_id"]).execute()
+            user_result = supabase.table("users").select("name, picture").eq("id", entry["user_id"]).execute()
             name = "Usuario"
+            avatar = None
             if user_result.data:
                 name = user_result.data[0].get("name", "Usuario")
+                avatar = user_result.data[0].get("picture")
+            
+            # Get user's first dog name
+            dog_name = None
+            try:
+                dog_result = supabase.table("dogs").select("name").eq("user_id", entry["user_id"]).limit(1).execute()
+                if dog_result.data:
+                    dog_name = dog_result.data[0].get("name")
+            except:
+                pass
             
             leaderboard.append({
                 "rank": i + 1,
                 "user_id": entry["user_id"],
                 "name": name,
+                "avatar": avatar,
+                "dog_name": dog_name,
                 "bones": entry.get("bones", 0),
                 "level": entry.get("level", 1),
+                "xp": entry.get("xp", 0),
+                "streak_days": entry.get("streak_days", 0),
+                "exercises_completed": entry.get("exercises_completed", 0),
                 "is_current_user": entry["user_id"] == user.user_id
             })
         
-        return {"leaderboard": leaderboard}
+        # Find current user's rank if not in top list
+        current_user_rank = None
+        current_user_in_list = any(e["is_current_user"] for e in leaderboard)
+        if not current_user_in_list:
+            try:
+                all_result = supabase.table("gamification").select("user_id, bones").order("bones", desc=True).execute()
+                for i, entry in enumerate(all_result.data):
+                    if entry["user_id"] == user.user_id:
+                        current_user_rank = i + 1
+                        break
+            except:
+                pass
+        
+        return {
+            "leaderboard": leaderboard,
+            "current_user_rank": current_user_rank,
+            "total_users": len(result.data)
+        }
     except Exception as e:
         logger.error(f"Error getting leaderboard: {e}")
-        return {"leaderboard": []}
+        return {"leaderboard": [], "current_user_rank": None, "total_users": 0}
+
+@api_router.get("/gamification/weekly-summary")
+async def get_weekly_summary(user: User = Depends(require_auth)):
+    """Get weekly progress summary"""
+    try:
+        result = supabase.table("gamification").select("*").eq("user_id", user.user_id).execute()
+        
+        if not result.data or len(result.data) == 0:
+            return {
+                "bones_this_week": 0,
+                "exercises_this_week": 0,
+                "xp_this_week": 0,
+                "streak_days": 0,
+                "level": 1,
+                "level_progress": 0,
+                "level_target": 500,
+                "bones_total": 0,
+                "week_start": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                "days_active_this_week": 0,
+                "best_day_bones": 0,
+            }
+        
+        stats = result.data[0]
+        now = datetime.now(timezone.utc)
+        
+        # Calculate week boundaries (Monday as start)
+        week_start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start_str = week_start.strftime("%Y-%m-%d")
+        
+        # Weekly tracking fields (stored in gamification table)
+        bones_this_week = stats.get("bones_this_week", 0)
+        exercises_this_week = stats.get("exercises_this_week", 0)
+        xp_this_week = stats.get("xp_this_week", 0)
+        stored_week_start = stats.get("week_start", "")
+        
+        # If week has changed, reset weekly counters
+        if stored_week_start != week_start_str:
+            bones_this_week = 0
+            exercises_this_week = 0
+            xp_this_week = 0
+            try:
+                supabase.table("gamification").update({
+                    "bones_this_week": 0,
+                    "exercises_this_week": 0,
+                    "xp_this_week": 0,
+                    "week_start": week_start_str
+                }).eq("user_id", user.user_id).execute()
+            except:
+                pass
+        
+        current_xp = stats.get("xp", 0)
+        current_level = stats.get("level", 1)
+        
+        return {
+            "bones_this_week": bones_this_week,
+            "exercises_this_week": exercises_this_week,
+            "xp_this_week": xp_this_week,
+            "streak_days": stats.get("streak_days", 0),
+            "level": current_level,
+            "level_progress": current_xp % 500,
+            "level_target": 500,
+            "bones_total": stats.get("bones", 0),
+            "week_start": week_start_str,
+            "days_active_this_week": min(stats.get("streak_days", 0), 7),
+            "exercises_total": stats.get("exercises_completed", 0),
+        }
+    except Exception as e:
+        logger.error(f"Error getting weekly summary: {e}")
+        return {
+            "bones_this_week": 0, "exercises_this_week": 0, "xp_this_week": 0,
+            "streak_days": 0, "level": 1, "level_progress": 0, "level_target": 500,
+            "bones_total": 0, "week_start": "", "days_active_this_week": 0, "exercises_total": 0,
+        }
 
 # ==================== ROUTES ENDPOINTS ====================
 
