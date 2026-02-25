@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 
 # Test configuration
-BACKEND_URL = "https://wallet-pass-feature.preview.emergentagent.com"
+BACKEND_URL = "https://dog-wellness-hub-2.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class Colors:
