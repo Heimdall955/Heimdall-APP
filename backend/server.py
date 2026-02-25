@@ -1173,9 +1173,11 @@ async def add_bones(data: AddBonesRequest, user: User = Depends(require_auth)):
                 try:
                     last_date = datetime.fromisoformat(last_activity.replace("Z", "+00:00")).date()
                     days_diff = (now.date() - last_date).days
-                    if days_diff == 1:
+                    if days_diff == 0:
+                        new_streak = max(old_streak, 1)
+                    elif days_diff == 1:
                         new_streak = old_streak + 1
-                    elif days_diff > 1:
+                    else:
                         new_streak = 1
                 except:
                     new_streak = 1
