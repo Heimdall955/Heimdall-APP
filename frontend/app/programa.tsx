@@ -134,13 +134,14 @@ export default function ProgramaScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
+  const { colors } = useTheme();
   const [leccionesCompletadas, setLeccionesCompletadas] = useState<string[]>([]);
 
   const programa = PROGRAMAS_DB[id || 'educacion-basica'];
 
   if (!programa) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
       </SafeAreaView>
     );
@@ -163,7 +164,7 @@ export default function ProgramaScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header Image */}
       <View style={styles.heroContainer}>
         <Image source={{ uri: programa.imagen }} style={styles.heroImage} />

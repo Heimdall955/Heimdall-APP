@@ -749,6 +749,7 @@ export default function LeccionScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, language } = useLanguage();
+  const { colors } = useTheme();
   const [pasoActual, setPasoActual] = useState(0);
   const [completado, setCompletado] = useState(false);
   const [rewardData, setRewardData] = useState<any>(null);
@@ -759,7 +760,7 @@ export default function LeccionScreen() {
 
   if (!leccion) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
       </SafeAreaView>
     );
@@ -803,7 +804,7 @@ export default function LeccionScreen() {
 
   if (completado) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.completadoContainer}>
           <View style={styles.completadoIcon}>
             <Ionicons name="checkmark-circle" size={80} color={Colors.primary} />
@@ -885,7 +886,7 @@ export default function LeccionScreen() {
   const pasoActualData = leccion.pasos[pasoActual];
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>

@@ -183,6 +183,7 @@ export default function EjercicioScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
+  const { colors } = useTheme();
   const [ejercicioActual, setEjercicioActual] = useState(0);
   const [completados, setCompletados] = useState<number[]>([]);
 
@@ -193,7 +194,7 @@ export default function EjercicioScreen() {
 
   if (!ejercicio) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
       </SafeAreaView>
     );
@@ -233,7 +234,7 @@ export default function EjercicioScreen() {
   const todosCompletados = completados.length === ejercicio.ejercicios.length;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>

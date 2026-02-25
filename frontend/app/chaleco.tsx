@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 export default function ChalecoScreen() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { colors } = useTheme();
   const {
     isScanning,
     isConnected,
@@ -87,7 +88,7 @@ export default function ChalecoScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>

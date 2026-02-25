@@ -66,7 +66,7 @@ export default function ProScreen() {
   // If already PRO, show success screen
   if (isProUser) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.successContainer}>
           <View style={styles.successIcon}>
             <Ionicons name="checkmark-circle" size={80} color={Colors.success} />
@@ -136,7 +136,7 @@ export default function ProScreen() {
   const annualPackage = packages.find(pkg => pkg.packageType === 'ANNUAL');
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>

@@ -26,6 +26,7 @@ interface Route {
 export default function RutasScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
+  const { colors } = useTheme();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -198,7 +199,7 @@ export default function RutasScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>

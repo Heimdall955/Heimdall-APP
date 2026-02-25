@@ -106,6 +106,7 @@ export default function JuegoScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
+  const { colors } = useTheme();
   const [pasoActual, setPasoActual] = useState(0);
   const [juegoCompletado, setJuegoCompletado] = useState(false);
   const [rewardData, setRewardData] = useState<any>(null);
@@ -114,7 +115,7 @@ export default function JuegoScreen() {
 
   if (!juego) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
       </SafeAreaView>
     );
@@ -152,7 +153,7 @@ export default function JuegoScreen() {
 
   if (juegoCompletado) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <ScrollView contentContainerStyle={styles.completadoContainer}>
           <View style={styles.completadoIcon}>
             <Ionicons name="game-controller" size={80} color={Colors.primary} />
@@ -182,7 +183,7 @@ export default function JuegoScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header Image */}
       <View style={styles.heroContainer}>
         <Image source={{ uri: juego.imagen }} style={styles.heroImage} />

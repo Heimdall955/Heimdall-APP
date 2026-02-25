@@ -34,6 +34,7 @@ const eventTypes = [
 export default function HistorialMedicoScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
+  const { colors } = useTheme();
   const [events, setEvents] = useState<MedicalEvent[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -168,7 +169,7 @@ export default function HistorialMedicoScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>

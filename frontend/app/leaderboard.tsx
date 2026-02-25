@@ -30,6 +30,7 @@ const MEDAL_ICONS = ['trophy', 'medal', 'ribbon'];
 export default function LeaderboardScreen() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { colors } = useTheme();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,7 +97,7 @@ export default function LeaderboardScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton} data-testid="leaderboard-back">
