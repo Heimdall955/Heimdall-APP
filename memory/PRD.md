@@ -65,8 +65,16 @@ Premium mobile app for monitoring dog health, providing education, and connectin
 - ✅ Fixed `get_wallet_pass` endpoint: corrected `age` → `age_months` DB column mapping
 - ✅ Added clinical data fetch from `clinical_files` table (resilient if table doesn't exist)
 - ✅ Fixed `create_wallet_pass_jwt`: now uses dynamic `text_modules` list (includes clinical data) instead of hardcoded list
+- ✅ Added `genericClasses` to JWT payload so Google Wallet can auto-create the pass class
 - ✅ Backend tested via curl: JWT generated correctly with all dog data
-- ⚠️ Final verification on real device pending (user must test "Add to Google Wallet" button)
+
+## P0 - Education & Gamification Complete Fix (Feb 2026)
+- ✅ Added 8 missing lessons: presentaciones-perros, interaccion-humanos, nuevos-entornos, sonidos-estimulos, parque-canino, rutina-cachorro, socializacion-temprana, juego-apropiado
+- ✅ Fixed ejercicio.tsx: now calls /api/gamification/add-bones on completion
+- ✅ Fixed juego.tsx: now calls /api/gamification/add-bones on completion
+- ✅ Fixed educacion.tsx session card: added onPress navigation
+- ✅ Added useFocusEffect to Home and Education screens for stat refresh
+- ✅ All 24 lessons, 5 exercises, 2 games verified (14/14 tests passed)
 
 ## P1 - Pending
 - Translate detailed education content (lesson internals still in Spanish)
