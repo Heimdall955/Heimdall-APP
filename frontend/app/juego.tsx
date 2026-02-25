@@ -557,4 +557,18 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: '600',
   },
+  statsRow: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  statsText: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+  },
+  levelUpText: {
+    fontSize: FontSizes.lg,
+    fontWeight: '800',
+    color: Colors.primary,
+    marginTop: Spacing.xs,
+  },
 });
