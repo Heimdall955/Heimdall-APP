@@ -820,24 +820,34 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
         logger.error(f"Error getting chat history: {e}")
     
     # Auto-detect language from user message and maintain conversation language
-    # Check recent history for language pattern, or detect from current message
     detected_language = "español"  # Default
     
-    # Simple language detection based on common words
+    # Simple language detection based on common words and patterns
     message_lower = data.content.lower()
     
-    # English indicators
-    english_words = ['the', 'is', 'are', 'what', 'how', 'why', 'my', 'dog', 'help', 'please', 'thanks', 'hello', 'hi', 'can', 'you', 'i am', "i'm", 'want', 'need']
+    # English indicators (common words and patterns)
+    english_patterns = ['the ', ' is ', ' are ', 'what ', 'how ', 'why ', ' my ', 'dog ', 'help', 'please', 'thanks', 'hello', ' hi ', ' can ', ' you ', "i'm ", ' want', ' need', "don't", "doesn't", 'could', 'would', 'should', ' not ', 'with ', 'have ', 'this ', 'that ']
     # Italian indicators  
-    italian_words = ['il', 'la', 'che', 'come', 'perché', 'mio', 'cane', 'aiuto', 'grazie', 'ciao', 'buongiorno', 'vorrei', 'posso', 'sono', 'ho']
+    italian_patterns = [' il ', ' la ', ' che ', 'come ', 'perché', ' mio ', 'cane ', 'aiuto', 'grazie', 'ciao', 'buon', 'vorrei', 'posso', ' sono ', ' ho ', ' non ', 'questo', 'quella', 'quando', 'dove', 'cosa ', ' dei ', ' del ', ' per ']
     # Spanish indicators
-    spanish_words = ['el', 'la', 'que', 'cómo', 'por qué', 'mi', 'perro', 'ayuda', 'gracias', 'hola', 'buenos', 'quiero', 'puedo', 'soy', 'tengo']
+    spanish_patterns = [' el ', ' la ', ' que ', 'cómo ', 'por qué', ' mi ', 'perro ', 'ayuda', 'gracias', 'hola', 'buenos', 'quiero', 'puedo', ' soy ', ' tengo', ' no ', 'este', 'esta', 'cuando', 'donde', 'qué ', ' los ', ' las ', ' para ']
     
-    english_count = sum(1 for word in english_words if word in message_lower)
-    italian_count = sum(1 for word in italian_words if word in message_lower)
-    spanish_count = sum(1 for word in spanish_words if word in message_lower)
+    english_count = sum(1 for pattern in english_patterns if pattern in message_lower)
+    italian_count = sum(1 for pattern in italian_patterns if pattern in message_lower)
+    spanish_count = sum(1 for pattern in spanish_patterns if pattern in message_lower)
     
-    # Also check for explicit language in the request
+    # Determine language based on scores
+    max_count = max(english_count, italian_count, spanish_count)
+    
+    if max_count > 0:
+        if english_count == max_count and english_count > italian_count and english_count > spanish_count:
+            detected_language = "English"
+        elif italian_count == max_count and italian_count > english_count and italian_count > spanish_count:
+            detected_language = "italiano"
+        elif spanish_count == max_count:
+            detected_language = "español"
+    
+    # Override with explicit language setting if provided
     if data.language:
         lang_lower = data.language.lower()
         if lang_lower in ['en', 'english', 'inglés']:
@@ -847,38 +857,12 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
         elif lang_lower in ['es', 'spanish', 'español']:
             detected_language = "español"
     
-    # Override with detected language if clear majority
-    if english_count > spanish_count and english_count > italian_count and english_count >= 2:
-        detected_language = "English"
-    elif italian_count > spanish_count and italian_count > english_count and italian_count >= 2:
-        detected_language = "italiano"
-    elif spanish_count >= 2:
-        detected_language = "español"
-    
-    # Check conversation history for language continuity
-    if history and len(history) > 0:
-        last_assistant_msg = None
-        for msg in reversed(history):
-            if msg.get('role') == 'assistant':
-                last_assistant_msg = msg.get('content', '')
-                break
-        
-        if last_assistant_msg:
-            # If recent response was in English, continue in English
-            if any(word in last_assistant_msg.lower() for word in ['the', 'is', 'your', 'you', 'can']):
-                if english_count > 0 or detected_language == "English":
-                    detected_language = "English"
-            # If recent response was in Italian, continue in Italian
-            elif any(word in last_assistant_msg.lower() for word in ['il', 'che', 'tuo', 'puoi']):
-                if italian_count > 0 or detected_language == "italiano":
-                    detected_language = "italiano"
-    
     # Language instruction based on detection
     language_instruction = f"""
 # IDIOMA DE RESPUESTA
-IMPORTANTE: Responde SIEMPRE en {detected_language}.
-Detecté que el usuario escribe en {detected_language}, mantén toda la conversación en este idioma.
-Si el usuario cambia de idioma, adapta tu respuesta al nuevo idioma.
+CRÍTICO: Debes responder ÚNICAMENTE en {detected_language}.
+El usuario ha escrito en {detected_language}. Toda tu respuesta debe estar completamente en {detected_language}.
+NO mezcles idiomas. NO uses otro idioma que no sea {detected_language}.
 """
     
     # Build the complete system prompt
