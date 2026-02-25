@@ -161,6 +161,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     send: 'Enviar',
     haniGreeting: '¡Hola! Soy Hani, tu asistente de educación canina. ¿En qué puedo ayudarte hoy?',
     thinking: 'Pensando...',
+    analyzing: 'Analizando',
     whyDogBarks: '¿Por qué mi perro ladra tanto?',
     rainyDayGames: 'Juegos para días de lluvia',
     howMuchToEat: '¿Cuánto debe comer mi perro?',
