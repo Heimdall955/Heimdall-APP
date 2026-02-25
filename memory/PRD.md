@@ -85,7 +85,16 @@ Premium mobile app for monitoring dog health, providing education, and connectin
 - ✅ i18n: es, en, it translations added
 - ✅ 17/17 backend tests passed
 
-## P1 - Pending
+## Security Hardening (Feb 2026)
+- Rate limiting: 15 req/min auth, 200 req/min general (per real client IP via X-Forwarded-For)
+- Brute force protection: 5 failed login attempts per email blocks for 15 min
+- Input validation: email regex, password min 6 chars, name min 2 chars
+- XSS prevention: HTML entity escaping on all user inputs (html.escape)
+- IDOR fix: DELETE /dogs verifies ownership before deleting (returns 404 if not owner)
+- CORS: Configurable allowed origins (not wildcard * in production)
+- .gitignore: .env files protected from git commits
+- Google Wallet Issuer ID moved from hardcode to .env
+- RevenueCat demo key fallbacks removed
 - Translate detailed education content (lesson internals still in Spanish)
 
 ## P2 - Pending  
