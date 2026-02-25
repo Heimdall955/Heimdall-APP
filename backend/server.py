@@ -929,6 +929,323 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
         "content": ai_response,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
+
+# ==================== FILE UPLOAD & ANALYSIS ====================
+
+ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+ALLOWED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/webm"]
+ALLOWED_PDF_TYPES = ["application/pdf"]
+MAX_VIDEO_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_IMAGE_SIZE = 5 * 1024 * 1024   # 5MB
+MAX_PDF_SIZE = 10 * 1024 * 1024    # 10MB
+
+@api_router.post("/chat/upload")
+async def upload_and_analyze(
+    file: UploadFile = File(...),
+    dog_id: str = Form(""),
+    message: str = Form(""),
+    file_type: str = Form("image"),
+    language: str = Form("Spanish"),
+    user: User = Depends(require_auth)
+):
+    """Upload a photo, video, or PDF and get Heimdall's analysis"""
+    try:
+        file_bytes = await file.read()
+        content_type = file.content_type or ""
+        file_size = len(file_bytes)
+        
+        # Validate file type and size
+        if file_type == "image":
+            if content_type not in ALLOWED_IMAGE_TYPES:
+                raise HTTPException(status_code=400, detail="Tipo de imagen no válido. Usa JPG, PNG o WebP.")
+            if file_size > MAX_IMAGE_SIZE:
+                raise HTTPException(status_code=400, detail="Imagen demasiado grande. Máximo 5MB.")
+        elif file_type == "video":
+            if content_type not in ALLOWED_VIDEO_TYPES:
+                raise HTTPException(status_code=400, detail="Tipo de vídeo no válido. Usa MP4 o WebM.")
+            if file_size > MAX_VIDEO_SIZE:
+                raise HTTPException(status_code=400, detail="Vídeo demasiado grande. Máximo 10MB.")
+        elif file_type == "pdf":
+            if content_type not in ALLOWED_PDF_TYPES:
+                raise HTTPException(status_code=400, detail="Solo se aceptan archivos PDF.")
+            if file_size > MAX_PDF_SIZE:
+                raise HTTPException(status_code=400, detail="PDF demasiado grande. Máximo 10MB.")
+        else:
+            raise HTTPException(status_code=400, detail="Tipo de archivo no válido.")
+        
+        # Upload to Supabase Storage
+        file_ext = file.filename.split(".")[-1] if file.filename else "bin"
+        storage_path = f"{user.user_id}/{file_type}s/{uuid.uuid4()}.{file_ext}"
+        bucket_name = "chat-attachments"
+        
+        try:
+            supabase.storage.from_(bucket_name).upload(
+                storage_path,
+                file_bytes,
+                {"content-type": content_type}
+            )
+            file_url = f"{SUPABASE_URL}/storage/v1/object/public/{bucket_name}/{storage_path}"
+        except Exception as storage_err:
+            logger.error(f"Storage upload error: {storage_err}")
+            # If bucket doesn't exist, try creating it
+            try:
+                supabase.storage.create_bucket(bucket_name, {"public": True})
+                supabase.storage.from_(bucket_name).upload(
+                    storage_path,
+                    file_bytes,
+                    {"content-type": content_type}
+                )
+                file_url = f"{SUPABASE_URL}/storage/v1/object/public/{bucket_name}/{storage_path}"
+            except Exception as retry_err:
+                logger.error(f"Storage retry error: {retry_err}")
+                file_url = None
+        
+        # Save attachment record in Supabase
+        attachment_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": user.user_id,
+            "dog_id": dog_id if dog_id else None,
+            "file_type": file_type,
+            "file_url": file_url,
+            "file_name": file.filename,
+            "file_size": file_size,
+            "content_type": content_type,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        try:
+            supabase.table("chat_attachments").insert(attachment_record).execute()
+        except Exception as db_err:
+            logger.error(f"Error saving attachment record: {db_err}")
+        
+        # Detect language
+        user_text = message or ""
+        try:
+            from langdetect import detect
+            if user_text:
+                lang_code = detect(user_text)
+                if lang_code == 'en':
+                    detected_language = "English"
+                elif lang_code == 'it':
+                    detected_language = "italiano"
+                else:
+                    detected_language = "español"
+            else:
+                detected_language = language if language else "español"
+        except:
+            detected_language = "español"
+        
+        # Get dog context
+        dog_context = ""
+        if dog_id:
+            try:
+                dog_result = supabase.table("dogs").select("*").eq("id", dog_id).execute()
+                if dog_result.data:
+                    dog = dog_result.data[0]
+                    dog_context = f"\nPerfil del perro: {dog.get('name', 'desconocido')}, raza: {dog.get('breed', 'desconocida')}, peso: {dog.get('weight', 'desconocido')}kg, nacimiento: {dog.get('birth_date', 'desconocido')}."
+            except:
+                pass
+        
+        # Analyze based on file type
+        if file_type == "image":
+            ai_response = await analyze_image(file_bytes, content_type, user_text, dog_context, detected_language)
+        elif file_type == "video":
+            ai_response = await analyze_video(file_bytes, content_type, user_text, dog_context, detected_language)
+        elif file_type == "pdf":
+            ai_response = await analyze_pdf(file_bytes, user_text, dog_context, detected_language)
+        else:
+            ai_response = "Tipo de archivo no soportado."
+        
+        # Save messages in chat history
+        now = datetime.now(timezone.utc).isoformat()
+        user_content = f"[{file_type.upper()}] {file.filename}"
+        if message:
+            user_content += f"\n{message}"
+        
+        try:
+            if dog_id:
+                supabase.table("chat_messages").insert({
+                    "user_id": user.user_id,
+                    "dog_id": dog_id,
+                    "role": "user",
+                    "content": user_content,
+                    "created_at": now
+                }).execute()
+                supabase.table("chat_messages").insert({
+                    "user_id": user.user_id,
+                    "dog_id": dog_id,
+                    "role": "assistant",
+                    "content": ai_response,
+                    "created_at": now
+                }).execute()
+        except Exception as e:
+            logger.error(f"Error saving chat messages: {e}")
+        
+        return {
+            "id": str(uuid.uuid4()),
+            "role": "assistant",
+            "content": ai_response,
+            "file_url": file_url,
+            "file_type": file_type,
+            "created_at": now
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Upload error: {e}")
+        raise HTTPException(status_code=500, detail="Error al procesar el archivo")
+
+
+async def analyze_image(image_bytes: bytes, content_type: str, user_message: str, dog_context: str, language: str) -> str:
+    """Analyze an image using GPT-4o-mini vision"""
+    b64_image = base64.b64encode(image_bytes).decode("utf-8")
+    
+    analysis_prompt = f"""Eres HEIMDALL, guardián de mascotas. Analiza esta imagen siguiendo tu protocolo:
+{dog_context}
+
+El usuario dice: {user_message if user_message else 'Analiza esta imagen de mi mascota'}
+
+Responde siguiendo la estructura del punto 12 de tu protocolo:
+1. Reacción humana cercana
+2. Descripción objetiva de lo que ves
+3. Interpretación prudente
+4. Qué observar/registrar
+5. Pregunta final"""
+
+    lang_override = ""
+    if language != "español":
+        lang_override = f"\n\nCRITICAL: Respond ENTIRELY in {language}."
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": HEIMDALL_SYSTEM_PROMPT + lang_override},
+                        {"role": "user", "content": [
+                            {"type": "text", "text": analysis_prompt},
+                            {"type": "image_url", "image_url": {"url": f"data:{content_type};base64,{b64_image}", "detail": "low"}}
+                        ]}
+                    ],
+                    "max_tokens": 800,
+                    "temperature": 0.7
+                },
+                timeout=45.0
+            )
+            if response.status_code == 200:
+                return response.json()["choices"][0]["message"]["content"]
+            else:
+                logger.error(f"OpenAI Vision error: {response.status_code} - {response.text}")
+                return "No pude analizar la imagen. Por favor, intenta de nuevo."
+    except Exception as e:
+        logger.error(f"Image analysis error: {e}")
+        return "Error al analizar la imagen."
+
+
+async def analyze_video(video_bytes: bytes, content_type: str, user_message: str, dog_context: str, language: str) -> str:
+    """Analyze a video by extracting a frame and analyzing it"""
+    # GPT-4o-mini doesn't support video directly, so we extract a frame
+    try:
+        import tempfile
+        import subprocess
+        
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_video:
+            tmp_video.write(video_bytes)
+            tmp_video_path = tmp_video.name
+        
+        tmp_frame_path = tmp_video_path.replace(".mp4", "_frame.jpg")
+        
+        # Extract frame at 1 second using ffmpeg
+        result = subprocess.run(
+            ["ffmpeg", "-i", tmp_video_path, "-ss", "1", "-vframes", "1", "-q:v", "2", tmp_frame_path],
+            capture_output=True, timeout=10
+        )
+        
+        if result.returncode == 0 and os.path.exists(tmp_frame_path):
+            with open(tmp_frame_path, "rb") as f:
+                frame_bytes = f.read()
+            # Clean up
+            os.unlink(tmp_video_path)
+            os.unlink(tmp_frame_path)
+            
+            analysis = await analyze_image(frame_bytes, "image/jpeg", 
+                f"[Esto es un fotograma de un vídeo del usuario] {user_message or 'Analiza este vídeo de mi mascota'}", 
+                dog_context, language)
+            return f"He analizado un fotograma de tu vídeo:\n\n{analysis}"
+        else:
+            os.unlink(tmp_video_path)
+            return "No pude extraer un fotograma del vídeo. ¿Puedes enviarlo en otro formato?"
+    except Exception as e:
+        logger.error(f"Video analysis error: {e}")
+        return "Error al procesar el vídeo. Intenta con un formato MP4."
+
+
+async def analyze_pdf(pdf_bytes: bytes, user_message: str, dog_context: str, language: str) -> str:
+    """Analyze a PDF (blood tests, medical reports) using text extraction + GPT"""
+    try:
+        import io
+        
+        # Try to extract text from PDF
+        pdf_text = ""
+        try:
+            import fitz  # PyMuPDF
+            doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+            for page in doc:
+                pdf_text += page.get_text()
+            doc.close()
+        except ImportError:
+            # Fallback: send as base64 image of first page
+            logger.warning("PyMuPDF not available, using base64 fallback")
+            b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+            pdf_text = f"[PDF en base64, no se pudo extraer texto. Peso: {len(pdf_bytes)} bytes]"
+        
+        if not pdf_text.strip():
+            pdf_text = "[PDF sin texto extraíble - puede ser una imagen escaneada]"
+        
+        analysis_prompt = f"""Eres HEIMDALL. El usuario ha subido un análisis de sangre o documento médico de su mascota.
+{dog_context}
+
+CONTENIDO DEL DOCUMENTO:
+{pdf_text[:4000]}
+
+Mensaje del usuario: {user_message if user_message else 'Analiza este documento médico'}
+
+Responde siguiendo la estructura del punto 11 de tu protocolo:
+1. Interpreta valores, señala desviaciones
+2. Habla en probabilidades y contexto
+3. Pide rangos de referencia si faltan
+4. NUNCA confirmes diagnóstico
+5. Cierra con preguntas: edad, síntomas, medicación, evolución, motivo del análisis"""
+
+        lang_override = ""
+        if language != "español":
+            lang_override = f"\n\nCRITICAL: Respond ENTIRELY in {language}."
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+                json={
+                    "model": "gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": HEIMDALL_SYSTEM_PROMPT + lang_override},
+                        {"role": "user", "content": analysis_prompt}
+                    ],
+                    "max_tokens": 1200,
+                    "temperature": 0.5
+                },
+                timeout=45.0
+            )
+            if response.status_code == 200:
+                return response.json()["choices"][0]["message"]["content"]
+            else:
+                logger.error(f"PDF analysis error: {response.status_code}")
+                return "No pude analizar el documento. Por favor, intenta de nuevo."
+    except Exception as e:
+        logger.error(f"PDF analysis error: {e}")
+        return "Error al procesar el PDF."
     
     message_id = None
     try:
