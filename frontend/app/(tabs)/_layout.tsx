@@ -4,13 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Colors, FontSizes, Shadows, BorderRadius } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
+import { FontSizes, BorderRadius } from '../../constants/theme';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const { colors, shadows } = useTheme();
   
-  // Calculate proper bottom padding based on device safe area
   const bottomInset = Math.max(insets.bottom, 0);
   const tabBarHeight = 70 + bottomInset;
 
@@ -18,16 +19,16 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.gray,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.gray,
         tabBarStyle: {
-          backgroundColor: Colors.white,
+          backgroundColor: colors.cardBg,
           borderTopWidth: 0,
           height: tabBarHeight,
           paddingBottom: bottomInset + 10,
           paddingTop: 10,
           paddingHorizontal: 5,
-          ...Shadows.lg,
+          ...shadows.lg as any,
         },
         tabBarLabelStyle: {
           fontSize: FontSizes.xs,
@@ -44,7 +45,7 @@ export default function TabsLayout() {
         options={{
           title: t('home'),
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconBg : undefined}>
+            <View style={focused ? [styles.activeIconBg, { backgroundColor: colors.primaryLight }] : undefined}>
               <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
             </View>
           ),
@@ -55,7 +56,7 @@ export default function TabsLayout() {
         options={{
           title: t('health'),
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconBg : undefined}>
+            <View style={focused ? [styles.activeIconBg, { backgroundColor: colors.primaryLight }] : undefined}>
               <Ionicons name={focused ? 'heart' : 'heart-outline'} size={24} color={color} />
             </View>
           ),
@@ -66,7 +67,7 @@ export default function TabsLayout() {
         options={{
           title: t('education'),
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.centerTab, focused && styles.centerTabActive]}>
+            <View style={[styles.centerTab, { backgroundColor: colors.grayLight, borderColor: colors.cardBg, ...shadows.md as any }, focused && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
               <Image 
                 source={require('../../assets/images/heimdall-logo.png')}
                 style={styles.logoImage}
@@ -81,7 +82,7 @@ export default function TabsLayout() {
         options={{
           title: t('chat'),
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconBg : undefined}>
+            <View style={focused ? [styles.activeIconBg, { backgroundColor: colors.primaryLight }] : undefined}>
               <Ionicons name={focused ? 'chatbubbles' : 'chatbubbles-outline'} size={24} color={color} />
             </View>
           ),
@@ -92,7 +93,7 @@ export default function TabsLayout() {
         options={{
           title: t('profile'),
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconBg : undefined}>
+            <View style={focused ? [styles.activeIconBg, { backgroundColor: colors.primaryLight }] : undefined}>
               <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
             </View>
           ),
@@ -104,7 +105,6 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   activeIconBg: {
-    backgroundColor: Colors.primaryLight,
     borderRadius: BorderRadius.md,
     padding: 6,
   },
@@ -112,17 +112,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.grayLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -20,
     borderWidth: 3,
-    borderColor: Colors.white,
-    ...Shadows.md,
-  },
-  centerTabActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
   },
   logoImage: {
     width: 40,
