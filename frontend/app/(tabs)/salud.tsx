@@ -37,6 +37,13 @@ export default function SaludScreen() {
   const { isConnected, biometricData, startSimulation, stopSimulation } = useBluetooth();
   const { t } = useLanguage();
   const { colors, shadows } = useTheme();
+  const EVENT_TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
+    vaccine: { icon: 'medical', color: colors.success },
+    checkup: { icon: 'clipboard', color: colors.info },
+    deworming: { icon: 'bug', color: colors.warning },
+    medication: { icon: 'medkit', color: colors.accentEducation },
+    note: { icon: 'document-text', color: colors.gray },
+  };
   const [refreshing, setRefreshing] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'24h' | '7d'>('24h');
   const [medicalEvents, setMedicalEvents] = useState<MedicalEvent[]>([]);
