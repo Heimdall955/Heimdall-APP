@@ -222,6 +222,49 @@ def generate_session_token() -> str:
 # In-memory session store (for simplicity, in production use Redis or DB)
 sessions = {}
 
+# In-memory PRO user store (in production, use DB)
+pro_users = {}  # user_id -> {"active_until": datetime, "plan": "monthly"|"annual"}
+
+# ==================== PRO / SUBSCRIPTION HELPERS ====================
+
+FREE_LIMITS = {
+    "messages": 5,
+    "photos": 1,
+    "videos": 0,
+    "pdfs": 0,
+}
+
+def is_pro_user(user_id: str) -> bool:
+    if user_id in pro_users:
+        info = pro_users[user_id]
+        if info.get("active_until") and info["active_until"] > datetime.now(timezone.utc):
+            return True
+        del pro_users[user_id]
+    return False
+
+def get_daily_usage(user_id: str) -> dict:
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    messages_count = 0
+    photos_count = 0
+    videos_count = 0
+    pdfs_count = 0
+    try:
+        result = supabase.table("chat_messages").select("id, content, role").eq("user_id", user_id).eq("role", "user").gte("created_at", today_start).execute()
+        if result.data:
+            for msg in result.data:
+                content = msg.get("content", "")
+                if content.startswith("[FOTO]") or content.startswith("[Photo]"):
+                    photos_count += 1
+                elif content.startswith("[VIDEO]") or content.startswith("[Video]"):
+                    videos_count += 1
+                elif content.startswith("[PDF]"):
+                    pdfs_count += 1
+                else:
+                    messages_count += 1
+    except Exception as e:
+        logger.error(f"Error getting daily usage: {e}")
+    return {"messages": messages_count, "photos": photos_count, "videos": videos_count, "pdfs": pdfs_count}
+
 async def get_current_user(request: Request) -> Optional[User]:
     auth_header = request.headers.get("Authorization")
     session_token = None
