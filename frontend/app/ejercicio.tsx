@@ -19,6 +19,58 @@ export default function EjercicioScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useLanguage();
   const { colors, shadows } = useTheme();
+
+  const EJERCICIOS_DB: Record<string, any> = {
+    'senales-basicas': {
+      id: 'senales-basicas', titulo: 'Senales Basicas', subtitulo: 'Sentado, Tumbado, Quieto',
+      descripcion: 'Los comandos fundamentales que todo perro deberia conocer.',
+      huesos: 5, imagen: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800', color: colors.primary,
+      ejercicios: [
+        { nombre: 'Sentado', instrucciones: '1. Sosten un premio cerca de la nariz\n2. Mueve hacia arriba\n3. Su trasero bajara\n4. Di "Sienta" y premia', repeticiones: '10 repeticiones', tip: 'No empujes su trasero' },
+        { nombre: 'Tumbado', instrucciones: '1. Desde sentado, lleva premio al suelo\n2. Arrastra formando una "L"\n3. Sus codos tocaran el suelo\n4. Di "Tumba" y premia', repeticiones: '10 repeticiones', tip: 'Si se levanta, vuelve al sentado' },
+        { nombre: 'Quieto', instrucciones: '1. Pide sentado o tumbado\n2. Di "Quieto" con palma hacia el\n3. Espera 1 segundo\n4. Premia y libera con "Vale"', repeticiones: '5 repeticiones', tip: 'Empieza con 1 segundo' }
+      ]
+    },
+    'control-impulsos': {
+      id: 'control-impulsos', titulo: 'Control de Impulsos', subtitulo: 'Espera, Deja, Suelta',
+      descripcion: 'Ejercicios para que tu perro aprenda a controlar sus impulsos.',
+      huesos: 10, imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800', color: colors.accentPurple,
+      ejercicios: [
+        { nombre: 'Espera', instrucciones: '1. Pon comida en el suelo\n2. Cubre con la mano\n3. Solo cuando deje de intentar, descubre\n4. Di "Espera" antes', repeticiones: '8 repeticiones', tip: 'Empieza con premios de bajo valor' },
+        { nombre: 'Deja', instrucciones: '1. Muestra un premio en mano cerrada\n2. Espera que deje de lamer/tocar\n3. En cuanto se aparte, premia con la otra mano\n4. Anade "Deja" como senal', repeticiones: '10 repeticiones', tip: 'Premia siempre con la OTRA mano' },
+        { nombre: 'Suelta', instrucciones: '1. Ofrece un juguete\n2. Cuando lo tenga, muestra un premio\n3. Cuando suelte el juguete di "Suelta"\n4. Da el premio y devuelve el juguete', repeticiones: '6 repeticiones', tip: 'El juguete vuelve = recompensa doble' }
+      ]
+    },
+    'socializacion': {
+      id: 'socializacion', titulo: 'Socializacion', subtitulo: 'Perros, Personas, Entornos',
+      descripcion: 'Aprende tecnicas para socializar correctamente a tu perro.',
+      huesos: 15, imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800', color: colors.accentMint,
+      ejercicios: [
+        { nombre: 'Observar Perros', instrucciones: '1. Lleva a tu perro a un parque\n2. Manten distancia segura\n3. Premia cuando mire perros con calma\n4. Reduce distancia gradualmente', repeticiones: '3 sesiones de 10 min', tip: 'Si se estresa, aumenta la distancia' },
+        { nombre: 'Conocer Personas', instrucciones: '1. Pide a un amigo que se acerque\n2. Que lance premios sin mirar al perro\n3. Deja que el perro se acerque a su ritmo\n4. Premia la interaccion tranquila', repeticiones: '2-3 personas por sesion', tip: 'Nunca fuerces el contacto' },
+        { nombre: 'Nuevos Entornos', instrucciones: '1. Visita un lugar nuevo tranquilo\n2. Deja que explore con correa larga\n3. Premia cuando se muestre curioso\n4. Si hay miedo, no fuerces', repeticiones: '1-2 lugares nuevos por semana', tip: 'Lleva muchos premios de alto valor' }
+      ]
+    },
+    'paseos': {
+      id: 'paseos', titulo: 'Paseos con Correa', subtitulo: 'Caminar sin tirar',
+      descripcion: 'Tu perro aprendera a caminar a tu lado sin tirar de la correa.',
+      huesos: 8, imagen: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800', color: colors.info,
+      ejercicios: [
+        { nombre: 'Junto', instrucciones: '1. Con correa corta, camina\n2. Cuando la correa se tense, para\n3. Espera que te mire\n4. Premia y continua', repeticiones: '15 min de practica', tip: 'La paciencia es la clave' },
+        { nombre: 'Cambio Direccion', instrucciones: '1. Camina y gira 180 grados\n2. Di el nombre de tu perro\n3. Premia cuando te siga\n4. Varia las direcciones', repeticiones: '10 cambios', tip: 'Hazlo divertido' }
+      ]
+    },
+    'trucos': {
+      id: 'trucos', titulo: 'Trucos Divertidos', subtitulo: 'Dar la pata, Girar, Reverencia',
+      descripcion: 'Trucos divertidos que fortalecen el vinculo con tu perro.',
+      huesos: 12, imagen: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800', color: colors.success,
+      ejercicios: [
+        { nombre: 'Dar la Pata', instrucciones: '1. Con tu perro sentado, toca su pata\n2. Cuando la levante, premia\n3. Anade senal "Pata"\n4. Practica con ambas patas', repeticiones: '10 repeticiones', tip: 'Toca suavemente' },
+        { nombre: 'Girar', instrucciones: '1. Con un premio, guia su nariz en circulo\n2. Sigue hasta que complete la vuelta\n3. Premia al finalizar\n4. Anade "Gira"', repeticiones: '5 giros por lado', tip: 'Hazlo lentamente al principio' }
+      ]
+    }
+  };
+
   const [ejercicioActual, setEjercicioActual] = useState(0);
   const [completados, setCompletados] = useState<number[]>([]);
 
