@@ -12,7 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 export default function ProScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const proFeatures = [
     { icon: 'videocam', title: 'Analisis de Video IA', description: 'Sube videos de tu perro y recibe analisis de comportamiento', color: colors.primary },
     { icon: 'document-text', title: 'Informes Veterinarios', description: 'Genera informes completos para compartir con tu veterinario', color: colors.info },
