@@ -171,7 +171,7 @@ class PurchasesService {
     }
 
     try {
-      const customerInfo = await Purchases.restoreTransactions();
+      const customerInfo = await Purchases.restorePurchases();
       const hasProEntitlement = customerInfo.entitlements.active['pro'] !== undefined;
 
       return {

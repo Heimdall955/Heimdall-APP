@@ -151,7 +151,7 @@ export default function EjercicioScreen() {
             {completados.length} {t('of')} {ejercicio.ejercicios.length} {t('completed')}
           </Text>
           <View style={styles.progressDots}>
-            {ejercicio.ejercicios.map((_, index) => (
+            {ejercicio.ejercicios.map((_: any, index: number) => (
               <View 
                 key={index} 
                 style={[
@@ -164,7 +164,7 @@ export default function EjercicioScreen() {
         </View>
 
         {/* Ejercicios */}
-        {ejercicio.ejercicios.map((ej, index) => (
+        {ejercicio.ejercicios.map((ej: any, index: number) => (
           <Card key={index} style={styles.ejercicioCard}>
             <TouchableOpacity 
               style={styles.ejercicioHeader}
