@@ -12,7 +12,7 @@ import os
 import uuid
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://hani-gps-fix.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://subscription-gating-3.preview.emergentagent.com').rstrip('/')
 
 # Test user credentials - unique per test run
 TEST_EMAIL = f"test_gam_{uuid.uuid4().hex[:8]}@test.com"
