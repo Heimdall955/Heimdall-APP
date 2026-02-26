@@ -20,29 +20,15 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Historial clinico
 - Suscripcion PRO
 - Seguridad: rate limiting, CORS, sanitizacion, proteccion IDOR
-- **Modo Oscuro/Claro** (Feb 2026): Toggle en header y perfil, persistencia via SecureStore, tema completo en todos los screens
-
-## Arquitectura de Tema (Dark/Light Mode)
-- `/app/frontend/contexts/ThemeContext.tsx` - Contexto con LightColors/DarkColors
-- Todos los screens usan `useTheme()` hook + `createStyles(colors, shadows)` factory
-- Persistencia en SecureStore
-- Toggle: Header (sol/luna) + Perfil (menu "Apariencia")
+- Modo Oscuro/Claro: Toggle en header y perfil, persistencia via SecureStore
 
 ## Bugs corregidos (Feb 2026)
-- `styles is not defined` en historial-medico, leccion, ejercicio, juego, pro, rutas, programa, leaderboard: useMemo estaba dentro del JSX return en vez de antes
-- `colors is not defined` a nivel de modulo en salud, perfil, ejercicio, historial-medico, pro: constantes movidas dentro del componente
-- `shadows is not defined` en perfil y pro: faltaba destructurar shadows de useTheme
+- `styles is not defined`: useMemo dentro de if blocks en leccion, juego, pro, programa
+- `styles is not defined`: useMemo dentro del JSX return en 8 pantallas secundarias
+- `colors is not defined` a nivel de modulo en salud, perfil, ejercicio, historial-medico, pro
+- `shadows is not defined` en perfil y pro
 
 ## Tareas Pendientes
-
 ### P0 - Migracion SQL Weekly Summary
-- Script ALTER TABLE para columnas weekly_bones, weekly_xp, etc.
-
 ### P1 - Traduccion Contenido Educativo
-- lessonsContent.ts: COMPLETADO
-- exercisesContent.ts: PENDIENTE
-- gamesContent.ts: PENDIENTE
-- Refactorizar leccion.tsx, ejercicio.tsx, juego.tsx para usar archivos de datos
-
 ### P2 - Bluetooth Development Build
-- Guiar al usuario para crear un EAS Development Build
