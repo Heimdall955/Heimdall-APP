@@ -2401,6 +2401,11 @@ async def rate_limit_middleware(request: Request, call_next):
 
 app.include_router(api_router)
 
+# Root health check for Kubernetes probes (without /api prefix)
+@app.get("/health")
+async def root_health_check():
+    return {"status": "healthy", "database": "supabase"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
