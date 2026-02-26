@@ -48,13 +48,17 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Creado splash-icon.png (referenciado en app.json pero no existia)
 - Agregado resolutions de yarn para @expo/config-plugins
 - TypeScript: 0 errores (corregidos duplicados en LanguageContext, tipos en bluetooth/rutas/purchases/ejercicio/Card)
+- **@types/react movido de devDependencies a dependencies** (npm build omite devDeps)
+- **Creado .easignore** para excluir cache dirs y archivos corruptos del tarball de EAS
+- **Actualizado .gitignore** con .metro-cache/ y .ruff_cache/
+- **Limpieza de cache dirs**: .metro-cache, .ruff_cache, dist, .expo, __pycache__
+- **eas.json**: Agregado appVersionSource: "local"
 
 ## Estado de Testing (Feb 2026)
 - Backend: 10/10 tests PASS sistema PRO (100%)
 - Frontend: Chat con limites, pantalla PRO, 5 tabs verificados (100%)
 - TypeScript: 0 errores con --noEmit
 - expo-doctor: 16/17 checks pass (1 advisory warning sobre @expo/config-plugins)
-- Test reports: /app/test_reports/iteration_3.json, /app/test_reports/iteration_4.json
 
 ## Tareas Pendientes
 ### P1 - Migracion SQL Weekly Summary
