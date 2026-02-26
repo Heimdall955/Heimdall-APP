@@ -23,14 +23,6 @@ interface MedicalEvent {
   color: string;
 }
 
-const eventTypeConfig: Record<string, { icon: string; color: string }> = {
-  vaccine: { icon: 'medical', color: colors.success },
-  checkup: { icon: 'clipboard', color: colors.info },
-  deworming: { icon: 'bug', color: colors.warning },
-  medication: { icon: 'medkit', color: colors.accentEducation },
-  note: { icon: 'document-text', color: colors.gray },
-};
-
 export default function SaludScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
