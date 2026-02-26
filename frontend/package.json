@@ -67,7 +67,7 @@
     "typescript": "~5.9.3"
   },
   "overrides": {
-    "@expo/config-plugins": "$@expo/config-plugins"
+    "@expo/config-plugins": "54.0.4"
   },
   "resolutions": {
     "@expo/config-plugins": "~54.0.4"
