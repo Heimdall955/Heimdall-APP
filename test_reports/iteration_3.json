@@ -1,0 +1,56 @@
+{
+  "summary": "Full regression test completed for HANI/Heimdall app after bug fixes. All 3 critical bug fixes verified: 1) rutas.tsx useMemo fix, 2) leaderboard.tsx useMemo fix, 3) salud.tsx EVENT_TYPE_CONFIG fix. All 5 tabs load correctly. Backend: 11/11 tests passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "PATCH /api/gamification", "issue": "Supabase returns 400 Bad Request on weekly tracking columns update - falls back gracefully", "priority": "LOW"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All screens", "issues": ["Deprecation warnings: 'textShadow*' and 'shadow*' style props are deprecated (cosmetic, not functional)"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_full_regression.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_full_regression.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 tests passed)",
+    "frontend": "100% - All 5 tabs load correctly, all 3 bug fixes verified"
+  },
+  "test_credentials": "email=alexhernandez81@gmail.com, password=123456",
+  "seed_data_creation": "None - uses existing Supabase database",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All bug fixes verified: rutas.tsx loads GPS routes screen correctly, leaderboard.tsx shows ranking page without crash, salud.tsx shows health monitoring with vital signs charts. Tab navigation works: Inicio, Salud, Educación, Chat, Perfil. App uses Supabase DB and email/password auth. BLE/Bluetooth is MOCKED in web mode via BluetoothContext simulator.",
+  "features_verified": {
+    "BUG_FIX_1_rutas": "PASS - GPS Routes screen (rutas.tsx) loads correctly without useMemo-inside-useEffect error",
+    "BUG_FIX_2_leaderboard": "PASS - Leaderboard screen (leaderboard.tsx) loads correctly showing 'Ranking de la Manada'",
+    "BUG_FIX_3_salud": "PASS - Health tab (salud.tsx) loads correctly with vital signs and heart rate chart",
+    "TAB_HOME": "PASS - Shows reward banner, session card, progress, weekly summary",
+    "TAB_SALUD": "PASS - Shows Salud 360°, chaleco status, signos vitales, frecuencia cardíaca chart",
+    "TAB_EDUCACION": "PASS - Shows programas guiados, sesión de hoy, progress stats",
+    "TAB_CHAT": "PASS - Shows Heimdall chat with message history and input",
+    "TAB_PERFIL": "PASS - Shows dog profile (Estrella), recompensas, logros",
+    "API_health": "PASS - /api/health returns {status: healthy}",
+    "API_login": "PASS - /api/auth/login works with valid credentials",
+    "API_gamification_stats": "PASS - Returns bones, xp, level, streak_days",
+    "API_leaderboard": "PASS - Returns leaderboard with 10 users",
+    "API_weekly_summary": "PASS - Returns weekly stats",
+    "API_dogs": "PASS - Returns user's dogs (Estrella - Galgo)",
+    "API_chat_history": "PASS - Returns chat messages",
+    "API_medical_events": "PASS - Returns medical events for dog",
+    "API_routes": "PASS - Returns GPS routes for dog"
+  },
+  "mocked_api": {
+    "BLE_Bluetooth": "MOCKED in web mode via BluetoothContext simulator - chaleco shows 'desconectado' as expected"
+  }
+}
