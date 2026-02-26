@@ -758,8 +758,9 @@ export default function LeccionScreen() {
 
   const leccion = LECCIONES_DB[id || 'llamada-perfecta'];
 
-  if (!leccion) {
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
+  if (!leccion) {
 
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

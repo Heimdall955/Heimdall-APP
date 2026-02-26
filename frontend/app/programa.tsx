@@ -139,8 +139,9 @@ export default function ProgramaScreen() {
 
   const programa = PROGRAMAS_DB[id || 'educacion-basica'];
 
-  if (!programa) {
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
+  if (!programa) {
 
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

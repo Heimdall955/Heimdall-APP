@@ -113,8 +113,9 @@ export default function JuegoScreen() {
 
   const juego = JUEGOS_DB[id || 'puzzle-mental'];
 
-  if (!juego) {
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
+  if (!juego) {
 
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

@@ -35,8 +35,9 @@ export default function ProScreen() {
   const [restoring, setRestoring] = useState(false);
 
   // If already PRO, show success screen
-  if (isProUser) {
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
+  if (isProUser) {
 
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
