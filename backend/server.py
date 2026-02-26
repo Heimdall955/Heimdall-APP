@@ -917,6 +917,12 @@ Pero sí observas, opinas, analizas y orientas con responsabilidad.
 
 @api_router.post("/chat")
 async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
+    # Check daily message limit for free users
+    if not is_pro_user(user.user_id):
+        usage = get_daily_usage(user.user_id)
+        if usage["messages"] >= FREE_LIMITS["messages"]:
+            raise HTTPException(status_code=403, detail="LIMIT_MESSAGES")
+    
     now = datetime.now(timezone.utc).isoformat()
     
     # Save user message
@@ -1097,6 +1103,16 @@ async def upload_and_analyze(
     user: User = Depends(require_auth)
 ):
     """Upload a photo, video, or PDF and get Heimdall's analysis"""
+    # Check PRO limits for uploads
+    if not is_pro_user(user.user_id):
+        usage = get_daily_usage(user.user_id)
+        if file_type == "video":
+            raise HTTPException(status_code=403, detail="PRO_REQUIRED_VIDEO")
+        elif file_type == "pdf":
+            raise HTTPException(status_code=403, detail="PRO_REQUIRED_PDF")
+        elif file_type == "image" and usage["photos"] >= FREE_LIMITS["photos"]:
+            raise HTTPException(status_code=403, detail="LIMIT_PHOTOS")
+    
     try:
         file_bytes = await file.read()
         content_type = file.content_type or ""
