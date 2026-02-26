@@ -75,8 +75,13 @@ class TestGamificationAPI:
         response = requests.get(f"{BASE_URL}/api/gamification/leaderboard", headers=self.headers)
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✓ Leaderboard returned {len(data)} entries")
+        # Leaderboard can return list directly or wrapped in {"leaderboard": [...]}
+        if isinstance(data, dict) and "leaderboard" in data:
+            leaderboard = data["leaderboard"]
+        else:
+            leaderboard = data
+        assert isinstance(leaderboard, list)
+        print(f"✓ Leaderboard returned {len(leaderboard)} entries")
     
     def test_get_weekly_summary(self):
         """Test weekly summary endpoint"""
