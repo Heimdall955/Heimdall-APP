@@ -7,7 +7,7 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - **Frontend:** React Native / Expo / Expo Router
 - **Backend:** FastAPI + Supabase (PostgreSQL + Storage)
 - **AI:** OpenAI GPT-4o-mini
-- **Integraciones:** Google Wallet, react-native-ble-plx
+- **Integraciones:** Google Wallet, react-native-ble-plx, RevenueCat (pendiente config)
 
 ## Funcionalidades Implementadas
 - Onboarding usuario/perro con seleccion de idioma (es/en/it)
@@ -21,6 +21,16 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Suscripcion PRO
 - Seguridad: rate limiting, CORS, sanitizacion, proteccion IDOR
 - Modo Oscuro/Claro: Toggle en header y perfil, persistencia via SecureStore
+- **Sistema FREE/PRO con limites diarios** (Feb 2026):
+  - Chat: 5 mensajes/dia FREE, ilimitado PRO
+  - Foto: 1/dia FREE, ilimitado PRO
+  - Video: Solo PRO
+  - Analisis PDF: Solo PRO
+  - Contador de uso visible en header del chat
+  - Modal de upgrade PRO al alcanzar limites
+  - Badges PRO en botones bloqueados
+  - Backend: enforcement de limites + endpoint de activacion
+  - Precios: 4,90 EUR/mes, 39,90 EUR/ano
 
 ## Bugs corregidos (Feb 2026)
 - `styles is not defined`: useMemo dentro de if blocks en leccion, juego, pro, programa
@@ -32,9 +42,9 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - **salud.tsx**: referencia a `eventTypeConfig` en vez de `EVENT_TYPE_CONFIG` corregida
 
 ## Estado de Testing (Feb 2026)
-- Backend: 11/11 tests PASS (100%)
-- Frontend: Todas las 5 pestanas + 3 bug fixes verificados (100%)
-- Test report: /app/test_reports/iteration_3.json
+- Backend: 10/10 tests PASS sistema PRO (100%)
+- Frontend: Chat con limites, pantalla PRO, 5 tabs verificados (100%)
+- Test reports: /app/test_reports/iteration_3.json, /app/test_reports/iteration_4.json
 
 ## Tareas Pendientes
 ### P1 - Migracion SQL Weekly Summary
@@ -49,3 +59,8 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 ### P2 - Bluetooth Development Build
 - BLE esta mocked en web y Expo Go
 - Requiere Development Build con EAS para testing real
+
+### P2 - Configurar RevenueCat con Google Play
+- Crear cuenta RevenueCat
+- Configurar productos en Google Play Console
+- Reemplazar simulacion por RevenueCat real
