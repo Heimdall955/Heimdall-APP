@@ -2134,6 +2134,46 @@ async def get_routes(dog_id: str, user: User = Depends(require_auth)):
         logger.error(f"Error getting routes: {e}")
         return []
 
+# ==================== SUBSCRIPTION / PRO ENDPOINTS ====================
+
+@api_router.get("/subscription/status")
+async def get_subscription_status(user: User = Depends(require_auth)):
+    is_pro = is_pro_user(user.user_id)
+    usage = get_daily_usage(user.user_id)
+    pro_info = pro_users.get(user.user_id, {})
+    return {
+        "is_pro": is_pro,
+        "plan": pro_info.get("plan") if is_pro else None,
+        "active_until": pro_info.get("active_until").isoformat() if is_pro and pro_info.get("active_until") else None,
+        "daily_usage": usage,
+        "daily_limits": {"messages": -1, "photos": -1, "videos": -1, "pdfs": -1} if is_pro else FREE_LIMITS,
+    }
+
+@api_router.post("/subscription/activate")
+async def activate_subscription(request: Request, user: User = Depends(require_auth)):
+    body = await request.json()
+    plan = body.get("plan", "monthly")
+    if plan == "annual":
+        duration = timedelta(days=365)
+    else:
+        duration = timedelta(days=30)
+    pro_users[user.user_id] = {
+        "active_until": datetime.now(timezone.utc) + duration,
+        "plan": plan,
+    }
+    logger.info(f"PRO activated for user {user.user_id}, plan={plan}")
+    return {"success": True, "is_pro": True, "plan": plan, "active_until": pro_users[user.user_id]["active_until"].isoformat()}
+
+@api_router.get("/chat/daily-usage")
+async def chat_daily_usage(user: User = Depends(require_auth)):
+    is_pro = is_pro_user(user.user_id)
+    usage = get_daily_usage(user.user_id)
+    return {
+        "is_pro": is_pro,
+        "usage": usage,
+        "limits": {"messages": -1, "photos": -1, "videos": -1, "pdfs": -1} if is_pro else FREE_LIMITS,
+    }
+
 # ==================== GOOGLE WALLET ====================
 
 def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict = None) -> str:
