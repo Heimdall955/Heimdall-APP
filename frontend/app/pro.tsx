@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 export default function ProScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const { 
     packages, 
     loading, 
