@@ -345,7 +345,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     yourPosition: 'Tu posición',
     noRankYet: 'Completa lecciones para aparecer',
     rank: 'Puesto',
-    totalBones: 'Huesos totales',
     viewLeaderboard: 'Ver ranking',
     
     // Weekly Summary
@@ -699,7 +698,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     yourPosition: 'Your position',
     noRankYet: 'Complete lessons to appear',
     rank: 'Rank',
-    totalBones: 'Total bones',
     viewLeaderboard: 'View ranking',
     
     // Weekly Summary
@@ -1053,7 +1051,6 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     yourPosition: 'La tua posizione',
     noRankYet: 'Completa lezioni per apparire',
     rank: 'Posizione',
-    totalBones: 'Ossa totali',
     viewLeaderboard: 'Vedi classifica',
     
     // Weekly Summary
