@@ -78,6 +78,12 @@ export default function ProScreen() {
       const result = await purchasePackage(selectedPackage);
       
       if (result.success) {
+        // Activate PRO on backend
+        try {
+          const token = await SecureStore.getItemAsync('session_token');
+          await axios.post(`${BACKEND_URL}/api/subscription/activate`, { plan: selectedPlan }, { headers: { Authorization: `Bearer ${token}` } });
+        } catch (e) { console.log('Backend activation error:', e); }
+        
         Alert.alert('¡Éxito!', result.message, [
           { text: 'OK', onPress: () => router.back() }
         ]);
