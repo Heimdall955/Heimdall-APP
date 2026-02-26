@@ -67,6 +67,8 @@ export default function LeaderboardScreen() {
     const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
     const heights = [100, 140, 80];
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
     return (
       <View style={styles.podiumContainer} data-testid="leaderboard-podium">
         {podiumOrder.map((entry, idx) => {
@@ -96,7 +98,6 @@ export default function LeaderboardScreen() {
     );
   };
 
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>

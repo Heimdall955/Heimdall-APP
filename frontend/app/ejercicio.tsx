@@ -80,6 +80,8 @@ export default function EjercicioScreen() {
   const ejercicio = EJERCICIOS_DB[id || 'senales-basicas'];
 
   if (!ejercicio) {
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
@@ -120,7 +122,6 @@ export default function EjercicioScreen() {
 
   const todosCompletados = completados.length === ejercicio.ejercicios.length;
 
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>

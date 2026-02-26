@@ -169,6 +169,8 @@ export default function HistorialMedicoScreen() {
     }
   };
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
@@ -235,7 +237,6 @@ export default function HistorialMedicoScreen() {
         ) : (
           filteredEvents.map((event) => {
             const config = getEventConfig(event.type);
-            const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
               <Card key={event.id} style={styles.eventCard} variant="elevated">

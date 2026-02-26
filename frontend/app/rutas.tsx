@@ -41,6 +41,8 @@ export default function RutasScreen() {
     loadRoutes();
     requestLocationPermission();
     
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
     return () => {
       stopTracking();
     };
@@ -198,7 +200,6 @@ export default function RutasScreen() {
     return `${Math.round(meters)} m`;
   };
 
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>

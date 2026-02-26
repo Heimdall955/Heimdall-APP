@@ -759,6 +759,8 @@ export default function LeccionScreen() {
   const leccion = LECCIONES_DB[id || 'llamada-perfecta'];
 
   if (!leccion) {
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
@@ -885,7 +887,6 @@ export default function LeccionScreen() {
 
   const pasoActualData = leccion.pasos[pasoActual];
 
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>

@@ -140,6 +140,8 @@ export default function ProgramaScreen() {
   const programa = PROGRAMAS_DB[id || 'educacion-basica'];
 
   if (!programa) {
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
@@ -163,7 +165,6 @@ export default function ProgramaScreen() {
     );
   };
 
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>

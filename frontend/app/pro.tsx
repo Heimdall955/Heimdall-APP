@@ -36,6 +36,8 @@ export default function ProScreen() {
 
   // If already PRO, show success screen
   if (isProUser) {
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <View style={styles.successContainer}>
@@ -106,7 +108,6 @@ export default function ProScreen() {
   const monthlyPackage = packages.find(pkg => pkg.packageType === 'MONTHLY');
   const annualPackage = packages.find(pkg => pkg.packageType === 'ANNUAL');
 
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
