@@ -4,10 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { PurchasesPackage } from 'react-native-purchases';
+import axios from 'axios';
 import { useSubscription } from '../hooks/useSubscription';
 import { Card, Button } from '../components/ui';
 import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { SecureStore } from '../utils/secureStore';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 
 export default function ProScreen() {
