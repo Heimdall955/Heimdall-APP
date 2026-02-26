@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, 
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image, Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -21,6 +22,10 @@ interface ChatMessage {
   content: string; created_at: string; rating?: 'up' | 'down'; file_url?: string; file_type?: string;
 }
 
+interface DailyUsage {
+  messages: number; photos: number; videos: number; pdfs: number;
+}
+
 const SUGGESTED_QUESTIONS = {
   es: ['¿Por qué mi perro ladra tanto?', 'Juegos para días de lluvia', '¿Cuánto debe comer mi perro?'],
   en: ['Why does my dog bark so much?', 'Games for rainy days', 'How much should my dog eat?'],
@@ -32,28 +37,47 @@ const WELCOME_MESSAGES = {
   it: { title: 'Ciao! Sono Heimdall', text: 'Sono il tuo guardiano conversazionale. Sono qui per accompagnarti, guidarti e proteggere il tuo migliore amico. Come posso aiutarti?', suggestions: 'Prova a chiedere:' },
 };
 const ATTACHMENT_LABELS = {
-  es: { photo: 'Foto', video: 'Vídeo', bloodTest: 'Análisis', attachTitle: 'Adjuntar archivo', photoDesc: 'Foto de tu mascota', videoDesc: 'Vídeo corto (máx 4s)', bloodDesc: 'Análisis de sangre (PDF)' },
-  en: { photo: 'Photo', video: 'Video', bloodTest: 'Analysis', attachTitle: 'Attach file', photoDesc: 'Photo of your pet', videoDesc: 'Short video (max 4s)', bloodDesc: 'Blood test (PDF)' },
-  it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)' },
+  es: { photo: 'Foto', video: 'Video', bloodTest: 'Analisis', attachTitle: 'Adjuntar archivo', photoDesc: 'Foto de tu mascota', videoDesc: 'Video corto (max 4s)', bloodDesc: 'Analisis de sangre (PDF)', proOnly: 'Solo PRO', limitReached: 'Limite alcanzado', upgradeToPro: 'Hazte PRO', messagesLeft: 'mensajes restantes hoy', photosLeft: 'foto restante hoy', unlimited: 'Ilimitado', limitTitle: 'Limite alcanzado', limitMsg: 'Has alcanzado el limite diario de mensajes gratuitos. Hazte PRO para chatear sin limites.', photoLimitMsg: 'Has alcanzado el limite diario de fotos gratuitas. Hazte PRO para enviar fotos ilimitadas.', videoProMsg: 'El analisis de video es una funcion PRO exclusiva.', pdfProMsg: 'El analisis de documentos es una funcion PRO exclusiva.' },
+  en: { photo: 'Photo', video: 'Video', bloodTest: 'Analysis', attachTitle: 'Attach file', photoDesc: 'Photo of your pet', videoDesc: 'Short video (max 4s)', bloodDesc: 'Blood test (PDF)', proOnly: 'PRO Only', limitReached: 'Limit reached', upgradeToPro: 'Go PRO', messagesLeft: 'messages left today', photosLeft: 'photo left today', unlimited: 'Unlimited', limitTitle: 'Limit reached', limitMsg: 'You have reached your daily free message limit. Go PRO for unlimited chat.', photoLimitMsg: 'You have reached your daily free photo limit. Go PRO for unlimited photos.', videoProMsg: 'Video analysis is a PRO exclusive feature.', pdfProMsg: 'Document analysis is a PRO exclusive feature.' },
+  it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)', proOnly: 'Solo PRO', limitReached: 'Limite raggiunto', upgradeToPro: 'Passa a PRO', messagesLeft: 'messaggi rimasti oggi', photosLeft: 'foto rimasta oggi', unlimited: 'Illimitato', limitTitle: 'Limite raggiunto', limitMsg: 'Hai raggiunto il limite giornaliero di messaggi gratuiti. Passa a PRO per chattare senza limiti.', photoLimitMsg: 'Hai raggiunto il limite giornaliero di foto gratuite. Passa a PRO per foto illimitate.', videoProMsg: "L'analisi video è una funzione PRO esclusiva.", pdfProMsg: "L'analisi dei documenti è una funzione PRO esclusiva." },
 };
+
+const FREE_LIMITS = { messages: 5, photos: 1, videos: 0, pdfs: 0 };
 
 export default function ChatScreen() {
   const { currentDog, user } = useAuth();
   const { language, t } = useLanguage();
   const { colors, shadows } = useTheme();
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [showProModal, setShowProModal] = useState(false);
+  const [proModalMessage, setProModalMessage] = useState('');
+  const [isPro, setIsPro] = useState(false);
+  const [usage, setUsage] = useState<DailyUsage>({ messages: 0, photos: 0, videos: 0, pdfs: 0 });
   const scrollViewRef = useRef<ScrollView>(null);
 
   const suggestedQuestions = SUGGESTED_QUESTIONS[language];
   const welcomeMessage = WELCOME_MESSAGES[language];
-  const attachLabels = ATTACHMENT_LABELS[language];
+  const labels = ATTACHMENT_LABELS[language];
 
-  useEffect(() => { loadChatHistory(); }, []);
+  const messagesRemaining = isPro ? -1 : Math.max(0, FREE_LIMITS.messages - usage.messages);
+  const photosRemaining = isPro ? -1 : Math.max(0, FREE_LIMITS.photos - usage.photos);
+
+  const fetchUsage = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      const res = await axios.get(`${BACKEND_URL}/api/chat/daily-usage`, { headers: { Authorization: `Bearer ${token}` } });
+      setIsPro(res.data.is_pro);
+      setUsage(res.data.usage);
+    } catch (e) { console.log('Error fetching usage:', e); }
+  }, []);
+
+  useEffect(() => { loadChatHistory(); fetchUsage(); }, []);
 
   const loadChatHistory = async () => {
     try {
@@ -64,26 +88,51 @@ export default function ChatScreen() {
     finally { setIsLoadingHistory(false); }
   };
 
+  const showProGate = (msg: string) => { setProModalMessage(msg); setShowProModal(true); };
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    if (!isPro && usage.messages >= FREE_LIMITS.messages) {
+      showProGate(labels.limitMsg); return;
+    }
     const userMessage: ChatMessage = { id: `temp_${Date.now()}`, user_id: user?.user_id || '', dog_id: currentDog?.id, role: 'user', content: text.trim(), created_at: new Date().toISOString() };
     setMessages(prev => [...prev, userMessage]); setInputText(''); setIsLoading(true);
+    setUsage(prev => ({ ...prev, messages: prev.messages + 1 }));
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
     try {
       const token = await SecureStore.getItemAsync('session_token');
       const response = await axios.post(`${BACKEND_URL}/api/chat`, { content: text.trim(), dog_id: currentDog?.id, language: getLanguageName(language) }, { headers: { Authorization: `Bearer ${token}` } });
       setMessages(prev => [...prev, response.data]);
-    } catch (error: any) { Alert.alert(t('error'), t('error')); setMessages(prev => prev.filter(m => m.id !== userMessage.id)); }
+    } catch (error: any) {
+      if (error?.response?.status === 403) { showProGate(labels.limitMsg); }
+      else { Alert.alert(t('error'), t('error')); }
+      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
+      setUsage(prev => ({ ...prev, messages: Math.max(0, prev.messages - 1) }));
+    }
     finally { setIsLoading(false); setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100); }
   };
 
-  const pickImage = async () => { setShowAttachMenu(false); const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.7 }); if (!result.canceled && result.assets[0]) await uploadFile(result.assets[0].uri, 'image', result.assets[0].fileName || 'photo.jpg'); };
-  const pickVideo = async () => { setShowAttachMenu(false); const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], allowsEditing: true, videoMaxDuration: 4, quality: 0.5 }); if (!result.canceled && result.assets[0]) await uploadFile(result.assets[0].uri, 'video', result.assets[0].fileName || 'video.mp4'); };
-  const pickPDF = async () => { setShowAttachMenu(false); try { const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf', copyToCacheDirectory: true }); if (!result.canceled && result.assets && result.assets[0]) await uploadFile(result.assets[0].uri, 'pdf', result.assets[0].name || 'document.pdf'); } catch (error) { console.log('Error picking PDF:', error); } };
+  const pickImage = async () => {
+    setShowAttachMenu(false);
+    if (!isPro && usage.photos >= FREE_LIMITS.photos) { showProGate(labels.photoLimitMsg); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.7 });
+    if (!result.canceled && result.assets[0]) { await uploadFile(result.assets[0].uri, 'image', result.assets[0].fileName || 'photo.jpg'); setUsage(prev => ({ ...prev, photos: prev.photos + 1 })); }
+  };
+  const pickVideo = async () => {
+    setShowAttachMenu(false);
+    if (!isPro) { showProGate(labels.videoProMsg); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], allowsEditing: true, videoMaxDuration: 4, quality: 0.5 });
+    if (!result.canceled && result.assets[0]) await uploadFile(result.assets[0].uri, 'video', result.assets[0].fileName || 'video.mp4');
+  };
+  const pickPDF = async () => {
+    setShowAttachMenu(false);
+    if (!isPro) { showProGate(labels.pdfProMsg); return; }
+    try { const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf', copyToCacheDirectory: true }); if (!result.canceled && result.assets && result.assets[0]) await uploadFile(result.assets[0].uri, 'pdf', result.assets[0].name || 'document.pdf'); } catch (error) { console.log('Error picking PDF:', error); }
+  };
 
   const uploadFile = async (uri: string, fileType: string, fileName: string) => {
     const userMsg: ChatMessage = { id: `temp_${Date.now()}`, user_id: user?.user_id || '', dog_id: currentDog?.id, role: 'user', content: `[${fileType === 'pdf' ? 'PDF' : fileType === 'video' ? 'VIDEO' : 'FOTO'}] ${fileName}${inputText ? '\n' + inputText : ''}`, created_at: new Date().toISOString(), file_type: fileType };
-    setMessages(prev => [...prev, userMsg]); setIsLoading(true); setUploadProgress(fileType === 'image' ? '📸' : fileType === 'video' ? '🎥' : '📄'); setInputText('');
+    setMessages(prev => [...prev, userMsg]); setIsLoading(true); setUploadProgress(fileType === 'image' ? 'Foto' : fileType === 'video' ? 'Video' : 'PDF'); setInputText('');
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
     try {
       const token = await SecureStore.getItemAsync('session_token');
@@ -93,7 +142,11 @@ export default function ChatScreen() {
       formData.append('dog_id', currentDog?.id || ''); formData.append('message', inputText || ''); formData.append('file_type', fileType); formData.append('language', getLanguageName(language));
       const response = await axios.post(`${BACKEND_URL}/api/chat/upload`, formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
       setMessages(prev => [...prev, response.data]);
-    } catch (error: any) { Alert.alert(t('error'), error?.response?.data?.detail || 'Error uploading file'); setMessages(prev => prev.filter(m => m.id !== userMsg.id)); }
+    } catch (error: any) {
+      if (error?.response?.status === 403) { const detail = error?.response?.data?.detail || ''; if (detail.includes('PHOTO')) showProGate(labels.photoLimitMsg); else if (detail.includes('VIDEO')) showProGate(labels.videoProMsg); else if (detail.includes('PDF')) showProGate(labels.pdfProMsg); else showProGate(labels.limitMsg); }
+      else { Alert.alert(t('error'), error?.response?.data?.detail || 'Error uploading file'); }
+      setMessages(prev => prev.filter(m => m.id !== userMsg.id));
+    }
     finally { setIsLoading(false); setUploadProgress(null); setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100); }
   };
 
@@ -123,6 +176,31 @@ export default function ChatScreen() {
     );
   };
 
+  const UsageCounter = () => {
+    if (isPro) return (
+      <View style={s.usageBadgePro} data-testid="usage-counter-pro">
+        <Ionicons name="diamond" size={14} color={colors.accent} />
+        <Text style={[s.usageBadgeText, { color: colors.accent }]}>PRO</Text>
+      </View>
+    );
+    const pct = (usage.messages / FREE_LIMITS.messages) * 100;
+    const isLow = messagesRemaining <= 1;
+    return (
+      <View style={[s.usageBadge, isLow && { borderColor: colors.error + '60', backgroundColor: colors.error + '10' }]} data-testid="usage-counter">
+        <Ionicons name="chatbubble-outline" size={14} color={isLow ? colors.error : colors.primary} />
+        <Text style={[s.usageBadgeText, isLow && { color: colors.error }]}>{messagesRemaining}/5</Text>
+        <View style={s.usageBarBg}><View style={[s.usageBarFill, { width: `${Math.min(pct, 100)}%`, backgroundColor: isLow ? colors.error : colors.primary }]} /></View>
+      </View>
+    );
+  };
+
+  const ProBadge = ({ small }: { small?: boolean }) => (
+    <View style={[s.proBadgeInline, small && { paddingHorizontal: 4, paddingVertical: 1 }]}>
+      <Ionicons name="diamond" size={small ? 8 : 10} color="#FFF" />
+      <Text style={[s.proBadgeText, small && { fontSize: 8 }]}>PRO</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={s.container} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
@@ -130,8 +208,9 @@ export default function ChatScreen() {
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
             <View style={s.haniAvatar}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 48, height: 48 }} resizeMode="cover" /></View>
-            <View><Text style={s.headerTitle}>Heimdall</Text><Text style={s.headerSub}>{t('guardianChat') || 'Tu guardián'}</Text></View>
+            <View><Text style={s.headerTitle}>Heimdall</Text><Text style={s.headerSub}>{t('guardianChat') || 'Tu guardian'}</Text></View>
           </View>
+          <UsageCounter />
         </View>
 
         <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
@@ -143,17 +222,31 @@ export default function ChatScreen() {
               <View style={s.welcomeAvatar}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 80, height: 80 }} resizeMode="cover" /></View>
               <Text style={{ fontSize: FontSizes.xl, fontWeight: '700', color: colors.text, marginBottom: Spacing.sm }}>{welcomeMessage.title}</Text>
               <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: Spacing.lg }}>{welcomeMessage.text}</Text>
+
+              {/* Quick Actions with PRO badges */}
               <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl, width: '100%' }} data-testid="quick-actions">
-                {[{ icon: 'camera', color: colors.primary, label: attachLabels.photo, desc: attachLabels.photoDesc, fn: pickImage },
-                  { icon: 'videocam', color: colors.accentOrange, label: attachLabels.video, desc: attachLabels.videoDesc, fn: pickVideo },
-                  { icon: 'document-text', color: colors.accentPurple, label: attachLabels.bloodTest, desc: attachLabels.bloodDesc, fn: pickPDF }].map((a, i) => (
-                  <TouchableOpacity key={i} style={s.quickActionCard} onPress={a.fn}>
-                    <Ionicons name={a.icon as any} size={28} color={a.color} />
-                    <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{a.label}</Text>
-                    <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{a.desc}</Text>
-                  </TouchableOpacity>
-                ))}
+                <TouchableOpacity style={s.quickActionCard} onPress={pickImage}>
+                  <Ionicons name="camera" size={28} color={colors.primary} />
+                  <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.photo}</Text>
+                  <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{labels.photoDesc}</Text>
+                  {!isPro && photosRemaining <= 0 && <ProBadge small />}
+                </TouchableOpacity>
+                <TouchableOpacity style={s.quickActionCard} onPress={pickVideo}>
+                  <View style={{ position: 'relative' }}>
+                    <Ionicons name="videocam" size={28} color={colors.accentOrange} />
+                  </View>
+                  <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.video}</Text>
+                  <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{labels.videoDesc}</Text>
+                  {!isPro && <ProBadge small />}
+                </TouchableOpacity>
+                <TouchableOpacity style={s.quickActionCard} onPress={pickPDF}>
+                  <Ionicons name="document-text" size={28} color={colors.accentPurple} />
+                  <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.bloodTest}</Text>
+                  <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{labels.bloodDesc}</Text>
+                  {!isPro && <ProBadge small />}
+                </TouchableOpacity>
               </View>
+
               <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text, marginBottom: Spacing.md }}>{welcomeMessage.suggestions}</Text>
               <View style={{ width: '100%', gap: Spacing.sm }}>
                 {suggestedQuestions.map((q, i) => (
@@ -176,52 +269,90 @@ export default function ChatScreen() {
           )}
         </ScrollView>
 
+        {/* PRO Upgrade Modal */}
+        <Modal visible={showProModal} transparent animationType="fade" onRequestClose={() => setShowProModal(false)}>
+          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowProModal(false)}>
+            <View style={s.proModal} data-testid="pro-modal">
+              <View style={s.proModalIcon}>
+                <Ionicons name="diamond" size={40} color={colors.accent} />
+              </View>
+              <Text style={s.proModalTitle}>{labels.limitTitle}</Text>
+              <Text style={s.proModalText}>{proModalMessage}</Text>
+              <TouchableOpacity style={s.proModalButton} onPress={() => { setShowProModal(false); router.push('/pro'); }} data-testid="go-pro-button">
+                <Ionicons name="diamond" size={18} color="#FFF" />
+                <Text style={s.proModalButtonText}>{labels.upgradeToPro} - 4,90 EUR/mes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ paddingVertical: Spacing.md }} onPress={() => setShowProModal(false)}>
+                <Text style={{ color: colors.textSecondary, fontSize: FontSizes.md }}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        {/* Quick Bar with PRO indicators */}
+        {!isLoading && (
+          <View style={s.quickBar} data-testid="quick-bar">
+            <TouchableOpacity style={s.quickBarBtn} onPress={pickImage}>
+              <Ionicons name="camera" size={20} color={!isPro && photosRemaining <= 0 ? colors.gray : colors.primary} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !isPro && photosRemaining <= 0 ? colors.gray : colors.text }}>{labels.photo}</Text>
+              {!isPro && photosRemaining <= 0 && <ProBadge small />}
+            </TouchableOpacity>
+            <TouchableOpacity style={s.quickBarBtn} onPress={pickVideo}>
+              <Ionicons name="videocam" size={20} color={!isPro ? colors.gray : colors.accentOrange} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !isPro ? colors.gray : colors.text }}>{labels.video}</Text>
+              {!isPro && <ProBadge small />}
+            </TouchableOpacity>
+            <TouchableOpacity style={s.quickBarBtn} onPress={pickPDF}>
+              <Ionicons name="document-text" size={20} color={!isPro ? colors.gray : colors.accentPurple} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !isPro ? colors.gray : colors.text }}>{labels.bloodTest}</Text>
+              {!isPro && <ProBadge small />}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Input */}
+        <View style={s.inputContainer}>
+          {!isPro && messagesRemaining <= 2 && messagesRemaining > 0 && (
+            <View style={s.limitWarning} data-testid="limit-warning">
+              <Ionicons name="warning" size={14} color={colors.accentOrange} />
+              <Text style={{ fontSize: FontSizes.xs, color: colors.accentOrange, flex: 1 }}>
+                {messagesRemaining} {labels.messagesLeft}
+              </Text>
+            </View>
+          )}
+          <View style={s.inputWrapper}>
+            <TouchableOpacity style={{ padding: Spacing.sm, justifyContent: 'center' }} onPress={() => setShowAttachMenu(true)} data-testid="attach-button">
+              <Ionicons name="add-circle" size={28} color={colors.primary} />
+            </TouchableOpacity>
+            <TextInput style={s.textInput} placeholder={!isPro && messagesRemaining <= 0 ? labels.limitReached : (t('typeMessage') || 'Escribe tu mensaje...')} placeholderTextColor={!isPro && messagesRemaining <= 0 ? colors.error : colors.gray} value={inputText} onChangeText={setInputText} multiline maxLength={1000} editable={isPro || messagesRemaining > 0} />
+            <TouchableOpacity style={[s.sendButton, (!inputText.trim() || isLoading || (!isPro && messagesRemaining <= 0)) && { backgroundColor: colors.grayLight }]} onPress={() => { if (!isPro && messagesRemaining <= 0) { showProGate(labels.limitMsg); } else { sendMessage(inputText); } }} disabled={!inputText.trim() || isLoading} data-testid="send-button">
+              <Ionicons name="send" size={20} color={inputText.trim() && !isLoading ? '#FFF' : colors.gray} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Attach Modal */}
         <Modal visible={showAttachMenu} transparent animationType="slide" onRequestClose={() => setShowAttachMenu(false)}>
           <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAttachMenu(false)}>
             <View style={s.attachMenu} data-testid="attach-menu">
-              <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: Spacing.lg }}>{attachLabels.attachTitle}</Text>
+              <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: Spacing.lg }}>{labels.attachTitle}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                {[{ icon: 'camera', color: colors.primary, bg: colors.primaryLight, label: attachLabels.photo, desc: attachLabels.photoDesc, fn: pickImage },
-                  { icon: 'videocam', color: colors.accentOrange, bg: '#FFF0E0', label: attachLabels.video, desc: attachLabels.videoDesc, fn: pickVideo },
-                  { icon: 'document-text', color: colors.accentPurple, bg: '#F0E8FF', label: attachLabels.bloodTest, desc: attachLabels.bloodDesc, fn: pickPDF }].map((a, i) => (
-                  <TouchableOpacity key={i} style={{ alignItems: 'center', gap: Spacing.sm, width: 90 }} onPress={a.fn}>
-                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}><Ionicons name={a.icon as any} size={24} color={a.color} /></View>
+                {[{ icon: 'camera', color: colors.primary, bg: colors.primaryLight, label: labels.photo, desc: !isPro && photosRemaining <= 0 ? labels.limitReached : labels.photoDesc, fn: pickImage, locked: !isPro && photosRemaining <= 0 },
+                  { icon: 'videocam', color: colors.accentOrange, bg: '#FFF0E0', label: labels.video, desc: !isPro ? labels.proOnly : labels.videoDesc, fn: pickVideo, locked: !isPro },
+                  { icon: 'document-text', color: colors.accentPurple, bg: '#F0E8FF', label: labels.bloodTest, desc: !isPro ? labels.proOnly : labels.bloodDesc, fn: pickPDF, locked: !isPro }].map((a, i) => (
+                  <TouchableOpacity key={i} style={{ alignItems: 'center', gap: Spacing.sm, width: 90, opacity: a.locked ? 0.5 : 1 }} onPress={a.fn}>
+                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                      <Ionicons name={a.icon as any} size={24} color={a.color} />
+                      {a.locked && <View style={{ position: 'absolute', top: -4, right: -4 }}><ProBadge small /></View>}
+                    </View>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{a.label}</Text>
-                    <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{a.desc}</Text>
+                    <Text style={{ fontSize: 10, color: a.locked ? colors.error : colors.textSecondary, textAlign: 'center' }}>{a.desc}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
           </TouchableOpacity>
         </Modal>
-
-        {/* Quick Bar */}
-        {!isLoading && (
-          <View style={s.quickBar} data-testid="quick-bar">
-            {[{ icon: 'camera', color: colors.primary, label: attachLabels.photo, fn: pickImage },
-              { icon: 'videocam', color: colors.accentOrange, label: attachLabels.video, fn: pickVideo },
-              { icon: 'document-text', color: colors.accentPurple, label: attachLabels.bloodTest, fn: pickPDF }].map((a, i) => (
-              <TouchableOpacity key={i} style={s.quickBarBtn} onPress={a.fn}>
-                <Ionicons name={a.icon as any} size={20} color={a.color} />
-                <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: colors.text }}>{a.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Input */}
-        <View style={s.inputContainer}>
-          <View style={s.inputWrapper}>
-            <TouchableOpacity style={{ padding: Spacing.sm, justifyContent: 'center' }} onPress={() => setShowAttachMenu(true)} data-testid="attach-button">
-              <Ionicons name="add-circle" size={28} color={colors.primary} />
-            </TouchableOpacity>
-            <TextInput style={s.textInput} placeholder={t('typeMessage')} placeholderTextColor={colors.gray} value={inputText} onChangeText={setInputText} multiline maxLength={1000} />
-            <TouchableOpacity style={[s.sendButton, (!inputText.trim() || isLoading) && { backgroundColor: colors.grayLight }]} onPress={() => sendMessage(inputText)} disabled={!inputText.trim() || isLoading} data-testid="send-button">
-              <Ionicons name="send" size={20} color={inputText.trim() && !isLoading ? '#FFF' : colors.gray} />
-            </TouchableOpacity>
-          </View>
-        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -233,8 +364,13 @@ const cs = (C: any, S: any) => StyleSheet.create({
   haniAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   headerTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text },
   headerSub: { fontSize: FontSizes.sm, color: C.textSecondary },
+  usageBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: C.primary + '40', backgroundColor: C.primary + '08' },
+  usageBadgePro: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, backgroundColor: C.accent + '15', borderWidth: 1, borderColor: C.accent + '40' },
+  usageBadgeText: { fontSize: FontSizes.sm, fontWeight: '700', color: C.primary },
+  usageBarBg: { width: 40, height: 4, borderRadius: 2, backgroundColor: C.grayLight, overflow: 'hidden' },
+  usageBarFill: { height: '100%', borderRadius: 2 },
   welcomeAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg, overflow: 'hidden' },
-  quickActionCard: { flex: 1, backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: 4, ...S.sm, borderWidth: 1, borderColor: C.grayLight },
+  quickActionCard: { flex: 1, backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: 4, ...S.sm, borderWidth: 1, borderColor: C.grayLight, position: 'relative' },
   suggestionChip: { backgroundColor: C.cardBg, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: C.primary + '40', ...S.sm },
   messageContainer: { flexDirection: 'row', marginBottom: Spacing.md, alignItems: 'flex-end' },
   userMessage: { justifyContent: 'flex-end' },
@@ -252,4 +388,13 @@ const cs = (C: any, S: any) => StyleSheet.create({
   quickBarBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, backgroundColor: C.background, borderWidth: 1, borderColor: C.grayLight },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   attachMenu: { backgroundColor: C.cardBg, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: Spacing.lg, paddingBottom: 40 },
+  proModal: { backgroundColor: C.cardBg, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, paddingBottom: 40, alignItems: 'center' },
+  proModalIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.accent + '15', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg },
+  proModalTitle: { fontSize: FontSizes.xl, fontWeight: '800', color: C.text, marginBottom: Spacing.sm },
+  proModalText: { fontSize: FontSizes.md, color: C.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: Spacing.lg },
+  proModalButton: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, backgroundColor: C.accent, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.lg },
+  proModalButtonText: { fontSize: FontSizes.md, fontWeight: '700', color: '#FFF' },
+  proBadgeInline: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: C.accent, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, position: 'absolute', top: -4, right: -4 },
+  proBadgeText: { fontSize: 9, fontWeight: '800', color: '#FFF' },
+  limitWarning: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingHorizontal: Spacing.sm, paddingVertical: 4, marginBottom: Spacing.xs },
 });
