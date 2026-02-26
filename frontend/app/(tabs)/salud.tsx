@@ -66,7 +66,7 @@ export default function SaludScreen() {
         type: e.type,
         title: e.title,
         date: e.date,
-        ...eventTypeConfig[e.type] || eventTypeConfig.note,
+        ...EVENT_TYPE_CONFIG[e.type] || EVENT_TYPE_CONFIG.note,
       }));
       
       setMedicalEvents(events);

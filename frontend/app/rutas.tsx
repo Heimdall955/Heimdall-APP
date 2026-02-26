@@ -37,11 +37,11 @@ export default function RutasScreen() {
   const startTime = useRef<Date | null>(null);
   const timerInterval = useRef<NodeJS.Timeout | null>(null);
 
+  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
   useEffect(() => {
     loadRoutes();
     requestLocationPermission();
-    
-  const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
     return () => {
       stopTracking();
