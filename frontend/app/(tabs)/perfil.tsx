@@ -34,13 +34,12 @@ interface UserSettings {
   achievement_alerts: boolean; pack_alerts: boolean; weight_unit: string; temperature_unit: string;
 }
 
-const PLACEHOLDER_COLORS = [colors.primary, colors.accentOrange, colors.accentPurple, '#4ECDC4', '#FF6B6B'];
-
 export default function PerfilScreen() {
   const router = useRouter();
   const { currentDog, user, logout, dogs, refreshDogs, setCurrentDog } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { colors, isDark, toggleTheme } = useTheme();
+  const PLACEHOLDER_COLORS = [colors.primary, colors.accentOrange, colors.accentPurple, '#4ECDC4', '#FF6B6B'];
   const [refreshing, setRefreshing] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
