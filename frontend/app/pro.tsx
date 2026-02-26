@@ -13,6 +13,14 @@ import { useTheme } from '../contexts/ThemeContext';
 export default function ProScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const proFeatures = [
+    { icon: 'videocam', title: 'Analisis de Video IA', description: 'Sube videos de tu perro y recibe analisis de comportamiento', color: colors.primary },
+    { icon: 'document-text', title: 'Informes Veterinarios', description: 'Genera informes completos para compartir con tu veterinario', color: colors.info },
+    { icon: 'chatbubbles', title: 'Chat Ilimitado con Hani', description: 'Sin limite de mensajes con tu asistente IA', color: colors.accentEducation },
+    { icon: 'analytics', title: 'Analisis Avanzado', description: 'Graficos detallados de salud y comportamiento', color: colors.success },
+    { icon: 'cloud-upload', title: 'Backup en la Nube', description: 'Todos tus datos seguros y sincronizados', color: colors.accent },
+    { icon: 'people', title: 'Manada Familiar', description: 'Invita hasta 5 miembros a gestionar tu perro', color: colors.error },
+  ];
   const { 
     packages, 
     loading, 
