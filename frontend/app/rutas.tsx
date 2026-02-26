@@ -35,7 +35,7 @@ export default function RutasScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const watchId = useRef<Location.LocationSubscription | null>(null);
   const startTime = useRef<Date | null>(null);
-  const timerInterval = useRef<NodeJS.Timeout | null>(null);
+  const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 

@@ -138,14 +138,12 @@ class PurchasesService {
           ? '¡Bienvenido a Heimdall PRO!'
           : 'La compra se procesó pero el beneficio no está activo.',
       };
-    } catch (error) {
-      if (error instanceof PurchasesError) {
-        if (error.code === 'PURCHASE_CANCELLED') {
-          return {
-            success: false,
-            message: 'Compra cancelada por el usuario',
-          };
-        }
+    } catch (error: any) {
+      if (error?.code === 'PURCHASE_CANCELLED') {
+        return {
+          success: false,
+          message: 'Compra cancelada por el usuario',
+        };
       }
       console.error('Purchase failed:', error);
       return {

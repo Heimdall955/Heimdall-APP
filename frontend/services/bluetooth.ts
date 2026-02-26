@@ -41,11 +41,11 @@ class BluetoothService {
   private biometricCallback: BiometricCallback | null = null;
   private stateCallback: StateCallback | null = null;
   private isScanning: boolean = false;
-  private simulationInterval: NodeJS.Timeout | null = null;
+  private simulationInterval: ReturnType<typeof setInterval> | null = null;
   private isSimulating: boolean = false;
   private bleAvailable: boolean = false;
   private subscriptions: any[] = [];
-  private dataPollingInterval: NodeJS.Timeout | null = null;
+  private dataPollingInterval: ReturnType<typeof setInterval> | null = null;
 
   // Current biometric data
   private currentData: BiometricData = {
