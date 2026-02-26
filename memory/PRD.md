@@ -4,7 +4,7 @@
 App premium para monitoreo de salud canina, educacion y conexion con chaleco inteligente.
 
 ## Stack Tecnico
-- **Frontend:** React Native / Expo / Expo Router
+- **Frontend:** React Native / Expo SDK 54 / Expo Router
 - **Backend:** FastAPI + Supabase (PostgreSQL + Storage)
 - **AI:** OpenAI GPT-4o-mini
 - **Integraciones:** Google Wallet, react-native-ble-plx, RevenueCat (pendiente config)
@@ -41,9 +41,19 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - **leaderboard.tsx**: useMemo colocado dentro de renderPodium() - movido al nivel del componente
 - **salud.tsx**: referencia a `eventTypeConfig` en vez de `EVENT_TYPE_CONFIG` corregida
 
+## Build Fixes (Feb 2026)
+- Fix critico EAS: @expo/config-plugins version ~54.0.4 + overrides/resolutions
+- Eliminado package-lock.json (conflicto con yarn.lock en EAS)
+- Iconos redimensionados: icon.png, adaptive-icon.png, favicon.png a 512x512
+- Creado splash-icon.png (referenciado en app.json pero no existia)
+- Agregado resolutions de yarn para @expo/config-plugins
+- TypeScript: 0 errores (corregidos duplicados en LanguageContext, tipos en bluetooth/rutas/purchases/ejercicio/Card)
+
 ## Estado de Testing (Feb 2026)
 - Backend: 10/10 tests PASS sistema PRO (100%)
 - Frontend: Chat con limites, pantalla PRO, 5 tabs verificados (100%)
+- TypeScript: 0 errores con --noEmit
+- expo-doctor: 16/17 checks pass (1 advisory warning sobre @expo/config-plugins)
 - Test reports: /app/test_reports/iteration_3.json, /app/test_reports/iteration_4.json
 
 ## Tareas Pendientes
@@ -64,3 +74,7 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Crear cuenta RevenueCat
 - Configurar productos en Google Play Console
 - Reemplazar simulacion por RevenueCat real
+
+## Mocked Features
+- Real BLE connectivity (simulado en web/Expo Go)
+- Google Play Store / RevenueCat payment processing en pro.tsx
