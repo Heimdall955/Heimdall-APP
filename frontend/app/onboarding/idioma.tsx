@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
@@ -24,7 +24,7 @@ export default function IdiomaScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Ionicons name="paw" size={80} color={Colors.primary} />
+          <Image source={require('../../assets/images/heimdall-character.png')} style={{ width: 120, height: 120, borderRadius: 60 }} resizeMode="cover" />
           <Text style={styles.title}>HEIMDALL</Text>
           <Text style={styles.subtitle}>Bienestar Canino Inteligente</Text>
         </View>

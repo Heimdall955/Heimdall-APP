@@ -134,10 +134,10 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logoText: {
-    fontSize: 56,
+    fontSize: 42,
     fontWeight: '900',
     color: '#ffffff',
-    letterSpacing: 12,
+    letterSpacing: 8,
     textShadowColor: '#4ECDC4',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
