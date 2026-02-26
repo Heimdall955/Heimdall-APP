@@ -1,0 +1,42 @@
+# EAS Build Ignore File
+# Excludes unnecessary files from EAS tarball upload
+
+# Cache directories
+.metro-cache/
+.ruff_cache/
+.expo/
+.cache/
+
+# Build output
+dist/
+web-build/
+
+# Test files
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# System
+.DS_Store
+*.pem
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Git
+.git/
+
+# Native build caches
+.kotlin/
+*.orig.*
+
+# Misc binary/corrupt files
+*.pack
+*.deb
+*.dylib
