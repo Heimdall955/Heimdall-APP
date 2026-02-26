@@ -180,7 +180,7 @@ export default function ProScreen() {
                 <Text style={styles.planName}>Mensual</Text>
                 <View style={styles.priceRow}>
                   <Text style={styles.planPrice}>
-                    {monthlyPackage?.product.priceString || '1,99 €'}
+                    {monthlyPackage?.product.priceString || '4,90 €'}
                   </Text>
                   <Text style={styles.planPeriod}>/mes</Text>
                 </View>
@@ -211,13 +211,13 @@ export default function ProScreen() {
                 <Text style={styles.planName}>Anual</Text>
                 <View style={styles.priceRow}>
                   <Text style={styles.planPrice}>
-                    {annualPackage?.product.priceString || '14,99 €'}
+                    {annualPackage?.product.priceString || '39,90 €'}
                   </Text>
                   <Text style={styles.planPeriod}>/año</Text>
                 </View>
                 
                 <View style={styles.savingsBadge}>
-                  <Text style={styles.savingsText}>Ahorra 37%</Text>
+                  <Text style={styles.savingsText}>Ahorra 32%</Text>
                 </View>
                 
                 <View style={[
