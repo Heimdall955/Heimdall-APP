@@ -79,9 +79,9 @@ export default function EjercicioScreen() {
 
   const ejercicio = EJERCICIOS_DB[id || 'senales-basicas'];
 
-  if (!ejercicio) {
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
+  if (!ejercicio) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>{t('error')}</Text>
