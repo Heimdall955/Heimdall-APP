@@ -23,7 +23,12 @@ interface MedicalEvent {
   created_at: string;
 }
 
-const eventTypes = [
+
+export default function HistorialMedicoScreen() {
+  const router = useRouter();
+  const { currentDog } = useAuth();
+  const { colors, shadows } = useTheme();
+  const eventTypes = [
   { type: 'vaccine', label: 'Vacuna', icon: 'medical', color: colors.success },
   { type: 'checkup', label: 'Revisión', icon: 'clipboard', color: colors.info },
   { type: 'deworming', label: 'Desparasitación', icon: 'bug', color: colors.warning },
@@ -31,10 +36,6 @@ const eventTypes = [
   { type: 'note', label: 'Nota', icon: 'document-text', color: colors.gray },
 ];
 
-export default function HistorialMedicoScreen() {
-  const router = useRouter();
-  const { currentDog } = useAuth();
-  const { colors, shadows } = useTheme();
   const [events, setEvents] = useState<MedicalEvent[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
