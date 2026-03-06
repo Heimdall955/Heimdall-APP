@@ -21,6 +21,12 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Seguridad: rate limiting, CORS, sanitizacion, proteccion IDOR
 - Modo Oscuro/Claro con persistencia
 - Sistema FREE/PRO con limites diarios
+- **Rutas GPS mejoradas** (Feb 2026):
+  - Permiso de ubicacion con UI dedicada
+  - Podometro integrado (expo-sensors)
+  - Sugerencias de rutas de senderismo con dificultad y Dog-friendly
+  - Diseno moderno con tabs, animaciones, estadisticas en vivo
+  - Fix: data mismatch corregido (distance_km, duration_minutes, coordinates)
 
 ## Build Fixes (Feb 2026)
 - Fix critico: @expo/config-plugins ELIMINADO de dependencies (build system lo cambiaba a v55 incompatible con SDK 54)
