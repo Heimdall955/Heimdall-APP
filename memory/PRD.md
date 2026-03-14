@@ -23,7 +23,8 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Sistema FREE/PRO con limites diarios
 - Rutas GPS v3: GDPR, podometro, senderos reales OSM, mapa Leaflet, favoritos
 - Autenticacion Biometrica: Face ID/Touch ID/Huella, auto-login, toggle en Perfil
-- Fix teclado movil: KeyboardAvoidingView con behavior='padding' en todas las pantallas, softwareKeyboardLayoutMode='pan' en app.json, keyboardShouldPersistTaps en ScrollViews y modales
+- Fix teclado movil: KeyboardAvoidingView en todas las pantallas
+- **Progreso de lecciones persistente**: Endpoints POST/GET /api/lessons/progress guardan completadas en tabla lesson_progress de Supabase. Frontend leccion.tsx y programa.tsx integrados (14 Mar 2026)
 
 ## Tareas Pendientes
 ### P1 - Migracion SQL Weekly Summary
