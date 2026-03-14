@@ -774,6 +774,19 @@ export default function LeccionScreen() {
     try {
       const token = await SecureStore.getItemAsync('session_token');
       if (!token) return;
+      
+      // Save lesson progress to DB
+      try {
+        await axios.post(
+          `${BACKEND_URL}/api/lessons/progress`,
+          { lesson_id: leccion.id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (progressError) {
+        console.log('Error saving lesson progress:', progressError);
+      }
+      
+      // Add bones/XP reward
       const response = await axios.post(
         `${BACKEND_URL}/api/gamification/add-bones`,
         { amount: leccion.huesos, reason: `Lección: ${leccion.titulo}`, lesson_id: leccion.id },

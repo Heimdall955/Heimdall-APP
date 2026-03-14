@@ -1,12 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import axios from 'axios';
 import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
+import { SecureStore } from '../utils/secureStore';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 interface Leccion {
   id: string;
@@ -139,6 +143,28 @@ export default function ProgramaScreen() {
 
   const programa = PROGRAMAS_DB[id || 'educacion-basica'];
 
+  // Load completed lessons from DB
+  const loadCompletedLessons = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const response = await axios.get(`${BACKEND_URL}/api/lessons/progress`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const completedIds = (response.data?.completed_lessons || []).map((l: any) => l.lesson_id);
+      setLeccionesCompletadas(completedIds);
+    } catch (error) {
+      console.log('Error loading lesson progress:', error);
+    }
+  }, []);
+
+  // Reload when screen gets focus (e.g., returning from a completed lesson)
+  useFocusEffect(
+    useCallback(() => {
+      loadCompletedLessons();
+    }, [loadCompletedLessons])
+  );
+
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
   if (!programa) {
@@ -154,16 +180,34 @@ export default function ProgramaScreen() {
   const xpTotal = programa.lecciones.reduce((acc, l) => acc + l.xp, 0);
 
   const handleLeccionPress = (leccionId: string) => {
-    // Navegar a la lección específica usando el ID directo
     router.push(`/leccion?id=${leccionId}`);
   };
 
-  const toggleLeccionCompletada = (leccionId: string) => {
-    setLeccionesCompletadas(prev => 
-      prev.includes(leccionId) 
-        ? prev.filter(id => id !== leccionId)
-        : [...prev, leccionId]
+  const toggleLeccionCompletada = async (leccionId: string) => {
+    const isCompleted = leccionesCompletadas.includes(leccionId);
+    // Optimistic update
+    setLeccionesCompletadas(prev =>
+      isCompleted ? prev.filter(id => id !== leccionId) : [...prev, leccionId]
     );
+
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      if (!isCompleted) {
+        await axios.post(
+          `${BACKEND_URL}/api/lessons/progress`,
+          { lesson_id: leccionId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+      // Note: no delete endpoint needed - unchecking is local-only for UX flexibility
+    } catch (error) {
+      console.log('Error toggling lesson progress:', error);
+      // Revert on failure
+      setLeccionesCompletadas(prev =>
+        isCompleted ? [...prev, leccionId] : prev.filter(id => id !== leccionId)
+      );
+    }
   };
 
 

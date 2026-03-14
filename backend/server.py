@@ -2106,6 +2106,54 @@ async def get_weekly_summary(user: User = Depends(require_auth)):
             "bones_total": 0, "week_start": "", "days_active_this_week": 0, "exercises_total": 0,
         }
 
+# ==================== LESSON PROGRESS ENDPOINTS ====================
+
+class LessonProgressCreate(BaseModel):
+    lesson_id: str
+    program_id: Optional[str] = None
+
+@api_router.post("/lessons/progress")
+async def save_lesson_progress(data: LessonProgressCreate, user: User = Depends(require_auth)):
+    """Save a completed lesson to the lesson_progress table"""
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        
+        # Check if already completed (avoid duplicates)
+        existing = supabase.table("lesson_progress").select("id").eq("user_id", user.user_id).eq("lesson_id", data.lesson_id).execute()
+        if existing.data and len(existing.data) > 0:
+            return {"message": "Lección ya completada", "already_completed": True}
+        
+        progress = {
+            "user_id": user.user_id,
+            "lesson_id": data.lesson_id,
+            "completed_at": now,
+            "created_at": now,
+        }
+        
+        supabase.table("lesson_progress").insert(progress).execute()
+        return {"message": "Progreso guardado", "lesson_id": data.lesson_id, "already_completed": False}
+    except Exception as e:
+        logger.error(f"Error saving lesson progress: {e}")
+        raise HTTPException(status_code=500, detail="Error al guardar progreso de lección")
+
+@api_router.get("/lessons/progress")
+async def get_lesson_progress(user: User = Depends(require_auth)):
+    """Get all completed lessons for the current user"""
+    try:
+        result = supabase.table("lesson_progress").select("lesson_id, completed_at").eq("user_id", user.user_id).order("completed_at", desc=True).execute()
+        
+        completed_lessons = []
+        for row in (result.data or []):
+            completed_lessons.append({
+                "lesson_id": row["lesson_id"],
+                "completed_at": row.get("completed_at"),
+            })
+        
+        return {"completed_lessons": completed_lessons}
+    except Exception as e:
+        logger.error(f"Error getting lesson progress: {e}")
+        return {"completed_lessons": []}
+
 # ==================== ROUTES ENDPOINTS ====================
 
 @api_router.post("/routes")
@@ -2459,7 +2507,7 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict 
     claims = {
         "iss": credentials_info["client_email"],
         "aud": "google",
-        "origins": ["https://health-check-38.preview.emergentagent.com"],
+        "origins": ["https://lesson-progress-fix.preview.emergentagent.com"],
         "typ": "savetowallet",
         "payload": {
             "genericClasses": [generic_class],
@@ -2537,7 +2585,7 @@ async def health_check():
 
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else []
 # Always allow the preview/production URL
-PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://health-check-38.preview.emergentagent.com")
+PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://lesson-progress-fix.preview.emergentagent.com")
 if PREVIEW_URL and PREVIEW_URL not in ALLOWED_ORIGINS:
     ALLOWED_ORIGINS.append(PREVIEW_URL)
 
