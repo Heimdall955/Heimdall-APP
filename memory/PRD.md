@@ -24,7 +24,8 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Rutas GPS v3: GDPR, podometro, senderos reales OSM, mapa Leaflet, favoritos
 - Autenticacion Biometrica: Face ID/Touch ID/Huella, auto-login, toggle en Perfil
 - Fix teclado movil: KeyboardAvoidingView en todas las pantallas
-- **Progreso de lecciones persistente**: Endpoints POST/GET /api/lessons/progress guardan completadas en tabla lesson_progress de Supabase. Frontend leccion.tsx y programa.tsx integrados (14 Mar 2026)
+- Progreso de lecciones persistente: Endpoints POST/GET /api/lessons/progress (14 Mar 2026)
+- **Pantalla "Mi Progreso"**: Vista completa del progreso educativo con anillo global, stats, barras de progreso por programa, lecciones recientes y mensajes motivacionales. Accesible desde tab Educacion (14 Mar 2026)
 
 ## Tareas Pendientes
 ### P1 - Migracion SQL Weekly Summary
@@ -36,3 +37,11 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Real BLE connectivity
 - Google Play Store / RevenueCat payment processing
 - Favoritos trails: almacenados localmente (pendiente tabla Supabase)
+
+## Archivos Clave
+- backend/server.py (endpoints /api/lessons/progress)
+- frontend/app/progreso.tsx (pantalla Mi Progreso)
+- frontend/app/programa.tsx (carga progreso desde API)
+- frontend/app/leccion.tsx (guarda progreso al completar)
+- frontend/app/(tabs)/educacion.tsx (boton navegacion a Mi Progreso)
+- frontend/app/_layout.tsx (ruta progreso registrada)

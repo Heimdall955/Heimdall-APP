@@ -213,8 +213,9 @@ export default function EducacionScreen() {
             </View>
           </View>
           
-          <TouchableOpacity style={styles.nextButton}>
-            <Text style={styles.nextButtonText}>{t('nextGoal')}: 50 🦴</Text>
+          <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/progreso')} data-testid="view-progress-btn">
+            <Ionicons name="bar-chart" size={16} color={colors.white} style={{ marginRight: 6 }} />
+            <Text style={styles.nextButtonText}>Mi Progreso</Text>
           </TouchableOpacity>
         </Card>
 
@@ -598,16 +599,18 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
     color: C.textSecondary,
   },
   nextButton: {
-    backgroundColor: C.accentLight,
+    backgroundColor: C.primary,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
     alignSelf: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   nextButtonText: {
     fontSize: FontSizes.sm,
     fontWeight: '600',
-    color: C.accent,
+    color: C.white,
   },
   programsGrid: {
     flexDirection: 'row',
