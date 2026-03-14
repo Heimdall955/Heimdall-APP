@@ -4,13 +4,14 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { Colors, FontSizes, Spacing } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BiometricAuth } from '../utils/biometricAuth';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, dogs, refreshDogs } = useAuth();
-  const [navigationState, setNavigationState] = useState<'loading' | 'checking' | 'ready'>('loading');
+  const { isAuthenticated, isLoading, dogs, refreshDogs, login } = useAuth();
+  const [navigationState, setNavigationState] = useState<'loading' | 'checking' | 'biometric' | 'ready'>('loading');
   const [showSplash, setShowSplash] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasNavigated = useRef(false);
@@ -30,6 +31,27 @@ export default function Index() {
         return;
       }
       if (!isAuthenticated) {
+        // Try biometric auto-login
+        const biometricEnabled = await BiometricAuth.isEnabled();
+        if (biometricEnabled) {
+          const { available, biometricType } = await BiometricAuth.isAvailable();
+          if (available) {
+            setNavigationState('biometric');
+            const success = await BiometricAuth.authenticate(`Inicia sesión con ${biometricType}`);
+            if (success) {
+              const creds = await BiometricAuth.getCredentials();
+              if (creds) {
+                try {
+                  await login(creds.email, creds.password);
+                  return; // Will re-trigger this effect with isAuthenticated=true
+                } catch {
+                  // Credentials invalid, disable biometric
+                  await BiometricAuth.disable();
+                }
+              }
+            }
+          }
+        }
         hasNavigated.current = true;
         router.replace('/onboarding/idioma');
         return;
@@ -89,7 +111,7 @@ export default function Index() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4ECDC4" />
           <Text style={styles.loadingText}>
-            {navigationState === 'checking' ? 'Verificando...' : 'Cargando...'}
+            {navigationState === 'checking' ? 'Verificando...' : navigationState === 'biometric' ? 'Verificando identidad...' : 'Cargando...'}
           </Text>
         </View>
 

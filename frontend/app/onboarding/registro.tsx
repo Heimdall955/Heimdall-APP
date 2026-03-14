@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button, Input } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
+import { BiometricAuth } from '../../utils/biometricAuth';
 
 export default function RegistroScreen() {
   const router = useRouter();
@@ -44,14 +45,39 @@ export default function RegistroScreen() {
     
     try {
       if (isLogin) {
-        // Para login: autenticar y luego verificar si tiene perros
         await login(email, password);
-        // Refrescar perros para verificar si ya tiene registrados
         const dogsResponse = await refreshDogs();
-        // La navegación se maneja en el index.tsx basado en el estado de dogs
-        router.replace('/');
+
+        // Offer biometric setup after successful login
+        const { available, biometricType } = await BiometricAuth.isAvailable();
+        const alreadyEnabled = await BiometricAuth.isEnabled();
+        if (available && !alreadyEnabled) {
+          Alert.alert(
+            biometricType,
+            `¿Quieres activar ${biometricType} para iniciar sesión más rápido?`,
+            [
+              { text: 'No, gracias', style: 'cancel', onPress: () => router.replace('/') },
+              {
+                text: 'Activar',
+                onPress: async () => {
+                  const success = await BiometricAuth.authenticate(`Confirma ${biometricType}`);
+                  if (success) {
+                    await BiometricAuth.saveCredentials(email, password);
+                    Alert.alert(biometricType, `${biometricType} activado correctamente`);
+                  }
+                  router.replace('/');
+                },
+              },
+            ]
+          );
+        } else {
+          // If biometric is already enabled, update credentials silently
+          if (alreadyEnabled) {
+            await BiometricAuth.saveCredentials(email, password);
+          }
+          router.replace('/');
+        }
       } else {
-        // Para registro nuevo: siempre ir a registrar perro
         await register(email, password, name);
         router.push('/onboarding/perro');
       }

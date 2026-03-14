@@ -15,6 +15,7 @@ import { SecureStore } from '../../utils/secureStore';
 import { Card, Button } from '../../components/ui';
 import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
+import { BiometricAuth } from '../../utils/biometricAuth';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -59,6 +60,9 @@ export default function PerfilScreen() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [inviteName, setInviteName] = useState('');
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricType, setBiometricType] = useState('');
   
   const [clinical, setClinical] = useState<ClinicalFile>({
     country: '', vet_name: '', vet_phone: '', allergies: '',
@@ -69,7 +73,7 @@ export default function PerfilScreen() {
     achievement_alerts: true, pack_alerts: true, weight_unit: 'kg', temperature_unit: 'celsius'
   });
 
-  useEffect(() => { loadDogImage(); loadAll(); }, []);
+  useEffect(() => { loadDogImage(); loadAll(); loadBiometricStatus(); }, []);
   useEffect(() => {
     if (currentDog) {
       setEditName(currentDog.name || ''); setEditAge(currentDog.age?.toString() || '');
@@ -113,6 +117,37 @@ export default function PerfilScreen() {
       if (saved) setDogImage(saved);
     }
   };
+
+  const loadBiometricStatus = async () => {
+    const { available, biometricType: bType } = await BiometricAuth.isAvailable();
+    setBiometricAvailable(available);
+    setBiometricType(bType);
+    if (available) {
+      const enabled = await BiometricAuth.isEnabled();
+      setBiometricEnabled(enabled);
+    }
+  };
+
+  const toggleBiometric = async () => {
+    if (biometricEnabled) {
+      await BiometricAuth.disable();
+      setBiometricEnabled(false);
+      Alert.alert(biometricType, `${biometricType} desactivado`);
+    } else {
+      const success = await BiometricAuth.authenticate(`Confirma ${biometricType}`);
+      if (success) {
+        const creds = await BiometricAuth.getCredentials();
+        if (creds) {
+          await BiometricAuth.enable();
+          setBiometricEnabled(true);
+          Alert.alert(biometricType, `${biometricType} activado correctamente`);
+        } else {
+          Alert.alert(biometricType, 'Inicia sesión primero con email y contraseña para activar la biometría');
+        }
+      }
+    }
+  };
+
 
   const onRefresh = async () => { setRefreshing(true); await Promise.all([refreshDogs(), loadAll()]); setRefreshing(false); };
 
@@ -203,6 +238,13 @@ export default function PerfilScreen() {
 
   const menuItems = [
     { id: 'theme', icon: isDark ? 'sunny-outline' : 'moon-outline', label: t('appearance'), onPress: toggleTheme, showValue: isDark ? t('darkMode') : t('lightMode') },
+    ...(biometricAvailable ? [{
+      id: 'biometric',
+      icon: 'finger-print-outline' as const,
+      label: biometricType || 'Biometric',
+      onPress: toggleBiometric,
+      showValue: biometricEnabled ? 'Activado' : 'Desactivado',
+    }] : []),
     { id: 'settings', icon: 'settings-outline', label: t('settings'), onPress: () => setShowSettingsModal(true) },
     { id: 'notifications', icon: 'notifications-outline', label: t('notifications'), onPress: () => setShowNotificationsModal(true) },
     { id: 'privacy', icon: 'shield-outline', label: t('privacy'), onPress: () => {} },
