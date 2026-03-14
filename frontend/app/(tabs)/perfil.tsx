@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, 
-  RefreshControl, Modal, TextInput, Image, Platform, Share, Switch
+  RefreshControl, Modal, TextInput, Image, Platform, Share, Switch, KeyboardAvoidingView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -439,9 +439,10 @@ export default function PerfilScreen() {
 
       {/* Edit Profile Modal */}
       <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
         <View style={styles.modalOverlay}><View style={[styles.modalContent, { maxHeight: '80%' }]}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('editDogProfile')}</Text><TouchableOpacity onPress={() => setShowEditModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
-          <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <TouchableOpacity style={{ alignSelf: 'center', marginBottom: Spacing.md }} onPress={pickImage}>
               {dogImage ? <Image source={{ uri: dogImage }} style={{ width: 90, height: 90, borderRadius: 45 }} /> : <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="paw" size={36} color={colors.white} /></View>}
             </TouchableOpacity>
@@ -455,13 +456,15 @@ export default function PerfilScreen() {
           </ScrollView>
           <Button title={saving ? '...' : t('save')} onPress={handleSaveProfile} loading={saving} disabled={saving} style={{ marginTop: Spacing.md }} />
         </View></View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Clinical File Modal */}
       <Modal visible={showClinicalModal} transparent animationType="slide" onRequestClose={() => setShowClinicalModal(false)}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
         <View style={styles.modalOverlay}><View style={[styles.modalContent, { maxHeight: '85%' }]}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('clinicalFile')}</Text><TouchableOpacity onPress={() => setShowClinicalModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
-          <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('country')}</Text><TextInput style={styles.input} value={clinical.country} onChangeText={v => setClinical(p => ({ ...p, country: v }))} placeholder="España" placeholderTextColor={colors.gray} /></View>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('vet')}</Text><TextInput style={styles.input} value={clinical.vet_name} onChangeText={v => setClinical(p => ({ ...p, vet_name: v }))} placeholder="Dr. García" placeholderTextColor={colors.gray} /></View>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{language === 'en' ? 'Vet phone' : 'Teléfono vet'}</Text><TextInput style={styles.input} value={clinical.vet_phone} onChangeText={v => setClinical(p => ({ ...p, vet_phone: v }))} keyboardType="phone-pad" placeholder="+34..." placeholderTextColor={colors.gray} /></View>
@@ -476,6 +479,7 @@ export default function PerfilScreen() {
           </ScrollView>
           <Button title={saving ? '...' : t('save')} onPress={handleSaveClinical} loading={saving} disabled={saving} style={{ marginTop: Spacing.md }} />
         </View></View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Settings Modal */}
@@ -532,6 +536,7 @@ export default function PerfilScreen() {
 
       {/* Invite Modal */}
       <Modal visible={showInviteModal} transparent animationType="slide" onRequestClose={() => setShowInviteModal(false)}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('invite')}</Text><TouchableOpacity onPress={() => setShowInviteModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, marginBottom: Spacing.lg, textAlign: 'center' }}>
@@ -543,6 +548,7 @@ export default function PerfilScreen() {
           </View>
           <Button title={language === 'en' ? 'Share invitation' : language === 'it' ? 'Condividi invito' : 'Compartir invitación'} onPress={handleInvite} disabled={!inviteName.trim()} style={{ marginTop: Spacing.md }} />
         </View></View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
