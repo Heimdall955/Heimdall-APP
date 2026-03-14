@@ -2150,6 +2150,120 @@ async def get_routes(dog_id: str, user: User = Depends(require_auth)):
         logger.error(f"Error getting routes: {e}")
         return []
 
+# ==================== NEARBY TRAILS (OpenStreetMap) ====================
+
+@api_router.get("/trails/nearby")
+async def get_nearby_trails(lat: float, lng: float, radius: int = 15000):
+    """Fetch real hiking trails near a location using OpenStreetMap Overpass API."""
+    import math
+    overpass_url = "https://overpass-api.de/api/interpreter"
+    # Focus on actual hiking/nature routes, not urban footways
+    query = f"""
+    [out:json][timeout:20];
+    (
+      relation["route"="hiking"](around:{radius},{lat},{lng});
+      relation["route"="foot"]["name"](around:{radius},{lat},{lng});
+      way["highway"="path"]["sac_scale"](around:{radius},{lat},{lng});
+      way["highway"="path"]["name"]["access"!="private"](around:{radius},{lat},{lng});
+      way["highway"="track"]["name"]["tracktype"](around:{radius},{lat},{lng});
+    );
+    out body center 50;
+    """
+    try:
+        async with httpx.AsyncClient(timeout=25.0) as client:
+            resp = await client.post(overpass_url, data={"data": query})
+            resp.raise_for_status()
+            data = resp.json()
+
+        def haversine(lat1, lon1, lat2, lon2):
+            R = 6371.0
+            p1, p2 = math.radians(lat1), math.radians(lat2)
+            dp = math.radians(lat2 - lat1)
+            dl = math.radians(lon2 - lon1)
+            a = math.sin(dp/2)**2 + math.cos(p1)*math.cos(p2)*math.sin(dl/2)**2
+            return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+        trails = []
+        seen_names = set()
+        for el in data.get("elements", []):
+            tags = el.get("tags", {})
+            name = tags.get("name", "")
+            if not name or name.lower() in seen_names:
+                continue
+            # Skip urban-sounding names (avinguda, carrer, calle, avenida, passeig, rambla)
+            name_low = name.lower()
+            urban_prefixes = ["avinguda", "carrer", "calle", "avenida", "passeig", "rambla", "plaça", "plaza", "paseo de", "via "]
+            if any(name_low.startswith(p) for p in urban_prefixes):
+                continue
+
+            seen_names.add(name_low)
+
+            # Distance from tags
+            distance_km = 0.0
+            for dist_key in ("distance", "length"):
+                dist_val = tags.get(dist_key, "")
+                if dist_val:
+                    try:
+                        cleaned = dist_val.replace("km", "").replace("mi", "").replace(",", ".").strip()
+                        distance_km = float(cleaned)
+                        break
+                    except Exception:
+                        pass
+
+            # Difficulty from sac_scale
+            sac = tags.get("sac_scale", "")
+            if sac in ("hiking", ""):
+                difficulty = "easy"
+            elif sac in ("mountain_hiking", "demanding_mountain_hiking"):
+                difficulty = "moderate"
+            elif sac in ("alpine_hiking", "demanding_alpine_hiking", "difficult_alpine_hiking"):
+                difficulty = "hard"
+            else:
+                difficulty = "easy"
+
+            # Relations (hiking routes) are generally moderate+
+            if el.get("type") == "relation" and difficulty == "easy":
+                difficulty = "easy" if distance_km < 5 else "moderate"
+
+            dog_friendly = tags.get("dog", "yes") != "no"
+            center_lat = el.get("center", {}).get("lat", lat)
+            center_lng = el.get("center", {}).get("lon", lng)
+
+            # Distance from user
+            dist_from_user = round(haversine(lat, lng, center_lat, center_lng), 1)
+
+            # Estimate duration (avg 4 km/h hiking)
+            duration_h = round(distance_km / 4.0, 1) if distance_km > 0 else round(dist_from_user / 4.0, 1)
+
+            surface = tags.get("surface", "")
+            trail_type = "hiking" if el.get("type") == "relation" else "path"
+
+            trails.append({
+                "id": str(el.get("id", "")),
+                "name": name,
+                "distance_km": round(distance_km, 1) if distance_km > 0 else None,
+                "duration_h": duration_h if duration_h > 0 else None,
+                "difficulty": difficulty,
+                "dog_friendly": dog_friendly,
+                "lat": center_lat,
+                "lng": center_lng,
+                "dist_from_user_km": dist_from_user,
+                "surface": surface,
+                "trail_type": trail_type,
+                "description": tags.get("description", ""),
+            })
+
+        # Sort by distance from user
+        trails.sort(key=lambda t: t["dist_from_user_km"])
+        return {"trails": trails[:25], "count": len(trails[:25])}
+
+    except httpx.TimeoutException:
+        logger.warning("Overpass API timeout")
+        return {"trails": [], "count": 0, "error": "timeout"}
+    except Exception as e:
+        logger.error(f"Error fetching trails: {e}")
+        return {"trails": [], "count": 0, "error": str(e)}
+
 # ==================== SUBSCRIPTION / PRO ENDPOINTS ====================
 
 @api_router.get("/subscription/status")
