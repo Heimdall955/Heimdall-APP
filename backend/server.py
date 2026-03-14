@@ -2264,6 +2264,62 @@ async def get_nearby_trails(lat: float, lng: float, radius: int = 15000):
         logger.error(f"Error fetching trails: {e}")
         return {"trails": [], "count": 0, "error": str(e)}
 
+# ==================== FAVORITE TRAILS ====================
+
+class FavoriteTrailCreate(BaseModel):
+    trail_id: str
+    name: str
+    distance_km: Optional[float] = None
+    duration_h: Optional[float] = None
+    difficulty: str = "easy"
+    dog_friendly: bool = True
+    lat: float = 0
+    lng: float = 0
+    surface: str = ""
+    trail_type: str = "path"
+
+@api_router.post("/trails/favorites")
+async def add_favorite_trail(data: FavoriteTrailCreate, user: User = Depends(require_auth)):
+    try:
+        fav = {
+            "id": str(uuid.uuid4()),
+            "user_id": user.user_id,
+            "trail_id": data.trail_id,
+            "name": data.name,
+            "distance_km": data.distance_km,
+            "duration_h": data.duration_h,
+            "difficulty": data.difficulty,
+            "dog_friendly": data.dog_friendly,
+            "lat": data.lat,
+            "lng": data.lng,
+            "surface": data.surface,
+            "trail_type": data.trail_type,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        supabase.table("favorite_trails").insert(fav).execute()
+        return {"id": fav["id"], "message": "Trail saved as favorite"}
+    except Exception as e:
+        logger.error(f"Error saving favorite trail: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/trails/favorites")
+async def get_favorite_trails(user: User = Depends(require_auth)):
+    try:
+        result = supabase.table("favorite_trails").select("*").eq("user_id", user.user_id).order("created_at", desc=True).execute()
+        return result.data
+    except Exception as e:
+        logger.error(f"Error getting favorite trails: {e}")
+        return []
+
+@api_router.delete("/trails/favorites/{trail_id}")
+async def remove_favorite_trail(trail_id: str, user: User = Depends(require_auth)):
+    try:
+        supabase.table("favorite_trails").delete().eq("user_id", user.user_id).eq("trail_id", trail_id).execute()
+        return {"message": "Favorite removed"}
+    except Exception as e:
+        logger.error(f"Error removing favorite trail: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ==================== SUBSCRIPTION / PRO ENDPOINTS ====================
 
 @api_router.get("/subscription/status")
