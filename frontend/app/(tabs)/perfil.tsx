@@ -207,14 +207,15 @@ export default function PerfilScreen() {
   };
 
   const handleInvite = async () => {
+    const appLink = 'https://heimdall-hani.app/download';
     const shareMessage = language === 'en' 
-      ? `Join me on Heimdall! The best app to take care of your pet. Download now!`
+      ? `Join me on Heimdall! The best app to take care of your pet. Download now:\n${appLink}`
       : language === 'it' 
-      ? `Unisciti a me su Heimdall! La migliore app per prenderti cura del tuo animale.`
-      : `¡Únete a mí en Heimdall! La mejor app para cuidar a tu mascota. ¡Descárgala ya!`;
+      ? `Unisciti a me su Heimdall! La migliore app per prenderti cura del tuo animale. Scarica ora:\n${appLink}`
+      : `Unete a mi en Heimdall! La mejor app para cuidar a tu mascota. Descargala ya:\n${appLink}`;
     
     try {
-      await Share.share({ message: shareMessage, title: 'Heimdall - Tu guardián' });
+      await Share.share({ message: shareMessage, url: appLink, title: 'Heimdall - Tu guardian' });
       // Save invite
       if (inviteName.trim()) {
         const headers = await getHeaders();
