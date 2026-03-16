@@ -151,7 +151,45 @@ export default function ChatScreen() {
   };
 
   const rateMessage = async (messageId: string, rating: 'up' | 'down') => {
-    try { const token = await SecureStore.getItemAsync('session_token'); await axios.post(`${BACKEND_URL}/api/chat/${messageId}/rate`, { rating }, { headers: { Authorization: `Bearer ${token}` } }); setMessages(prev => prev.map(m => m.id === messageId ? { ...m, rating } : m)); } catch (error) { console.log('Error rating:', error); }
+    // Toggle: if same rating clicked again, do nothing (keep it)
+    const current = messages.find(m => m.id === messageId)?.rating;
+    const newRating = current === rating ? rating : rating;
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, rating: newRating } : m));
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      await axios.post(`${BACKEND_URL}/api/chat/${messageId}/rate`, { rating: newRating }, { headers: { Authorization: `Bearer ${token}` } });
+    } catch (error) {
+      console.log('Error rating:', error);
+    }
+  };
+
+  // Simple markdown-like renderer for assistant messages
+  const renderFormattedText = (text: string, textColor: string) => {
+    // Split into paragraphs by double newline or single newline
+    const paragraphs = text.split(/\n\n+/);
+    return paragraphs.map((paragraph, pIdx) => {
+      // Handle lines within a paragraph
+      const lines = paragraph.split('\n');
+      return (
+        <View key={pIdx} style={pIdx > 0 ? { marginTop: 10 } : undefined}>
+          {lines.map((line, lIdx) => {
+            // Parse bold **text** within each line
+            const parts = line.split(/(\*\*[^*]+\*\*)/g);
+            return (
+              <Text key={`${pIdx}-${lIdx}`} style={[s.messageText, { color: textColor }, lIdx > 0 ? { marginTop: 3 } : undefined]}>
+                {parts.map((part, partIdx) => {
+                  if (part.startsWith('**') && part.endsWith('**')) {
+                    return <Text key={partIdx} style={{ fontWeight: '700' }}>{part.slice(2, -2)}</Text>;
+                  }
+                  return <Text key={partIdx}>{part}</Text>;
+                })}
+              </Text>
+            );
+          })}
+        </View>
+      );
+    });
   };
 
   const s = useMemo(() => cs(colors, shadows), [colors, shadows]);
@@ -160,15 +198,31 @@ export default function ChatScreen() {
     const isUser = message.role === 'user';
     const hasAttachment = message.file_type || (message.content && message.content.startsWith('['));
     return (
-      <View key={message.id} style={[s.messageContainer, isUser ? s.userMessage : s.assistantMessage]}>
+      <View key={message.id} style={[s.messageContainer, isUser ? s.userMessage : s.assistantMessage]} data-testid={`message-${message.id}`}>
         {!isUser && <View style={s.avatarContainer}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 32, height: 32 }} resizeMode="cover" /></View>}
         <View style={[s.messageBubble, isUser ? s.userBubble : s.assistantBubble]}>
           {isUser && hasAttachment && <View style={{ marginBottom: 4 }}><Ionicons name={message.file_type === 'pdf' || message.content?.includes('[PDF]') ? 'document-text' : message.file_type === 'video' || message.content?.includes('[VIDEO]') ? 'videocam' : 'camera'} size={16} color="#FFF" /></View>}
-          <Text style={[s.messageText, isUser && { color: '#FFF' }]}>{message.content}</Text>
+          {isUser ? (
+            <Text style={[s.messageText, { color: '#FFF' }]}>{message.content}</Text>
+          ) : (
+            renderFormattedText(message.content, colors.text)
+          )}
           {!isUser && (
-            <View style={{ flexDirection: 'row', marginTop: Spacing.sm, gap: Spacing.sm }}>
-              <TouchableOpacity onPress={() => rateMessage(message.id, 'up')} style={{ padding: Spacing.xs }}><Ionicons name={message.rating === 'up' ? 'thumbs-up' : 'thumbs-up-outline'} size={16} color={message.rating === 'up' ? colors.primary : colors.gray} /></TouchableOpacity>
-              <TouchableOpacity onPress={() => rateMessage(message.id, 'down')} style={{ padding: Spacing.xs }}><Ionicons name={message.rating === 'down' ? 'thumbs-down' : 'thumbs-down-outline'} size={16} color={message.rating === 'down' ? colors.error : colors.gray} /></TouchableOpacity>
+            <View style={s.ratingRow} data-testid={`rating-${message.id}`}>
+              <TouchableOpacity
+                onPress={() => rateMessage(message.id, 'up')}
+                style={[s.ratingBtn, message.rating === 'up' && { backgroundColor: colors.primary + '20' }]}
+                data-testid={`rate-up-${message.id}`}
+              >
+                <Ionicons name={message.rating === 'up' ? 'thumbs-up' : 'thumbs-up-outline'} size={15} color={message.rating === 'up' ? colors.primary : colors.gray} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => rateMessage(message.id, 'down')}
+                style={[s.ratingBtn, message.rating === 'down' && { backgroundColor: colors.error + '20' }]}
+                data-testid={`rate-down-${message.id}`}
+              >
+                <Ionicons name={message.rating === 'down' ? 'thumbs-down' : 'thumbs-down-outline'} size={15} color={message.rating === 'down' ? colors.error : colors.gray} />
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -380,6 +434,8 @@ const cs = (C: any, S: any) => StyleSheet.create({
   userBubble: { backgroundColor: C.primary, borderBottomRightRadius: 4 },
   assistantBubble: { backgroundColor: C.cardBg, borderBottomLeftRadius: 4, ...S.sm },
   messageText: { fontSize: FontSizes.md, color: C.text, lineHeight: 22 },
+  ratingRow: { flexDirection: 'row', marginTop: Spacing.sm, gap: Spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.grayLight, paddingTop: Spacing.sm },
+  ratingBtn: { padding: 6, borderRadius: BorderRadius.sm },
   inputContainer: { padding: Spacing.md, backgroundColor: C.cardBg, borderTopWidth: 1, borderTopColor: C.grayLight },
   inputWrapper: { flexDirection: 'row', alignItems: 'flex-end', backgroundColor: C.background, borderRadius: BorderRadius.lg, paddingLeft: Spacing.xs, paddingRight: Spacing.xs, paddingVertical: Spacing.xs },
   textInput: { flex: 1, fontSize: FontSizes.md, color: C.text, maxHeight: 100, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.sm },

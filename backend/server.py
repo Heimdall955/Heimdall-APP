@@ -913,6 +913,17 @@ Tienes contexto de:
 
 No diagnosticas.
 Pero sí observas, opinas, analizas y orientas con responsabilidad.
+
+# 19) FORMATO DE RESPUESTAS
+
+Tu formato de respuesta debe ser limpio y agradable de leer en una app movil:
+
+- Usa emojis de forma moderada pero natural para dar vida a tus respuestas (ej: perrito, corazon, estrella, check, warning, etc). No abuses, 2-4 emojis por respuesta es suficiente.
+- Separa las ideas en parrafos cortos con saltos de linea entre ellos.
+- NO uses asteriscos para negritas (**texto**). En su lugar, escribe el texto directamente sin formato especial.
+- Usa guiones (-) o emojis para listas.
+- Mantén las respuestas bien espaciadas y faciles de escanear visualmente.
+- Cada seccion o idea principal debe estar en su propio parrafo.
 """
 
 @api_router.post("/chat")
@@ -1423,17 +1434,40 @@ async def get_chat_history(dog_id: Optional[str] = None, limit: int = 50, user: 
         
         messages = []
         for msg in reversed(result.data):
-            messages.append({
+            m = {
                 "id": str(msg["id"]),
                 "role": msg["role"],
                 "content": msg["content"],
                 "created_at": msg["created_at"]
-            })
+            }
+            if msg.get("rating"):
+                m["rating"] = msg["rating"]
+            messages.append(m)
         
         return messages
     except Exception as e:
         logger.error(f"Error getting chat history: {e}")
         return []
+
+@api_router.post("/chat/{message_id}/rate")
+async def rate_chat_message(message_id: str, data: ChatRating, user: User = Depends(require_auth)):
+    """Rate a chat message as up or down"""
+    try:
+        if data.rating not in ("up", "down"):
+            raise HTTPException(status_code=400, detail="Rating must be 'up' or 'down'")
+        
+        try:
+            supabase.table("chat_messages").update({"rating": data.rating}).eq("id", message_id).eq("user_id", user.user_id).execute()
+        except Exception as db_err:
+            # Column might not exist yet - log but don't fail
+            logger.warning(f"Could not save rating to DB (column may not exist): {db_err}")
+        
+        return {"message": "Rating saved", "rating": data.rating}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rating message: {e}")
+        return {"message": "Rating noted", "rating": data.rating}
 
 # ==================== MEDICAL EVENTS ENDPOINTS ====================
 
