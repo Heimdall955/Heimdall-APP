@@ -25,23 +25,23 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Autenticacion Biometrica: Face ID/Touch ID/Huella, auto-login, toggle en Perfil
 - Fix teclado movil: KeyboardAvoidingView en todas las pantallas
 - Progreso de lecciones persistente: Endpoints POST/GET /api/lessons/progress (14 Mar 2026)
-- **Pantalla "Mi Progreso"**: Vista completa del progreso educativo con anillo global, stats, barras de progreso por programa, lecciones recientes y mensajes motivacionales. Accesible desde tab Educacion (14 Mar 2026)
+- Pantalla "Mi Progreso": Vista completa con anillo global, stats, barras por programa (14 Mar 2026)
+- **Chat mejorado**: Markdown renderer (negritas), emojis en respuestas IA, botones like/dislike con feedback visual, endpoint POST /api/chat/{id}/rate (16 Mar 2026)
+
+## SQL Migrations Pendientes (para ejecutar en Supabase)
+```sql
+-- Columna rating para chat_messages (para persistir like/dislike)
+ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS rating TEXT;
+```
 
 ## Tareas Pendientes
-### P1 - Migracion SQL Weekly Summary
-### P1 - Traduccion Contenido Educativo
+### P1 - Migracion SQL Weekly Summary (columnas en gamification)
+### P1 - Traduccion Contenido Educativo (exercisesContent.ts, gamesContent.ts)
 ### P2 - Bluetooth Development Build
 ### P2 - Configurar RevenueCat con Google Play
 
-## Mocked Features
-- Real BLE connectivity
-- Google Play Store / RevenueCat payment processing
-- Favoritos trails: almacenados localmente (pendiente tabla Supabase)
-
-## Archivos Clave
-- backend/server.py (endpoints /api/lessons/progress)
-- frontend/app/progreso.tsx (pantalla Mi Progreso)
-- frontend/app/programa.tsx (carga progreso desde API)
-- frontend/app/leccion.tsx (guarda progreso al completar)
-- frontend/app/(tabs)/educacion.tsx (boton navegacion a Mi Progreso)
-- frontend/app/_layout.tsx (ruta progreso registrada)
+## Mocked/Parcial
+- Real BLE connectivity (MOCKED)
+- Google Play Store / RevenueCat (MOCKED)
+- Favoritos trails: local storage (pendiente tabla Supabase)
+- Rating de chat: funciona visualmente, persistencia pendiente de columna rating en chat_messages
