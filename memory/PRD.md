@@ -17,7 +17,6 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Google Wallet (HANI Passport)
 - Leaderboard global / Weekly Summary
 - Historial clinico
-- Suscripcion PRO (RevenueCat - actualmente en modo demo)
 - Modo Oscuro/Claro con persistencia
 - Rutas GPS v4: mapa claro, tabs rediseñados, podometro, senderos OSM
 - Autenticacion Biometrica
@@ -28,26 +27,27 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Notificaciones push locales con toggles individuales
 - Pantalla de Privacidad y Datos
 - Pantalla de Centro de Ayuda con FAQ
-- Pantalla PRO traducida con i18n
 
 ## Traduccion i18n COMPLETA (16 Mar 2026)
-Todos los contenidos educativos y pantallas traducidos a es/en/it:
-- **Programas guiados**: educacion-basica, calma-control, socializacion, mundo-cachorro (titulos, descripciones, lecciones, objetivos) via `programsContent.ts`
-- **Ejercicios**: senales-basicas, control-impulsos, socializacion, paseos, trucos via `exercisesContent.ts`
-- **Juegos**: puzzle-mental, tira-afloja via `gamesContent.ts`
-- **Diario de Emociones**: labels, textos, placeholders via LanguageContext
-- **Pantalla PRO**: features, planes, CTA, garantia via LanguageContext
-- **Privacidad y Ayuda**: contenido completo via LanguageContext
+- Programas guiados: educacion-basica, calma-control, socializacion, mundo-cachorro (programsContent.ts)
+- Ejercicios: 5 tipos (exercisesContent.ts)
+- Juegos: 2 tipos (gamesContent.ts)
+- Diario de Emociones: labels, textos, placeholders
+- Pantalla PRO, Privacidad, Ayuda
 
-## Archivos de datos multilenguaje
-- frontend/data/programsContent.ts (4 programas x 3 idiomas con lecciones)
-- frontend/data/exercisesContent.ts (5 ejercicios x 3 idiomas)
-- frontend/data/gamesContent.ts (2 juegos x 3 idiomas)
-- frontend/data/educationContent.ts (listados de la tab educacion)
-- frontend/data/lessonContent.ts (contenido detallado de lecciones)
+## Pantalla PRO Premium (16 Mar 2026)
+- Diseno dorado premium sobre fondo negro (#0D0D0D)
+- 2 planes: Heimdall Basico / Heimdall Guardian (Recomendado)
+- 7 features exclusivas del Guardian
+- Precios: 4,90 EUR/mes o 39,90 EUR/ano (ahorra 32%)
+- 7 dias gratis de prueba
+- Timeline visual del proceso de suscripcion
+- Cita motivacional: "Heimdall ilumina lo que no siempre sabemos ver"
+- Todo traducido en es/en/it
+- Integrado con RevenueCat (modo demo hasta configurar claves reales)
 
 ## Tareas Pendientes
 ### P2 - EAS Development Build (Bluetooth real)
-### P2 - RevenueCat produccion (reemplazar modo demo)
+### P2 - RevenueCat produccion (configurar claves reales)
 ### P2 - Google Play Store publicacion
 ### P2 - Crear tablas user_settings, pack_friends, clinical_files en Supabase
