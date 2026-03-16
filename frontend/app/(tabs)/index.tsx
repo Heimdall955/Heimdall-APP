@@ -35,6 +35,7 @@ export default function HomeScreen() {
   const { colors, shadows, isDark, toggleTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [weeklySummary, setWeeklySummary] = useState<any>(null);
+  const [todayEmotion, setTodayEmotion] = useState<string | null>(null);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
     status: 'calm', bones: 0, level: 1, level_progress: 0,
     level_target: 500, streak_days: 0, exercises_completed: 0, practice_minutes: 0,
@@ -53,9 +54,11 @@ export default function HomeScreen() {
     try {
       const token = await SecureStore.getItemAsync('session_token');
       if (!token) return;
-      const [statsRes, weeklyRes] = await Promise.all([
-        axios.get(`${BACKEND_URL}/api/gamification/stats`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${BACKEND_URL}/api/gamification/weekly-summary`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+      const headers = { Authorization: `Bearer ${token}` };
+      const [statsRes, weeklyRes, diaryRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/gamification/stats`, { headers }),
+        axios.get(`${BACKEND_URL}/api/gamification/weekly-summary`, { headers }).catch(() => null),
+        axios.get(`${BACKEND_URL}/api/diary/today`, { headers }).catch(() => null),
       ]);
       setDogStatus(prev => ({
         ...prev, bones: statsRes.data.bones, level: statsRes.data.level || 1,
@@ -64,6 +67,8 @@ export default function HomeScreen() {
         practice_minutes: statsRes.data.practice_minutes || 0,
       }));
       if (weeklyRes?.data) setWeeklySummary(weeklyRes.data);
+      if (diaryRes?.data?.logged_today) setTodayEmotion(diaryRes.data.emotion);
+      else setTodayEmotion(null);
     } catch (error) { console.log('Error loading gamification stats'); }
   }, []);
 
@@ -181,6 +186,24 @@ export default function HomeScreen() {
             </View>
           </Card>
         </View>
+
+        {/* Emotion Diary Card */}
+        <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} data-testid="emotion-diary-card">
+          <Card style={{ padding: Spacing.md, flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
+            <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: todayEmotion ? '#E8F5E9' : colors.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={26} color={todayEmotion ? '#4CAF50' : colors.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: colors.text }}>
+                {todayEmotion ? 'Ya registraste hoy' : 'Como os sentis hoy?'}
+              </Text>
+              <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, marginTop: 2 }}>
+                {todayEmotion ? 'Toca para ver tu diario completo' : 'Registra tus emociones y las de tu perro'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.gray} />
+          </Card>
+        </TouchableOpacity>
 
         {/* Weekly Summary */}
         <View style={s.section} data-testid="weekly-summary-section">

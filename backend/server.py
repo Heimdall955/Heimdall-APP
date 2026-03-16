@@ -175,6 +175,11 @@ class ChatMessage(BaseModel):
 class ChatRating(BaseModel):
     rating: str
 
+class EmotionDiaryCreate(BaseModel):
+    emotion: str
+    note: Optional[str] = None
+    dog_id: Optional[str] = None
+
 class MedicalEventCreate(BaseModel):
     dog_id: str
     type: str
@@ -2234,6 +2239,128 @@ async def get_lesson_progress(user: User = Depends(require_auth)):
     except Exception as e:
         logger.error(f"Error getting lesson progress: {e}")
         return {"completed_lessons": []}
+
+
+# ==================== EMOTION DIARY ENDPOINTS ====================
+
+EMOTIONS = {
+    "happy": {"emoji": "happy", "label": "Feliz"},
+    "calm": {"emoji": "leaf", "label": "Tranquilo"},
+    "worried": {"emoji": "alert-circle", "label": "Preocupado"},
+    "sad": {"emoji": "sad", "label": "Triste"},
+    "stressed": {"emoji": "thunderstorm", "label": "Estresado"},
+}
+
+@api_router.post("/diary")
+async def create_diary_entry(data: EmotionDiaryCreate, user: User = Depends(require_auth)):
+    """Save an emotion diary entry"""
+    try:
+        now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+        
+        # Check if already logged today
+        existing = supabase.table("emotion_diary").select("id").eq("user_id", user.user_id).gte("created_at", today_start).execute()
+        if existing.data and len(existing.data) > 0:
+            # Update today's entry
+            supabase.table("emotion_diary").update({
+                "emotion": data.emotion,
+                "note": data.note,
+            }).eq("id", existing.data[0]["id"]).execute()
+            return {"message": "Entrada actualizada", "updated": True}
+        
+        entry = {
+            "user_id": user.user_id,
+            "dog_id": data.dog_id,
+            "emotion": data.emotion,
+            "note": data.note,
+            "created_at": now.isoformat(),
+        }
+        supabase.table("emotion_diary").insert(entry).execute()
+        return {"message": "Entrada guardada", "updated": False}
+    except Exception as e:
+        logger.error(f"Error saving diary entry: {e}")
+        raise HTTPException(status_code=500, detail="Error al guardar entrada del diario")
+
+@api_router.get("/diary")
+async def get_diary_entries(days: int = 30, user: User = Depends(require_auth)):
+    """Get diary entries for the last N days"""
+    try:
+        since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        result = supabase.table("emotion_diary").select("*").eq("user_id", user.user_id).gte("created_at", since).order("created_at", desc=True).execute()
+        
+        entries = []
+        for row in (result.data or []):
+            entries.append({
+                "id": str(row["id"]),
+                "emotion": row["emotion"],
+                "note": row.get("note"),
+                "created_at": row["created_at"],
+            })
+        return {"entries": entries}
+    except Exception as e:
+        logger.error(f"Error getting diary entries: {e}")
+        return {"entries": []}
+
+@api_router.get("/diary/today")
+async def get_today_diary(user: User = Depends(require_auth)):
+    """Check if user already logged today"""
+    try:
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+        result = supabase.table("emotion_diary").select("*").eq("user_id", user.user_id).gte("created_at", today_start).execute()
+        if result.data and len(result.data) > 0:
+            entry = result.data[0]
+            return {"logged_today": True, "emotion": entry["emotion"], "note": entry.get("note")}
+        return {"logged_today": False}
+    except Exception as e:
+        logger.error(f"Error checking today diary: {e}")
+        return {"logged_today": False}
+
+@api_router.get("/diary/insights")
+async def get_diary_insights(user: User = Depends(require_auth)):
+    """Generate AI insights from the last 7 days of diary entries"""
+    try:
+        since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+        result = supabase.table("emotion_diary").select("emotion, note, created_at").eq("user_id", user.user_id).gte("created_at", since).order("created_at", desc=False).execute()
+        
+        entries = result.data or []
+        if len(entries) < 3:
+            return {"insight": "Necesitas al menos 3 entradas esta semana para generar un analisis. Sigue registrando como os sentis cada dia!", "entries_count": len(entries)}
+        
+        # Build summary for AI
+        entries_text = "\n".join([f"- {e['created_at'][:10]}: {e['emotion']} {('- ' + e['note']) if e.get('note') else ''}" for e in entries])
+        
+        # Get dog name
+        dog_name = "tu perro"
+        try:
+            dogs = supabase.table("dogs").select("name").eq("user_id", user.user_id).execute()
+            if dogs.data:
+                dog_name = dogs.data[0]["name"]
+        except:
+            pass
+        
+        prompt = f"""Analiza el diario emocional de esta semana de un tutor con su perro {dog_name}:
+
+{entries_text}
+
+Genera un insight breve, calido y util (3-4 frases maximo). Detecta patrones si los hay. Usa emojis con moderacion. Se como un amigo que se preocupa de verdad. Responde en espanol."""
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+                json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}], "max_tokens": 200, "temperature": 0.7},
+                timeout=15.0
+            )
+            if response.status_code == 200:
+                insight = response.json()["choices"][0]["message"]["content"]
+            else:
+                insight = "No he podido generar el analisis esta vez. Intentalo mas tarde."
+        
+        return {"insight": insight, "entries_count": len(entries)}
+    except Exception as e:
+        logger.error(f"Error generating diary insights: {e}")
+        return {"insight": "Hubo un error al analizar tu semana. Intentalo mas tarde.", "entries_count": 0}
+
 
 # ==================== ROUTES ENDPOINTS ====================
 

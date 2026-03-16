@@ -1,0 +1,267 @@
+import React, { useState, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter, useFocusEffect } from 'expo-router';
+import axios from 'axios';
+import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Card } from '../components/ui';
+import { SecureStore } from '../utils/secureStore';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+
+const EMOTIONS = [
+  { id: 'happy', icon: 'happy', label: 'Feliz', color: '#4CAF50', bg: '#E8F5E9' },
+  { id: 'calm', icon: 'leaf', label: 'Tranquilo', color: '#2196F3', bg: '#E3F2FD' },
+  { id: 'worried', icon: 'alert-circle', label: 'Preocupado', color: '#FF9800', bg: '#FFF3E0' },
+  { id: 'sad', icon: 'sad', label: 'Triste', color: '#9C27B0', bg: '#F3E5F5' },
+  { id: 'stressed', icon: 'thunderstorm', label: 'Estresado', color: '#F44336', bg: '#FFEBEE' },
+];
+
+export default function DiarioScreen() {
+  const router = useRouter();
+  const { colors, shadows } = useTheme();
+  const { currentDog } = useAuth();
+  const [selected, setSelected] = useState<string | null>(null);
+  const [note, setNote] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [todayLogged, setTodayLogged] = useState(false);
+  const [entries, setEntries] = useState<any[]>([]);
+  const [insight, setInsight] = useState('');
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [entriesCount, setEntriesCount] = useState(0);
+
+  const loadData = useCallback(async () => {
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const headers = { Authorization: `Bearer ${token}` };
+      const [todayRes, entriesRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/diary/today`, { headers }),
+        axios.get(`${BACKEND_URL}/api/diary?days=30`, { headers }),
+      ]);
+      if (todayRes.data.logged_today) {
+        setTodayLogged(true);
+        setSelected(todayRes.data.emotion);
+        setNote(todayRes.data.note || '');
+      }
+      setEntries(entriesRes.data.entries || []);
+    } catch (e) {
+      console.log('Error loading diary:', e);
+    }
+  }, []);
+
+  const loadInsight = useCallback(async () => {
+    setInsightLoading(true);
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      if (!token) return;
+      const res = await axios.get(`${BACKEND_URL}/api/diary/insights`, { headers: { Authorization: `Bearer ${token}` } });
+      setInsight(res.data.insight || '');
+      setEntriesCount(res.data.entries_count || 0);
+    } catch (e) {
+      console.log('Error loading insights:', e);
+    } finally {
+      setInsightLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => { loadData(); loadInsight(); }, [loadData, loadInsight]));
+
+  const saveEntry = async () => {
+    if (!selected) return;
+    setSaving(true);
+    try {
+      const token = await SecureStore.getItemAsync('session_token');
+      await axios.post(`${BACKEND_URL}/api/diary`, {
+        emotion: selected, note: note.trim() || null, dog_id: currentDog?.id,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      setTodayLogged(true);
+      loadData();
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo guardar la entrada');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const s = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
+
+  // Group entries by week
+  const weekEmotions = useMemo(() => {
+    const last7 = entries.slice(0, 7);
+    const counts: Record<string, number> = {};
+    last7.forEach(e => { counts[e.emotion] = (counts[e.emotion] || 0) + 1; });
+    return counts;
+  }, [entries]);
+
+  const dominantEmotion = useMemo(() => {
+    let max = 0; let dominant = '';
+    Object.entries(weekEmotions).forEach(([k, v]) => { if (v > max) { max = v; dominant = k; } });
+    return EMOTIONS.find(e => e.id === dominant);
+  }, [weekEmotions]);
+
+  return (
+    <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={s.header}>
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} data-testid="diary-back-btn">
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={s.headerTitle}>Diario de Emociones</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
+      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Today's entry */}
+        <Card style={s.todayCard}>
+          <Text style={s.todayTitle}>{todayLogged ? 'Hoy te sientes...' : 'Como os sentis hoy?'}</Text>
+          <View style={s.emotionsRow}>
+            {EMOTIONS.map(em => (
+              <TouchableOpacity
+                key={em.id}
+                style={[s.emotionBtn, selected === em.id && { backgroundColor: em.bg, borderColor: em.color, borderWidth: 2 }]}
+                onPress={() => setSelected(em.id)}
+                data-testid={`emotion-${em.id}`}
+              >
+                <Ionicons name={em.icon as any} size={28} color={selected === em.id ? em.color : colors.gray} />
+                <Text style={[s.emotionLabel, selected === em.id && { color: em.color, fontWeight: '700' }]}>{em.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <TextInput
+            style={s.noteInput}
+            placeholder="Anade una nota (opcional)..."
+            placeholderTextColor={colors.gray}
+            value={note}
+            onChangeText={setNote}
+            multiline
+            maxLength={200}
+          />
+          <TouchableOpacity
+            style={[s.saveBtn, !selected && { opacity: 0.5 }]}
+            onPress={saveEntry}
+            disabled={!selected || saving}
+            data-testid="save-diary-btn"
+          >
+            <Text style={s.saveBtnText}>{saving ? 'Guardando...' : todayLogged ? 'Actualizar' : 'Guardar'}</Text>
+          </TouchableOpacity>
+        </Card>
+
+        {/* Weekly insight */}
+        {entries.length >= 3 && (
+          <Card style={s.insightCard}>
+            <View style={s.insightHeader}>
+              <Ionicons name="sparkles" size={20} color={colors.accent} />
+              <Text style={s.insightTitle}>Insight Semanal</Text>
+            </View>
+            {insightLoading ? (
+              <Text style={s.insightText}>Analizando tu semana...</Text>
+            ) : (
+              <Text style={s.insightText}>{insight}</Text>
+            )}
+          </Card>
+        )}
+
+        {/* Week overview */}
+        {entries.length > 0 && (
+          <>
+            <Text style={s.sectionTitle}>Esta semana</Text>
+            <View style={s.weekRow}>
+              {EMOTIONS.map(em => {
+                const count = weekEmotions[em.id] || 0;
+                return (
+                  <View key={em.id} style={s.weekItem}>
+                    <View style={[s.weekDot, { backgroundColor: count > 0 ? em.color : colors.grayLight }]}>
+                      <Text style={s.weekCount}>{count}</Text>
+                    </View>
+                    <Ionicons name={em.icon as any} size={16} color={count > 0 ? em.color : colors.gray} />
+                  </View>
+                );
+              })}
+            </View>
+            {dominantEmotion && (
+              <Text style={s.dominantText}>
+                Emocion predominante: <Text style={{ color: dominantEmotion.color, fontWeight: '700' }}>{dominantEmotion.label}</Text>
+              </Text>
+            )}
+          </>
+        )}
+
+        {/* History */}
+        {entries.length > 0 && (
+          <>
+            <Text style={[s.sectionTitle, { marginTop: Spacing.lg }]}>Historial</Text>
+            {entries.slice(0, 14).map((entry, idx) => {
+              const em = EMOTIONS.find(e => e.id === entry.emotion);
+              const date = new Date(entry.created_at);
+              const dayStr = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+              return (
+                <View key={entry.id} style={[s.historyItem, idx < Math.min(entries.length, 14) - 1 && s.historyBorder]}>
+                  <View style={[s.historyDot, { backgroundColor: em?.bg || colors.grayLight }]}>
+                    <Ionicons name={(em?.icon || 'ellipse') as any} size={18} color={em?.color || colors.gray} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={[s.historyEmotion, { color: em?.color }]}>{em?.label || entry.emotion}</Text>
+                      <Text style={s.historyDate}>{dayStr}</Text>
+                    </View>
+                    {entry.note && <Text style={s.historyNote}>{entry.note}</Text>}
+                  </View>
+                </View>
+              );
+            })}
+          </>
+        )}
+
+        {entries.length === 0 && (
+          <Card style={s.emptyCard}>
+            <Ionicons name="journal" size={40} color={colors.gray} />
+            <Text style={s.emptyText}>Empieza tu diario registrando como os sentis hoy. Heimdall analizara tus emociones cada semana.</Text>
+          </Card>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const createStyles = (C: any, S: any) => StyleSheet.create({
+  container: { flex: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text },
+  scroll: { flex: 1 },
+  scrollContent: { padding: Spacing.md, paddingBottom: Spacing.xxl },
+
+  todayCard: { marginBottom: Spacing.lg },
+  todayTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text, marginBottom: Spacing.md, textAlign: 'center' },
+  emotionsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.md },
+  emotionBtn: { alignItems: 'center', padding: Spacing.sm, borderRadius: BorderRadius.lg, borderWidth: 2, borderColor: 'transparent', width: '18%' },
+  emotionLabel: { fontSize: 10, color: C.textSecondary, marginTop: 4, textAlign: 'center' },
+  noteInput: { backgroundColor: C.grayLight, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: FontSizes.md, color: C.text, minHeight: 60, textAlignVertical: 'top', marginBottom: Spacing.md },
+  saveBtn: { backgroundColor: C.primary, paddingVertical: Spacing.md, borderRadius: BorderRadius.lg, alignItems: 'center' },
+  saveBtnText: { fontSize: FontSizes.md, fontWeight: '700', color: '#FFF' },
+
+  insightCard: { marginBottom: Spacing.lg, backgroundColor: C.accentLight },
+  insightHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.sm },
+  insightTitle: { fontSize: FontSizes.md, fontWeight: '700', color: C.accent },
+  insightText: { fontSize: FontSizes.md, color: C.text, lineHeight: 22 },
+
+  sectionTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text, marginBottom: Spacing.sm },
+  weekRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.sm },
+  weekItem: { alignItems: 'center', gap: 4 },
+  weekDot: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  weekCount: { fontSize: FontSizes.sm, fontWeight: '700', color: '#FFF' },
+  dominantText: { fontSize: FontSizes.sm, color: C.textSecondary, textAlign: 'center', marginBottom: Spacing.md },
+
+  historyItem: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm },
+  historyBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.grayLight },
+  historyDot: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  historyEmotion: { fontSize: FontSizes.md, fontWeight: '600' },
+  historyDate: { fontSize: FontSizes.sm, color: C.textSecondary },
+  historyNote: { fontSize: FontSizes.sm, color: C.textSecondary, marginTop: 2 },
+
+  emptyCard: { alignItems: 'center', paddingVertical: Spacing.xl, gap: Spacing.md },
+  emptyText: { fontSize: FontSizes.md, color: C.textSecondary, textAlign: 'center', lineHeight: 22 },
+});
