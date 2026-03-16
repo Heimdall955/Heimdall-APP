@@ -33,6 +33,8 @@ function InnerLayout() {
         <Stack.Screen name="progreso" options={{ presentation: 'card' }} />
         <Stack.Screen name="diario" options={{ presentation: 'card' }} />
         <Stack.Screen name="juego" options={{ presentation: 'card' }} />
+        <Stack.Screen name="privacidad" options={{ presentation: 'card' }} />
+        <Stack.Screen name="ayuda" options={{ presentation: 'card' }} />
       </Stack>
     </>
   );

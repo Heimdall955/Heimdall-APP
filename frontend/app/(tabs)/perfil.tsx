@@ -266,8 +266,8 @@ export default function PerfilScreen() {
     }] : []),
     { id: 'settings', icon: 'settings-outline', label: t('settings'), onPress: () => setShowSettingsModal(true) },
     { id: 'notifications', icon: 'notifications-outline', label: t('notifications'), onPress: () => setShowNotificationsModal(true) },
-    { id: 'privacy', icon: 'shield-outline', label: t('privacy'), onPress: () => {} },
-    { id: 'help', icon: 'help-circle-outline', label: t('help'), onPress: () => {} },
+    { id: 'privacy', icon: 'shield-outline', label: t('privacy'), onPress: () => router.push('/privacidad') },
+    { id: 'help', icon: 'help-circle-outline', label: t('help'), onPress: () => router.push('/ayuda') },
     { id: 'language', icon: 'language-outline', label: t('language'), onPress: () => setShowLanguageModal(true), showValue: language.toUpperCase() },
     { id: 'logout', icon: 'log-out-outline', label: t('logout'), onPress: handleLogout, danger: true },
   ];

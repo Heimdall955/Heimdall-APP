@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { Card, Button } from '../components/ui';
 import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
@@ -17,13 +18,14 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 export default function ProScreen() {
   const router = useRouter();
   const { colors, shadows } = useTheme();
+  const { t } = useLanguage();
   const proFeatures = [
-    { icon: 'videocam', title: 'Analisis de Video IA', description: 'Sube videos de tu perro y recibe analisis de comportamiento', color: colors.primary },
-    { icon: 'document-text', title: 'Informes Veterinarios', description: 'Genera informes completos para compartir con tu veterinario', color: colors.info },
-    { icon: 'chatbubbles', title: 'Chat Ilimitado con Hani', description: 'Sin limite de mensajes con tu asistente IA', color: colors.accentEducation },
-    { icon: 'analytics', title: 'Analisis Avanzado', description: 'Graficos detallados de salud y comportamiento', color: colors.success },
-    { icon: 'cloud-upload', title: 'Backup en la Nube', description: 'Todos tus datos seguros y sincronizados', color: colors.accent },
-    { icon: 'people', title: 'Manada Familiar', description: 'Invita hasta 5 miembros a gestionar tu perro', color: colors.error },
+    { icon: 'videocam', title: t('proFeatureVideo'), description: t('proFeatureVideoDesc'), color: colors.primary },
+    { icon: 'document-text', title: t('proFeatureReports'), description: t('proFeatureReportsDesc'), color: colors.info },
+    { icon: 'chatbubbles', title: t('proFeatureChat'), description: t('proFeatureChatDesc'), color: colors.accentEducation },
+    { icon: 'analytics', title: t('proFeatureAnalytics'), description: t('proFeatureAnalyticsDesc'), color: colors.success },
+    { icon: 'cloud-upload', title: t('proFeatureCloud'), description: t('proFeatureCloudDesc'), color: colors.accent },
+    { icon: 'people', title: t('proFeaturePack'), description: t('proFeaturePackDesc'), color: colors.error },
   ];
   const { 
     packages, 
@@ -49,15 +51,9 @@ export default function ProScreen() {
           <View style={styles.successIcon}>
             <Ionicons name="checkmark-circle" size={80} color={colors.success} />
           </View>
-          <Text style={styles.successTitle}>¡Ya eres PRO!</Text>
-          <Text style={styles.successText}>
-            Disfruta de todas las funciones premium de Heimdall
-          </Text>
-          <Button
-            title="Volver al inicio"
-            onPress={() => router.back()}
-            style={styles.successButton}
-          />
+          <Text style={styles.successTitle}>{t('alreadyPro')}</Text>
+          <Text style={styles.successText}>{t('enjoyPro')}</Text>
+          <Button title={t('backToHome')} onPress={() => router.back()} style={styles.successButton} />
         </View>
       </SafeAreaView>
     );
@@ -134,24 +130,18 @@ export default function ProScreen() {
         {isSimulated && (
           <View style={styles.demoBanner}>
             <Ionicons name="information-circle" size={20} color={colors.accent} />
-            <Text style={styles.demoBannerText}>
-              Modo demo - Configura RevenueCat para compras reales
-            </Text>
+            <Text style={styles.demoBannerText}>Demo mode - Configure RevenueCat for real purchases</Text>
           </View>
         )}
 
-        {/* Hero Section */}
         <View style={styles.hero}>
-          <View style={styles.proBadge}>
-            <Ionicons name="diamond" size={32} color={colors.white} />
-          </View>
-          <Text style={styles.heroTitle}>Heimdall PRO</Text>
-          <Text style={styles.heroSubtitle}>Desbloquea todo el potencial de Heimdall</Text>
+          <View style={styles.proBadge}><Ionicons name="diamond" size={32} color={colors.white} /></View>
+          <Text style={styles.heroTitle}>{t('proTitle')}</Text>
+          <Text style={styles.heroSubtitle}>{t('proSubtitle')}</Text>
         </View>
 
-        {/* Features */}
         <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>Todo lo que incluye PRO</Text>
+          <Text style={styles.sectionTitle}>{t('allProIncludes')}</Text>
           
           <View style={styles.featuresGrid}>
             {proFeatures.map((feature, index) => (
@@ -168,26 +158,21 @@ export default function ProScreen() {
           </View>
         </View>
 
-        {/* Plans */}
         <View style={styles.plansSection}>
-          <Text style={styles.sectionTitle}>Elige tu plan</Text>
+          <Text style={styles.sectionTitle}>{t('choosePlan')}</Text>
           
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={styles.loadingText}>Cargando planes...</Text>
+              <Text style={styles.loadingText}>{t('loadingPlans')}</Text>
             </View>
           ) : (
             <View style={styles.plansRow}>
-              {/* Monthly Plan */}
               <TouchableOpacity
-                style={[
-                  styles.planCard,
-                  selectedPlan === 'monthly' && styles.planCardSelected,
-                ]}
+                style={[styles.planCard, selectedPlan === 'monthly' && styles.planCardSelected]}
                 onPress={() => setSelectedPlan('monthly')}
               >
-                <Text style={styles.planName}>Mensual</Text>
+                <Text style={styles.planName}>{t('monthly')}</Text>
                 <View style={styles.priceRow}>
                   <Text style={styles.planPrice}>
                     {monthlyPackage?.product.priceString || '4,90 €'}
@@ -205,20 +190,12 @@ export default function ProScreen() {
                 </View>
               </TouchableOpacity>
 
-              {/* Annual Plan */}
               <TouchableOpacity
-                style={[
-                  styles.planCard,
-                  selectedPlan === 'annual' && styles.planCardSelected,
-                  styles.planCardPopular,
-                ]}
+                style={[styles.planCard, selectedPlan === 'annual' && styles.planCardSelected, styles.planCardPopular]}
                 onPress={() => setSelectedPlan('annual')}
               >
-                <View style={styles.popularBadge}>
-                  <Text style={styles.popularText}>MÁS POPULAR</Text>
-                </View>
-                
-                <Text style={styles.planName}>Anual</Text>
+                <View style={styles.popularBadge}><Text style={styles.popularText}>{t('mostPopular')}</Text></View>
+                <Text style={styles.planName}>{t('annual')}</Text>
                 <View style={styles.priceRow}>
                   <Text style={styles.planPrice}>
                     {annualPackage?.product.priceString || '39,90 €'}
@@ -226,9 +203,7 @@ export default function ProScreen() {
                   <Text style={styles.planPeriod}>/año</Text>
                 </View>
                 
-                <View style={styles.savingsBadge}>
-                  <Text style={styles.savingsText}>Ahorra 32%</Text>
-                </View>
+                <View style={styles.savingsBadge}><Text style={styles.savingsText}>{t('savingsPercent')}</Text></View>
                 
                 <View style={[
                   styles.radioCircle,
@@ -243,49 +218,28 @@ export default function ProScreen() {
           )}
         </View>
 
-        {/* CTA */}
         <View style={styles.ctaSection}>
           <Button
-            title={purchasing ? 'Procesando...' : 'Activar PRO Ahora'}
-            onPress={handleSubscribe}
-            size="lg"
-            style={styles.ctaButton}
-            loading={purchasing}
-            disabled={purchasing || loading}
+            title={purchasing ? t('processing') : t('activateProNow')}
+            onPress={handleSubscribe} size="lg" style={styles.ctaButton}
+            loading={purchasing} disabled={purchasing || loading}
           />
-          
-          <TouchableOpacity
-            style={styles.restoreButton}
-            onPress={handleRestore}
-            disabled={restoring}
-          >
-            {restoring ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : (
-              <Text style={styles.restoreButtonText}>Restaurar compras</Text>
-            )}
+          <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} disabled={restoring}>
+            {restoring ? <ActivityIndicator size="small" color={colors.primary} /> : <Text style={styles.restoreButtonText}>{t('restorePurchases')}</Text>}
           </TouchableOpacity>
-          
-          <Text style={styles.termsText}>
-            Cancela cuando quieras. Al suscribirte aceptas los{' '}
-            <Text style={styles.termsLink}>Términos de servicio</Text>
-          </Text>
+          <Text style={styles.termsText}>{t('cancelAnytime')} <Text style={styles.termsLink}>{t('termsOfService')}</Text></Text>
         </View>
 
-        {/* Guarantee */}
         <View style={styles.guaranteeCard}>
           <Ionicons name="shield-checkmark" size={32} color={colors.success} />
           <View style={styles.guaranteeContent}>
-            <Text style={styles.guaranteeTitle}>Garantía de 7 días</Text>
-            <Text style={styles.guaranteeText}>
-              Si no estás satisfecho, te devolvemos el dinero sin preguntas.
-            </Text>
+            <Text style={styles.guaranteeTitle}>{t('guarantee7days')}</Text>
+            <Text style={styles.guaranteeText}>{t('guaranteeDesc')}</Text>
           </View>
         </View>
 
-        {/* Payment Methods */}
         <View style={styles.paymentMethods}>
-          <Text style={styles.paymentTitle}>Pago seguro con</Text>
+          <Text style={styles.paymentTitle}>{t('securePayment')}</Text>
           <View style={styles.paymentIcons}>
             <View style={styles.paymentIcon}>
               <Ionicons name="logo-google" size={24} color={colors.white} />
@@ -296,8 +250,8 @@ export default function ProScreen() {
 
         {/* Testimonials */}
         <View style={styles.testimonialSection}>
-          <Text style={styles.testimonialTitle}>"¡Heimdall PRO ha cambiado nuestra rutina!"</Text>
-          <Text style={styles.testimonialAuthor}>— María y Max, usuarios PRO</Text>
+          <Text style={styles.testimonialTitle}>"Heimdall PRO has changed our routine!"</Text>
+          <Text style={styles.testimonialAuthor}>-- Maria & Max, PRO users</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
