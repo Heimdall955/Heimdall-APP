@@ -20,17 +20,20 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Suscripcion PRO (MOCKED payments)
 - Seguridad: rate limiting, CORS, sanitizacion, proteccion IDOR
 - Modo Oscuro/Claro con persistencia
-- Sistema FREE/PRO con limites diarios
+- Sistema FREE/PRO: PRO solo para fotos, videos y PDFs. Chat ILIMITADO para todos
 - Rutas GPS v3: GDPR, podometro, senderos reales OSM, mapa Leaflet, favoritos
 - Autenticacion Biometrica: Face ID/Touch ID/Huella, auto-login, toggle en Perfil
 - Fix teclado movil: KeyboardAvoidingView en todas las pantallas
 - Progreso de lecciones persistente: Endpoints POST/GET /api/lessons/progress (14 Mar 2026)
 - Pantalla "Mi Progreso": Vista completa con anillo global, stats, barras por programa (14 Mar 2026)
-- **Chat mejorado**: Markdown renderer (negritas), emojis en respuestas IA, botones like/dislike con feedback visual, endpoint POST /api/chat/{id}/rate (16 Mar 2026)
+- Chat mejorado: Markdown renderer (negritas), emojis, botones like/dislike con feedback visual (16 Mar 2026)
+- **Chat ilimitado**: Eliminado limite de 5 mensajes/dia. PRO solo para archivos multimedia (16 Mar 2026)
+- **Heimdall companero fiel**: System prompt con personalidad de companero cercano y empatico (Sec 20) (16 Mar 2026)
+- **Aprendizaje adaptativo**: Heimdall analiza feedback (like/dislike) del usuario y ajusta estilo/tono/extension (Sec 21) (16 Mar 2026)
 
 ## SQL Migrations Pendientes (para ejecutar en Supabase)
 ```sql
--- Columna rating para chat_messages (para persistir like/dislike)
+-- Columna rating para chat_messages (para persistir like/dislike entre sesiones)
 ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS rating TEXT;
 ```
 
@@ -43,5 +46,5 @@ ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS rating TEXT;
 ## Mocked/Parcial
 - Real BLE connectivity (MOCKED)
 - Google Play Store / RevenueCat (MOCKED)
-- Favoritos trails: local storage (pendiente tabla Supabase)
-- Rating de chat: funciona visualmente, persistencia pendiente de columna rating en chat_messages
+- Favoritos trails: local storage
+- Rating de chat: funciona visualmente, persistencia DB pendiente de columna rating
