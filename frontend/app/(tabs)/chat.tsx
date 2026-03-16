@@ -42,7 +42,7 @@ const ATTACHMENT_LABELS = {
   it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)', proOnly: 'Solo PRO', limitReached: 'Limite raggiunto', upgradeToPro: 'Passa a PRO', messagesLeft: 'messaggi rimasti oggi', photosLeft: 'foto rimasta oggi', unlimited: 'Illimitato', limitTitle: 'Limite raggiunto', limitMsg: 'Hai raggiunto il limite giornaliero di messaggi gratuiti. Passa a PRO per chattare senza limiti.', photoLimitMsg: 'Hai raggiunto il limite giornaliero di foto gratuite. Passa a PRO per foto illimitate.', videoProMsg: "L'analisi video è una funzione PRO esclusiva.", pdfProMsg: "L'analisi dei documenti è una funzione PRO esclusiva." },
 };
 
-const FREE_LIMITS = { messages: 5, photos: 1, videos: 0, pdfs: 0 };
+const FREE_LIMITS = { photos: 1, videos: 0, pdfs: 0 };
 
 export default function ChatScreen() {
   const { currentDog, user } = useAuth();
@@ -65,7 +65,6 @@ export default function ChatScreen() {
   const welcomeMessage = WELCOME_MESSAGES[language];
   const labels = ATTACHMENT_LABELS[language];
 
-  const messagesRemaining = isPro ? -1 : Math.max(0, FREE_LIMITS.messages - usage.messages);
   const photosRemaining = isPro ? -1 : Math.max(0, FREE_LIMITS.photos - usage.photos);
 
   const fetchUsage = useCallback(async () => {
@@ -92,22 +91,16 @@ export default function ChatScreen() {
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
-    if (!isPro && usage.messages >= FREE_LIMITS.messages) {
-      showProGate(labels.limitMsg); return;
-    }
     const userMessage: ChatMessage = { id: `temp_${Date.now()}`, user_id: user?.user_id || '', dog_id: currentDog?.id, role: 'user', content: text.trim(), created_at: new Date().toISOString() };
     setMessages(prev => [...prev, userMessage]); setInputText(''); setIsLoading(true);
-    setUsage(prev => ({ ...prev, messages: prev.messages + 1 }));
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
     try {
       const token = await SecureStore.getItemAsync('session_token');
       const response = await axios.post(`${BACKEND_URL}/api/chat`, { content: text.trim(), dog_id: currentDog?.id, language: getLanguageName(language) }, { headers: { Authorization: `Bearer ${token}` } });
       setMessages(prev => [...prev, response.data]);
     } catch (error: any) {
-      if (error?.response?.status === 403) { showProGate(labels.limitMsg); }
-      else { Alert.alert(t('error'), t('error')); }
+      Alert.alert(t('error'), t('error'));
       setMessages(prev => prev.filter(m => m.id !== userMessage.id));
-      setUsage(prev => ({ ...prev, messages: Math.max(0, prev.messages - 1) }));
     }
     finally { setIsLoading(false); setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100); }
   };
@@ -237,15 +230,7 @@ export default function ChatScreen() {
         <Text style={[s.usageBadgeText, { color: colors.accent }]}>PRO</Text>
       </View>
     );
-    const pct = (usage.messages / FREE_LIMITS.messages) * 100;
-    const isLow = messagesRemaining <= 1;
-    return (
-      <View style={[s.usageBadge, isLow && { borderColor: colors.error + '60', backgroundColor: colors.error + '10' }]} data-testid="usage-counter">
-        <Ionicons name="chatbubble-outline" size={14} color={isLow ? colors.error : colors.primary} />
-        <Text style={[s.usageBadgeText, isLow && { color: colors.error }]}>{messagesRemaining}/5</Text>
-        <View style={s.usageBarBg}><View style={[s.usageBarFill, { width: `${Math.min(pct, 100)}%`, backgroundColor: isLow ? colors.error : colors.primary }]} /></View>
-      </View>
-    );
+    return null;
   };
 
   const ProBadge = ({ small }: { small?: boolean }) => (
@@ -366,20 +351,12 @@ export default function ChatScreen() {
 
         {/* Input */}
         <View style={s.inputContainer}>
-          {!isPro && messagesRemaining <= 2 && messagesRemaining > 0 && (
-            <View style={s.limitWarning} data-testid="limit-warning">
-              <Ionicons name="warning" size={14} color={colors.accentOrange} />
-              <Text style={{ fontSize: FontSizes.xs, color: colors.accentOrange, flex: 1 }}>
-                {messagesRemaining} {labels.messagesLeft}
-              </Text>
-            </View>
-          )}
           <View style={s.inputWrapper}>
             <TouchableOpacity style={{ padding: Spacing.sm, justifyContent: 'center' }} onPress={() => setShowAttachMenu(true)} data-testid="attach-button">
               <Ionicons name="add-circle" size={28} color={colors.primary} />
             </TouchableOpacity>
-            <TextInput style={s.textInput} placeholder={!isPro && messagesRemaining <= 0 ? labels.limitReached : (t('typeMessage') || 'Escribe tu mensaje...')} placeholderTextColor={!isPro && messagesRemaining <= 0 ? colors.error : colors.gray} value={inputText} onChangeText={setInputText} multiline maxLength={1000} editable={isPro || messagesRemaining > 0} />
-            <TouchableOpacity style={[s.sendButton, (!inputText.trim() || isLoading || (!isPro && messagesRemaining <= 0)) && { backgroundColor: colors.grayLight }]} onPress={() => { if (!isPro && messagesRemaining <= 0) { showProGate(labels.limitMsg); } else { sendMessage(inputText); } }} disabled={!inputText.trim() || isLoading} data-testid="send-button">
+            <TextInput style={s.textInput} placeholder={t('typeMessage') || 'Escribe tu mensaje...'} placeholderTextColor={colors.gray} value={inputText} onChangeText={setInputText} multiline maxLength={1000} />
+            <TouchableOpacity style={[s.sendButton, (!inputText.trim() || isLoading) && { backgroundColor: colors.grayLight }]} onPress={() => sendMessage(inputText)} disabled={!inputText.trim() || isLoading} data-testid="send-button">
               <Ionicons name="send" size={20} color={inputText.trim() && !isLoading ? '#FFF' : colors.gray} />
             </TouchableOpacity>
           </View>

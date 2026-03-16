@@ -228,7 +228,7 @@ pro_users = {}  # user_id -> {"active_until": datetime, "plan": "monthly"|"annua
 # ==================== PRO / SUBSCRIPTION HELPERS ====================
 
 FREE_LIMITS = {
-    "messages": 5,
+    "messages": -1,
     "photos": 1,
     "videos": 0,
     "pdfs": 0,
@@ -924,15 +924,39 @@ Tu formato de respuesta debe ser limpio y agradable de leer en una app movil:
 - Usa guiones (-) o emojis para listas.
 - Mantén las respuestas bien espaciadas y faciles de escanear visualmente.
 - Cada seccion o idea principal debe estar en su propio parrafo.
+
+# 20) PERSONALIDAD DE COMPANERO FIEL
+
+Heimdall no es solo un asistente. Es un companero.
+
+Tu relacion con el usuario debe sentirse como la de un amigo cercano que:
+- Se preocupa de verdad por el bienestar del perro y del tutor
+- Recuerda lo que le han contado y lo usa con carino
+- Celebra los logros ("Que bien que habeis salido a pasear hoy!")
+- Muestra empatia real cuando hay problemas o preocupaciones
+- Hace seguimiento espontaneo ("Como siguio lo de ayer?")
+- Usa el nombre del perro con naturalidad, como un amigo de verdad lo haria
+- Transmite calidez y cercania en cada mensaje
+
+Heimdall es el companero que todos los tutores de perros merecen tener.
+
+# 21) APRENDIZAJE POR FEEDBACK DEL USUARIO
+
+El usuario puede valorar tus respuestas con like o dislike. Cuando recibas informacion sobre respuestas previas que NO gustaron (dislike), debes:
+
+- Ajustar tu estilo: si diste una respuesta muy tecnica y no gusto, se mas cercano y simple
+- Ajustar tu extension: si la respuesta era muy larga, se mas conciso la proxima vez
+- Ajustar tu tono: si fuiste demasiado formal, se mas coloquial
+- NUNCA menciones explicitamente que estas ajustando tu comportamiento por el feedback
+- Simplemente mejora de forma natural, como un amigo que aprende a conocerte mejor
+
+Si recibes informacion sobre respuestas que SI gustaron (like), mantén ese estilo y tono.
 """
 
 @api_router.post("/chat")
 async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
-    # Check daily message limit for free users
-    if not is_pro_user(user.user_id):
-        usage = get_daily_usage(user.user_id)
-        if usage["messages"] >= FREE_LIMITS["messages"]:
-            raise HTTPException(status_code=403, detail="LIMIT_MESSAGES")
+    # No message limit - chat is free for everyone
+    # PRO limits only apply to file uploads (photos, videos, PDFs)
     
     now = datetime.now(timezone.utc).isoformat()
     
@@ -985,14 +1009,36 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
     
     # Get recent chat history for context
     history = []
+    feedback_context = ""
     try:
         result = supabase.table("chat_messages").select("*").eq("user_id", user.user_id)
         if data.dog_id:
             result = result.eq("dog_id", data.dog_id)
         result = result.order("created_at", desc=True).limit(10).execute()
         
+        liked_count = 0
+        disliked_count = 0
+        disliked_samples = []
         for msg in reversed(result.data):
             history.append({"role": msg["role"], "content": msg["content"]})
+            rating = msg.get("rating")
+            if rating == "up":
+                liked_count += 1
+            elif rating == "down":
+                disliked_count += 1
+                if msg["role"] == "assistant" and len(disliked_samples) < 2:
+                    disliked_samples.append(msg["content"][:80])
+        
+        if disliked_count > 0 or liked_count > 0:
+            parts = []
+            if disliked_count > 0:
+                parts.append(f"El usuario ha indicado que {disliked_count} de tus respuestas recientes NO le gustaron.")
+                if disliked_samples:
+                    parts.append("Ejemplos de respuestas que no gustaron (resumidas): " + " | ".join(disliked_samples))
+                parts.append("Ajusta tu estilo: se mas cercano, simple y breve.")
+            if liked_count > 0:
+                parts.append(f"El usuario ha valorado positivamente {liked_count} respuestas. Mantén ese estilo.")
+            feedback_context = "\n# FEEDBACK DEL USUARIO\n" + "\n".join(parts) + "\n"
     except Exception as e:
         logger.error(f"Error getting chat history: {e}")
     
@@ -1030,6 +1076,7 @@ Usa esta información para personalizar tus respuestas. Menciona a {dog_name} po
     complete_system_prompt = f"""{HEIMDALL_SYSTEM_PROMPT}
 
 {dog_context}
+{feedback_context}
 """
     
     # Build messages with aggressive language override for non-Spanish
