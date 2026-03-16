@@ -145,7 +145,22 @@ export default function RutasScreen() {
   };
 
   const checkPedometer = async () => {
-    try { setIsPedometerAvailable(await Pedometer.isAvailableAsync()); } catch { setIsPedometerAvailable(false); }
+    try {
+      const available = await Pedometer.isAvailableAsync();
+      setIsPedometerAvailable(available);
+      if (available) {
+        // Load today's steps
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        const end = new Date();
+        try {
+          const result = await Pedometer.getStepCountAsync(start, end);
+          setStepCount(result.steps);
+        } catch {
+          // getStepCountAsync may not be available on all devices
+        }
+      }
+    } catch { setIsPedometerAvailable(false); }
   };
 
   const fetchNearbyTrails = async (lat: number, lng: number) => {
@@ -186,24 +201,43 @@ export default function RutasScreen() {
   }, [currentDog]);
 
   const startTracking = async () => {
-    if (screenState !== 'main') return;
+    if (screenState !== 'main') {
+      Alert.alert('Permisos', 'Necesitas aceptar los permisos de ubicacion para iniciar un paseo.');
+      return;
+    }
+    if (!location) {
+      try {
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc);
+      } catch {
+        Alert.alert('GPS', 'No se pudo obtener tu ubicacion. Asegurate de tener el GPS activado.');
+        return;
+      }
+    }
     setIsTracking(true); setCurrentRoute([]); setTrackingStats({ distance: 0, duration: 0 }); setStepCount(0);
     startTime.current = new Date();
     timerInterval.current = setInterval(() => {
       if (startTime.current) setTrackingStats(prev => ({ ...prev, duration: Math.floor((Date.now() - startTime.current!.getTime()) / 1000) }));
     }, 1000);
-    if (isPedometerAvailable) pedometerSub.current = Pedometer.watchStepCount(r => setStepCount(r.steps));
-    watchId.current = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.High, timeInterval: 2000, distanceInterval: 5 },
-      (nl) => {
-        const p = { lat: nl.coords.latitude, lng: nl.coords.longitude };
-        setCurrentRoute(prev => {
-          const nr = [...prev, p];
-          if (nr.length > 1) { const l = nr[nr.length - 2]; const d = calcDist(l.lat, l.lng, p.lat, p.lng); setTrackingStats(s => ({ ...s, distance: s.distance + d })); }
-          return nr;
-        });
-      }
-    );
+    if (isPedometerAvailable) {
+      pedometerSub.current = Pedometer.watchStepCount(r => setStepCount(r.steps));
+    }
+    try {
+      watchId.current = await Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.High, timeInterval: 2000, distanceInterval: 5 },
+        (nl) => {
+          const p = { lat: nl.coords.latitude, lng: nl.coords.longitude };
+          setCurrentRoute(prev => {
+            const nr = [...prev, p];
+            if (nr.length > 1) { const l = nr[nr.length - 2]; const d = calcDist(l.lat, l.lng, p.lat, p.lng); setTrackingStats(s => ({ ...s, distance: s.distance + d })); }
+            return nr;
+          });
+        }
+      );
+    } catch {
+      Alert.alert('Error', 'No se pudo iniciar el seguimiento GPS.');
+      setIsTracking(false);
+    }
   };
 
   const stopTracking = async () => {
@@ -362,16 +396,16 @@ export default function RutasScreen() {
       </View>
 
       {/* Tabs */}
-      <View style={[styles.tabBar, { backgroundColor: colors.cardBg }]}>
+      <View style={[styles.tabBar]}>
         {(['walk', 'map', 'trails', 'history'] as ActiveTab[]).map((tab) => {
           const icons: Record<ActiveTab, string> = { walk: 'walk', map: 'map', trails: 'trail-sign', history: 'time' };
           const labels: Record<ActiveTab, string> = {
-            walk: t('startWalk'), map: 'Mapa', trails: t('hikingTrails'), history: t('savedRoutes'),
+            walk: 'Paseo', map: 'Mapa', trails: 'Senderos', history: 'Guardadas',
           };
           const isActive = activeTab === tab;
           return (
             <TouchableOpacity key={tab} style={[styles.tabItem, isActive && { backgroundColor: colors.primary + '18' }]} onPress={() => setActiveTab(tab)} data-testid={`tab-${tab}`}>
-              <Ionicons name={icons[tab] as any} size={16} color={isActive ? colors.primary : colors.textSecondary} />
+              <Ionicons name={icons[tab] as any} size={20} color={isActive ? colors.primary : colors.textSecondary} />
               <Text style={[styles.tabLabel, isActive && { color: colors.primary, fontWeight: '700' }]}>{labels[tab]}</Text>
             </TouchableOpacity>
           );
@@ -675,9 +709,9 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   actionBtnText: { color: '#FFF', fontSize: FontSizes.lg, fontWeight: '700' },
 
   // Tabs
-  tabBar: { flexDirection: 'row', marginHorizontal: Spacing.md, marginBottom: Spacing.sm, borderRadius: BorderRadius.lg, padding: 3, ...S.sm },
-  tabItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 9, borderRadius: BorderRadius.md },
-  tabLabel: { fontSize: 11, color: C.textSecondary, fontWeight: '500' },
+  tabBar: { flexDirection: 'row', marginHorizontal: Spacing.sm, marginBottom: Spacing.sm, borderRadius: BorderRadius.lg, padding: 4, gap: 4, ...S.sm, backgroundColor: C.cardBg },
+  tabItem: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: BorderRadius.md },
+  tabLabel: { fontSize: 10, color: C.textSecondary, fontWeight: '500', marginTop: 2, textAlign: 'center' },
 
   // Location bar
   locationBar: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 10, paddingHorizontal: Spacing.md, borderRadius: BorderRadius.md, marginBottom: Spacing.md },

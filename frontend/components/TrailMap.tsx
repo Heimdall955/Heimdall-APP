@@ -35,22 +35,22 @@ export function TrailMap({ userLat, userLng, markers, height = 300, onMarkerPres
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#1a1a2e}
+  body{background:#f0f0f0}
   #map{width:100%;height:100vh;border-radius:12px;overflow:hidden}
   .user-marker{background:#4361ee;border:3px solid #fff;border-radius:50%;width:16px;height:16px;box-shadow:0 0 12px rgba(67,97,238,0.6)}
-  .trail-marker{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+  .trail-marker{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
   .fav-marker{width:14px;height:14px;border-radius:50%;border:2px solid #ffd700;box-shadow:0 0 8px rgba(255,215,0,0.5)}
-  .selected-marker{width:16px;height:16px;border:3px solid #fff;box-shadow:0 0 16px rgba(255,255,255,0.6)}
+  .selected-marker{width:16px;height:16px;border:3px solid #333;box-shadow:0 0 16px rgba(0,0,0,0.3)}
   .popup-content{font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:4px}
-  .popup-content h3{font-size:13px;margin:0 0 4px}
+  .popup-content h3{font-size:13px;margin:0 0 4px;color:#333}
   .popup-content p{font-size:11px;margin:0;color:#666}
-  .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2)}
+  .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.15)}
 </style>
 </head><body>
 <div id="map"></div>
 <script>
 var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([${userLat},${userLng}],13);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(map);
 
 // User marker
 var userIcon = L.divIcon({className:'user-marker',iconSize:[16,16],iconAnchor:[8,8]});
