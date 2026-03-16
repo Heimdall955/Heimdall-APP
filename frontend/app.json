@@ -63,6 +63,13 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Heimdall to track your dog's walks."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/heimdall-logo.png",
+          "color": "#4ABDAC"
+        }
       ]
     ],
     "experiments": {

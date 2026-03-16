@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '../contexts/AuthContext';
@@ -8,9 +8,14 @@ import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
+import notificationService from '../services/NotificationService';
 
 function InnerLayout() {
   const { isDark } = useTheme();
+
+  useEffect(() => {
+    notificationService.init().then(() => notificationService.scheduleAll());
+  }, []);
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />

@@ -24,7 +24,8 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - Progreso lecciones + Mi Progreso
 - Diario de Emociones (pendiente tabla Supabase)
 - Chaleco BLE ESP32 sin simulacion (pendiente EAS Build)
-- **Ejercicios UI rediseñada**: Sin banner verde, header limpio, SafeAreaView bottom, barra progreso, cards coloreadas por tema (16 Mar 2026)
+- Ejercicios UI rediseñada sin banner verde
+- **Notificaciones push locales**: 5 tipos (entrenamiento 10:00, diario 20:00, racha 21:00, logros instantaneos, te echamos de menos semanal). Toggles individuales en perfil. expo-notifications + canales Android (16 Mar 2026)
 
 ## SQL Migrations Pendientes
 ```sql
@@ -46,3 +47,9 @@ CREATE INDEX idx_emotion_diary_created ON emotion_diary(created_at);
 ### P1 - Traduccion Contenido Educativo
 ### P2 - EAS Development Build
 ### P2 - RevenueCat + Google Play
+
+## Archivos Clave Notificaciones
+- frontend/services/NotificationService.ts
+- frontend/app/(tabs)/perfil.tsx (modal de ajustes)
+- frontend/app/_layout.tsx (inicializacion)
+- frontend/app.json (plugin expo-notifications)

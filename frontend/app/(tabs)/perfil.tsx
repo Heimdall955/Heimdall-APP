@@ -26,6 +26,8 @@ interface GamificationData {
 }
 interface Achievement { id: string; name: string; description: string; icon: string; bones_reward: number; unlocked: boolean; }
 interface Friend { id: string; name: string; status: string; created_at: string; }
+import notificationService, { NotificationPrefs, DEFAULT_PREFS } from '../../services/NotificationService';
+
 interface ClinicalFile {
   country: string; vet_name: string; vet_phone: string; allergies: string;
   chronic_conditions: string; current_medication: string; blood_type: string; neutered: boolean; insurance: string;
@@ -63,6 +65,7 @@ export default function PerfilScreen() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricType, setBiometricType] = useState('');
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
   
   const [clinical, setClinical] = useState<ClinicalFile>({
     country: '', vet_name: '', vet_phone: '', allergies: '',
@@ -73,7 +76,7 @@ export default function PerfilScreen() {
     achievement_alerts: true, pack_alerts: true, weight_unit: 'kg', temperature_unit: 'celsius'
   });
 
-  useEffect(() => { loadDogImage(); loadAll(); loadBiometricStatus(); }, []);
+  useEffect(() => { loadDogImage(); loadAll(); loadBiometricStatus(); loadNotifPrefs(); }, []);
   useEffect(() => {
     if (currentDog) {
       setEditName(currentDog.name || ''); setEditAge(currentDog.age?.toString() || '');
@@ -127,6 +130,21 @@ export default function PerfilScreen() {
       setBiometricEnabled(enabled);
     }
   };
+
+  const loadNotifPrefs = async () => {
+    try {
+      const prefs = await notificationService.getPrefs();
+      setNotifPrefs(prefs);
+    } catch (e) { console.log('Error loading notif prefs:', e); }
+  };
+
+  const handleNotifToggle = async (key: keyof NotificationPrefs, value: boolean) => {
+    const newPrefs = { ...notifPrefs, [key]: value };
+    setNotifPrefs(newPrefs);
+    await notificationService.init();
+    await notificationService.savePrefs(newPrefs);
+  };
+
 
   const toggleBiometric = async () => {
     if (biometricEnabled) {
@@ -517,19 +535,27 @@ export default function PerfilScreen() {
       <Modal visible={showNotificationsModal} transparent animationType="slide" onRequestClose={() => setShowNotificationsModal(false)}>
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('notifications')}</Text><TouchableOpacity onPress={() => setShowNotificationsModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
-          {[
-            { key: 'notifications_enabled', label: language === 'en' ? 'Enable notifications' : 'Activar notificaciones', icon: 'notifications' },
-            { key: 'daily_reminder', label: language === 'en' ? 'Daily check-in' : 'Check-in diario', icon: 'sunny' },
-            { key: 'health_alerts', label: language === 'en' ? 'Health alerts' : 'Alertas de salud', icon: 'heart' },
-            { key: 'achievement_alerts', label: language === 'en' ? 'Achievement alerts' : 'Alertas de logros', icon: 'trophy' },
-            { key: 'pack_alerts', label: language === 'en' ? 'Pack activity' : 'Actividad de manada', icon: 'people' },
-          ].map(item => (
-            <View key={item.key} style={styles.settingRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flex: 1 }}>
-                <Ionicons name={item.icon as any} size={20} color={colors.primary} />
-                <Text style={styles.settingLabel}>{item.label}</Text>
+          <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, marginBottom: Spacing.lg }}>
+            Elige que notificaciones quieres recibir para motivarte cada dia.
+          </Text>
+          {([
+            { key: 'training_reminder' as const, icon: 'barbell', color: '#4CAF50', label: 'Recordatorio de entrenamiento', desc: 'Cada dia a las 10:00' },
+            { key: 'emotion_diary' as const, icon: 'journal', color: '#2196F3', label: 'Diario de emociones', desc: 'Cada dia a las 20:00' },
+            { key: 'streak_warning' as const, icon: 'flame', color: '#FF9800', label: 'Racha en peligro', desc: 'Cada dia a las 21:00' },
+            { key: 'achievements' as const, icon: 'trophy', color: '#9C27B0', label: 'Logros desbloqueados', desc: 'Cuando desbloqueas un logro' },
+            { key: 'miss_you' as const, icon: 'heart', color: '#FF4B4B', label: 'Heimdall te echa de menos', desc: 'Si llevas dias sin entrar' },
+          ]).map(item => (
+            <View key={item.key} style={[styles.settingRow, { paddingVertical: Spacing.md }]} data-testid={`notif-toggle-${item.key}`}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: item.color + '18', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name={item.icon as any} size={20} color={item.color} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.settingLabel}>{item.label}</Text>
+                  <Text style={{ fontSize: FontSizes.xs, color: colors.textSecondary, marginTop: 1 }}>{item.desc}</Text>
+                </View>
               </View>
-              <Switch value={(settings as any)[item.key]} onValueChange={v => handleSaveSettings({ ...settings, [item.key]: v })} trackColor={{ true: colors.primary }} />
+              <Switch value={notifPrefs[item.key]} onValueChange={v => handleNotifToggle(item.key, v)} trackColor={{ true: item.color }} />
             </View>
           ))}
         </View></View>
