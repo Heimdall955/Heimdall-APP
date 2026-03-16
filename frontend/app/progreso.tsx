@@ -9,50 +9,34 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
+import { getAllPrograms } from '../data/programsContent';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-// Programs data (matching programa.tsx)
-const PROGRAMS = [
-  {
-    id: 'educacion-basica',
-    title: 'Educacion Basica',
-    color: '#4CAF50',
-    icon: 'school' as const,
-    lessons: ['refuerzo-positivo', 'sentado-basico', 'quieto', 'llamada-perfecta', 'tumbado', 'paseo-correa'],
-  },
-  {
-    id: 'calma-control',
-    title: 'Calma y Control',
-    color: '#FF9800',
-    icon: 'leaf' as const,
-    lessons: ['estres-canino', 'relajacion', 'lugar-seguro', 'desensibilizacion', 'rutinas-calmantes'],
-  },
-  {
-    id: 'socializacion',
-    title: 'Socializacion',
-    color: '#2196F3',
-    icon: 'people' as const,
-    lessons: ['ventana-socializacion', 'presentaciones-perros', 'interaccion-humanos', 'nuevos-entornos', 'sonidos-estimulos', 'parque-canino'],
-  },
-  {
-    id: 'mundo-cachorro',
-    title: 'Mundo Cachorro',
-    color: '#E91E63',
-    icon: 'paw' as const,
-    lessons: ['bienvenido-casa', 'rutina-cachorro', 'inhibicion-mordisco', 'necesidades', 'socializacion-temprana', 'juego-apropiado', 'quedarse-solo'],
-  },
-];
-
-const ALL_LESSONS_COUNT = PROGRAMS.reduce((acc, p) => acc + p.lessons.length, 0);
+const ALL_PROGRAM_ICONS: Record<string, string> = {
+  'educacion-basica': 'school',
+  'calma-control': 'leaf',
+  'socializacion': 'people',
+  'mundo-cachorro': 'paw',
+};
 
 export default function ProgresoScreen() {
   const router = useRouter();
   const { colors, shadows } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [stats, setStats] = useState({ bones: 0, xp: 0, level: 1, streak_days: 0, exercises_completed: 0 });
   const [loading, setLoading] = useState(true);
+
+  const PROGRAMS = useMemo(() => getAllPrograms(language).map(p => ({
+    id: p.id,
+    title: p.titulo,
+    color: p.categoriaColor,
+    icon: ALL_PROGRAM_ICONS[p.id] || 'school',
+    lessons: p.lecciones.map(l => l.id),
+  })), [language]);
+
+  const ALL_LESSONS_COUNT = PROGRAMS.reduce((acc, p) => acc + p.lessons.length, 0);
 
   const loadData = useCallback(async () => {
     try {

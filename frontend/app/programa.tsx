@@ -9,139 +9,18 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
+import { getProgramData } from '../data/programsContent';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
-
-interface Leccion {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  duracion: string;
-  xp: number;
-  completada: boolean;
-}
-
-interface Programa {
-  id: string;
-  titulo: string;
-  subtitulo: string;
-  descripcion: string;
-  categoria: string;
-  categoriaColor: string;
-  imagen: string;
-  duracionTotal: string;
-  lecciones: Leccion[];
-  objetivos: string[];
-}
-
-const PROGRAMAS_DB: Record<string, Programa> = {
-  'educacion-basica': {
-    id: 'educacion-basica',
-    titulo: 'Educación Básica',
-    subtitulo: 'Fundamentos sólidos para tu perro',
-    descripcion: 'Aprende las bases del adiestramiento canino con técnicas de refuerzo positivo. Este programa te guiará paso a paso para establecer una comunicación efectiva con tu perro.',
-    categoria: 'Básico',
-    categoriaColor: '#4CAF50',
-    imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600',
-    duracionTotal: '4 semanas',
-    lecciones: [
-      { id: 'refuerzo-positivo', titulo: 'Introducción al Refuerzo Positivo', descripcion: 'Fundamentos del entrenamiento', duracion: '15 min', xp: 20, completada: false },
-      { id: 'sentado-basico', titulo: 'El Comando "Sienta"', descripcion: 'Primera señal básica', duracion: '20 min', xp: 25, completada: false },
-      { id: 'quieto', titulo: 'El Comando "Quieto"', descripcion: 'Control y paciencia', duracion: '25 min', xp: 30, completada: false },
-      { id: 'llamada-perfecta', titulo: 'El Comando "Ven"', descripcion: 'La llamada perfecta', duracion: '20 min', xp: 25, completada: false },
-      { id: 'tumbado', titulo: 'El Comando "Tumba"', descripcion: 'Posición de relajación', duracion: '20 min', xp: 25, completada: false },
-      { id: 'paseo-correa', titulo: 'Paseo con Correa', descripcion: 'Caminar sin tirones', duracion: '30 min', xp: 35, completada: false },
-    ],
-    objetivos: [
-      'Establecer comunicación clara con tu perro',
-      'Dominar los 5 comandos básicos',
-      'Crear rutinas de entrenamiento diarias',
-      'Pasear sin tirones de correa',
-    ],
-  },
-  'calma-control': {
-    id: 'calma-control',
-    titulo: 'Calma y Control',
-    subtitulo: 'Gestión del estrés canino',
-    descripcion: 'Técnicas especializadas para ayudar a tu perro a manejar la ansiedad y el estrés. Ideal para perros reactivos o que se sobreexcitan fácilmente.',
-    categoria: 'Emocional',
-    categoriaColor: '#FF9800',
-    imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600',
-    duracionTotal: '3 semanas',
-    lecciones: [
-      { id: 'estres-canino', titulo: 'Entender el Estrés Canino', descripcion: 'Señales y causas', duracion: '15 min', xp: 20, completada: false },
-      { id: 'relajacion', titulo: 'Técnicas de Relajación', descripcion: 'Ejercicios calmantes', duracion: '25 min', xp: 30, completada: false },
-      { id: 'lugar-seguro', titulo: 'El Lugar Seguro', descripcion: 'Crear un refugio', duracion: '20 min', xp: 25, completada: false },
-      { id: 'desensibilizacion', titulo: 'Desensibilización', descripcion: 'Reducir la reactividad', duracion: '30 min', xp: 35, completada: false },
-      { id: 'rutinas-calmantes', titulo: 'Rutinas Calmantes', descripcion: 'Establecer paz diaria', duracion: '20 min', xp: 25, completada: false },
-    ],
-    objetivos: [
-      'Identificar señales de estrés en tu perro',
-      'Aplicar técnicas de relajación efectivas',
-      'Crear un ambiente tranquilo en casa',
-      'Manejar situaciones de alta excitación',
-    ],
-  },
-  'socializacion': {
-    id: 'socializacion',
-    titulo: 'Socialización',
-    subtitulo: 'Amigos caninos y humanos',
-    descripcion: 'Programa completo para mejorar las habilidades sociales de tu perro. Aprenderás a presentar nuevos perros, personas y situaciones de forma segura.',
-    categoria: 'Social',
-    categoriaColor: '#2196F3',
-    imagen: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600',
-    duracionTotal: '5 semanas',
-    lecciones: [
-      { id: 'ventana-socializacion', titulo: 'La Ventana de Socialización', descripcion: 'Períodos críticos', duracion: '15 min', xp: 20, completada: false },
-      { id: 'presentaciones-perros', titulo: 'Presentaciones Seguras', descripcion: 'Conocer otros perros', duracion: '25 min', xp: 30, completada: false },
-      { id: 'interaccion-humanos', titulo: 'Interacción con Humanos', descripcion: 'Saludos apropiados', duracion: '20 min', xp: 25, completada: false },
-      { id: 'nuevos-entornos', titulo: 'Nuevos Entornos', descripcion: 'Explorar con confianza', duracion: '25 min', xp: 30, completada: false },
-      { id: 'sonidos-estimulos', titulo: 'Sonidos y Estímulos', descripcion: 'Habituación gradual', duracion: '20 min', xp: 25, completada: false },
-      { id: 'parque-canino', titulo: 'El Parque Canino', descripcion: 'Juego social seguro', duracion: '30 min', xp: 35, completada: false },
-    ],
-    objetivos: [
-      'Mejorar la confianza social de tu perro',
-      'Realizar presentaciones seguras con otros perros',
-      'Enseñar saludos apropiados con personas',
-      'Explorar nuevos lugares sin miedo',
-    ],
-  },
-  'mundo-cachorro': {
-    id: 'mundo-cachorro',
-    titulo: 'Mundo Cachorro',
-    subtitulo: 'Primeros pasos juntos',
-    descripcion: 'Todo lo que necesitas saber para criar un cachorro feliz y equilibrado. Desde el primer día en casa hasta los 6 meses de edad.',
-    categoria: 'Cachorros',
-    categoriaColor: '#E91E63',
-    imagen: 'https://images.unsplash.com/photo-1591160690555-5debfba289f0?w=600',
-    duracionTotal: '6 semanas',
-    lecciones: [
-      { id: 'bienvenido-casa', titulo: 'Bienvenido a Casa', descripcion: 'El primer día', duracion: '15 min', xp: 20, completada: false },
-      { id: 'rutina-cachorro', titulo: 'Rutina del Cachorro', descripcion: 'Horarios y hábitos', duracion: '20 min', xp: 25, completada: false },
-      { id: 'inhibicion-mordisco', titulo: 'Inhibición del Mordisco', descripcion: 'Boca suave', duracion: '25 min', xp: 30, completada: false },
-      { id: 'necesidades', titulo: 'Enseñar a Hacer Sus Necesidades', descripcion: 'Entrenamiento de baño', duracion: '25 min', xp: 30, completada: false },
-      { id: 'socializacion-temprana', titulo: 'Socialización Temprana', descripcion: 'Experiencias positivas', duracion: '20 min', xp: 25, completada: false },
-      { id: 'juego-apropiado', titulo: 'Juego Apropiado', descripcion: 'Diversión segura', duracion: '20 min', xp: 25, completada: false },
-      { id: 'quedarse-solo', titulo: 'Quedarse Solo', descripcion: 'Prevenir ansiedad', duracion: '25 min', xp: 30, completada: false },
-    ],
-    objetivos: [
-      'Establecer rutinas saludables desde el inicio',
-      'Enseñar inhibición del mordisco',
-      'Completar entrenamiento de baño',
-      'Socializar correctamente al cachorro',
-      'Prevenir problemas de comportamiento',
-    ],
-  },
-};
 
 export default function ProgramaScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { colors, shadows } = useTheme();
   const [leccionesCompletadas, setLeccionesCompletadas] = useState<string[]>([]);
 
-  const programa = PROGRAMAS_DB[id || 'educacion-basica'];
+  const programa = getProgramData(language, id || 'educacion-basica');
 
   // Load completed lessons from DB
   const loadCompletedLessons = useCallback(async () => {
