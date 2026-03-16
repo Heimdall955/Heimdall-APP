@@ -15,7 +15,7 @@ from datetime import datetime
 # Use external URL from environment
 BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://lesson-progress-fix.preview.emergentagent.com"
+    BASE_URL = "https://hani-learning.preview.emergentagent.com"
 
 # Test credentials from main agent context
 TEST_EMAIL = "testlesson@test.com"

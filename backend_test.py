@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 
 # Test configuration
-BACKEND_URL = "https://lesson-progress-fix.preview.emergentagent.com"
+BACKEND_URL = "https://hani-learning.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class Colors:
