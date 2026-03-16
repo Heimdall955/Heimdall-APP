@@ -61,11 +61,7 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
     if (Platform.OS === 'web') {
       Alert.alert(
         'Bluetooth no disponible',
-        'El escaneo Bluetooth solo está disponible en dispositivos móviles con Expo Go. ¿Quieres usar el simulador para probar?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Usar Simulador', onPress: () => startSimulation() },
-        ]
+        'El escaneo Bluetooth solo funciona en dispositivos moviles. Para probarlo, instala la app en tu telefono.',
       );
       return;
     }
@@ -77,13 +73,10 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
     try {
       await bluetoothService.startScan((device) => {
         setScannedDevices((prev) => {
-          // Avoid duplicates and sort by signal strength
           if (prev.some((d) => d.id === device.id)) {
-            // Update RSSI if device already exists
             return prev.map(d => d.id === device.id ? { ...d, rssi: device.rssi } : d);
           }
           const newDevices = [...prev, device];
-          // Sort: Heimdall devices first, then by signal strength
           return newDevices.sort((a, b) => {
             if (a.isHeimdallVest && !b.isHeimdallVest) return -1;
             if (!a.isHeimdallVest && b.isHeimdallVest) return 1;
@@ -95,9 +88,13 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
       console.error('Scan error:', error);
       setIsScanning(false);
       setConnectionState('error');
+      
+      const isExpoGo = error.message?.includes('Expo Go') || error.message?.includes('development build');
       Alert.alert(
-        'Error de Bluetooth', 
-        error.message || 'No se pudo iniciar el escaneo. Verifica que Bluetooth esté activado.'
+        isExpoGo ? 'Build nativo necesario' : 'Error de Bluetooth',
+        isExpoGo
+          ? 'Para usar el Bluetooth real necesitas compilar la app con EAS Build. Contacta al equipo de desarrollo para crear el build.'
+          : error.message || 'No se pudo iniciar el escaneo. Verifica que Bluetooth este activado.'
       );
     }
   }, []);

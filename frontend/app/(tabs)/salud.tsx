@@ -26,7 +26,7 @@ interface MedicalEvent {
 export default function SaludScreen() {
   const router = useRouter();
   const { currentDog } = useAuth();
-  const { isConnected, biometricData, startSimulation, stopSimulation } = useBluetooth();
+  const { isConnected, biometricData, disconnect } = useBluetooth();
   const { t } = useLanguage();
   const { colors, shadows } = useTheme();
   const EVENT_TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
@@ -99,9 +99,9 @@ export default function SaludScreen() {
 
   const toggleSensors = () => {
     if (isConnected) {
-      stopSimulation();
+      disconnect();
     } else {
-      startSimulation();
+      router.push('/chaleco');
     }
   };
 
