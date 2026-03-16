@@ -382,6 +382,24 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lightMode: 'Modo claro',
     theme: 'Tema',
     appearance: 'Apariencia',
+
+    // Diary
+    emotionDiary: 'Diario de Emociones',
+    howDoYouFeel: '¿Cómo os sentís hoy?',
+    todayYouFeel: 'Hoy te sientes...',
+    addNotePlaceholder: 'Añade una nota (opcional)...',
+    saving: 'Guardando...',
+    update: 'Actualizar',
+    weeklyInsight: 'Insight Semanal',
+    analyzingWeek: 'Analizando tu semana...',
+    dominantEmotion: 'Emoción predominante:',
+    diaryEmpty: 'Empieza tu diario registrando cómo os sentís hoy. Heimdall analizará tus emociones cada semana.',
+    diaryError: 'No se pudo guardar la entrada',
+    emotionHappy: 'Feliz',
+    emotionCalm: 'Tranquilo',
+    emotionWorried: 'Preocupado',
+    emotionSad: 'Triste',
+    emotionStressed: 'Estresado',
   },
   en: {
     // General
@@ -755,6 +773,24 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lightMode: 'Light mode',
     theme: 'Theme',
     appearance: 'Appearance',
+
+    // Diary
+    emotionDiary: 'Emotion Diary',
+    howDoYouFeel: 'How are you feeling today?',
+    todayYouFeel: 'Today you feel...',
+    addNotePlaceholder: 'Add a note (optional)...',
+    saving: 'Saving...',
+    update: 'Update',
+    weeklyInsight: 'Weekly Insight',
+    analyzingWeek: 'Analyzing your week...',
+    dominantEmotion: 'Dominant emotion:',
+    diaryEmpty: 'Start your diary by recording how you feel today. Heimdall will analyze your emotions every week.',
+    diaryError: 'Could not save the entry',
+    emotionHappy: 'Happy',
+    emotionCalm: 'Calm',
+    emotionWorried: 'Worried',
+    emotionSad: 'Sad',
+    emotionStressed: 'Stressed',
   },
   it: {
     // General
@@ -1128,6 +1164,24 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     lightMode: 'Modalit\u00e0 chiara',
     theme: 'Tema',
     appearance: 'Aspetto',
+
+    // Diary
+    emotionDiary: 'Diario delle Emozioni',
+    howDoYouFeel: 'Come vi sentite oggi?',
+    todayYouFeel: 'Oggi ti senti...',
+    addNotePlaceholder: 'Aggiungi una nota (opzionale)...',
+    saving: 'Salvataggio...',
+    update: 'Aggiorna',
+    weeklyInsight: 'Insight Settimanale',
+    analyzingWeek: 'Analizzando la tua settimana...',
+    dominantEmotion: 'Emozione predominante:',
+    diaryEmpty: 'Inizia il tuo diario registrando come vi sentite oggi. Heimdall analizzerà le tue emozioni ogni settimana.',
+    diaryError: 'Impossibile salvare la voce',
+    emotionHappy: 'Felice',
+    emotionCalm: 'Calmo',
+    emotionWorried: 'Preoccupato',
+    emotionSad: 'Triste',
+    emotionStressed: 'Stressato',
   },
 };
 

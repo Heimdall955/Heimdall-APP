@@ -9,109 +9,20 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Card } from '../components/ui';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
+import { getGameData } from '../data/gamesContent';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
-
-interface Paso {
-  numero: number;
-  titulo: string;
-  instrucciones: string;
-}
-
-interface Juego {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  dificultad: string;
-  duracion: string;
-  beneficios: string[];
-  materialesNecesarios: string[];
-  pasos: Paso[];
-  consejos: string[];
-  xp: number;
-  imagen: string;
-}
-
-const JUEGOS_DB: Record<string, Juego> = {
-  'puzzle-mental': {
-    id: 'puzzle-mental',
-    titulo: 'Puzzle Mental',
-    descripcion: 'Estimula la mente de tu perro con juegos de búsqueda de premios escondidos. Ideal para cansar mentalmente a perros activos.',
-    dificultad: 'Media',
-    duracion: '15-20 min',
-    beneficios: [
-      'Estimulación mental intensa',
-      'Reduce el aburrimiento',
-      'Mejora la concentración',
-      'Cansa sin ejercicio físico intenso',
-    ],
-    materialesNecesarios: [
-      'Premios pequeños o croquetas',
-      'Toalla o manta',
-      'Vasos de plástico o cajas pequeñas',
-      'Opcional: juguete puzzle comercial',
-    ],
-    pasos: [
-      { numero: 1, titulo: 'Preparación', instrucciones: 'Reúne los materiales y elige un espacio tranquilo. Asegúrate de que tu perro tenga hambre moderada para mayor motivación.' },
-      { numero: 2, titulo: 'Nivel Fácil', instrucciones: 'Coloca premios bajo una toalla con las esquinas levantadas. Deja que tu perro los encuentre con su nariz.' },
-      { numero: 3, titulo: 'Nivel Medio', instrucciones: 'Esconde premios bajo vasos boca abajo. Tu perro debe voltearlos para encontrar la recompensa.' },
-      { numero: 4, titulo: 'Nivel Difícil', instrucciones: 'Enrolla premios dentro de la toalla formando un rollo. Tu perro debe desenrollar para acceder a ellos.' },
-      { numero: 5, titulo: 'Celebración', instrucciones: '¡Felicita a tu perro efusivamente cuando complete cada nivel! Esto refuerza la conducta de búsqueda.' },
-    ],
-    consejos: [
-      'Empieza siempre por el nivel más fácil',
-      'No dejes a tu perro solo con materiales que pueda tragar',
-      'Aumenta la dificultad gradualmente',
-      'Limita las sesiones a 15-20 minutos para evitar frustración',
-    ],
-    xp: 25,
-    imagen: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600',
-  },
-  'tira-afloja': {
-    id: 'tira-afloja',
-    titulo: 'Tira y Afloja',
-    descripcion: 'Un juego clásico que fortalece el vínculo y permite canalizar energía. Aprende a jugarlo correctamente con reglas claras.',
-    dificultad: 'Fácil',
-    duracion: '10-15 min',
-    beneficios: [
-      'Ejercicio físico moderado',
-      'Fortalece el vínculo humano-perro',
-      'Enseña autocontrol (soltar a la orden)',
-      'Reduce el estrés acumulado',
-    ],
-    materialesNecesarios: [
-      'Juguete de cuerda resistente',
-      'Espacio suficiente para moverse',
-      'Premios para recompensar el "suelta"',
-    ],
-    pasos: [
-      { numero: 1, titulo: 'La Invitación', instrucciones: 'Muestra el juguete y muévelo por el suelo para captar la atención. Di "¡Juega!" cuando tu perro lo muerda.' },
-      { numero: 2, titulo: 'El Juego', instrucciones: 'Tira suavemente en diferentes direcciones. No levantes el juguete para evitar lesiones en el cuello de tu perro.' },
-      { numero: 3, titulo: 'La Pausa', instrucciones: 'Cada 30 segundos, deja de tirar y di "Suelta". Espera a que suelte y recompensa con un premio.' },
-      { numero: 4, titulo: 'Reinicio', instrucciones: 'Una vez suelte, di "¡Juega!" y continúa. Esto enseña que soltar significa que el juego continúa.' },
-      { numero: 5, titulo: 'Fin del Juego', instrucciones: 'Termina siempre tú la sesión, no tu perro. Di "Suelta" y guarda el juguete.' },
-    ],
-    consejos: [
-      'Nunca dejes que tu perro inicie el juego sin permiso',
-      'Si los dientes tocan tu mano, di "¡Ay!" y detén el juego 10 segundos',
-      'El juguete de tira es solo para este juego, guárdalo después',
-      'No juegues si tu perro está muy excitado o agresivo',
-    ],
-    xp: 15,
-    imagen: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600',
-  },
-};
 
 export default function JuegoScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { colors, shadows } = useTheme();
   const [pasoActual, setPasoActual] = useState(0);
   const [juegoCompletado, setJuegoCompletado] = useState(false);
   const [rewardData, setRewardData] = useState<any>(null);
 
-  const juego = JUEGOS_DB[id || 'puzzle-mental'];
+  const juego = getGameData(language, id || 'puzzle-mental');
 
   const styles = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 

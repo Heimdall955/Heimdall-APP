@@ -9,21 +9,23 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Card } from '../components/ui';
 import { SecureStore } from '../utils/secureStore';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
-const EMOTIONS = [
-  { id: 'happy', icon: 'happy', label: 'Feliz', color: '#4CAF50', bg: '#E8F5E9' },
-  { id: 'calm', icon: 'leaf', label: 'Tranquilo', color: '#2196F3', bg: '#E3F2FD' },
-  { id: 'worried', icon: 'alert-circle', label: 'Preocupado', color: '#FF9800', bg: '#FFF3E0' },
-  { id: 'sad', icon: 'sad', label: 'Triste', color: '#9C27B0', bg: '#F3E5F5' },
-  { id: 'stressed', icon: 'thunderstorm', label: 'Estresado', color: '#F44336', bg: '#FFEBEE' },
+const EMOTION_KEYS = [
+  { id: 'happy', icon: 'happy', labelKey: 'emotionHappy', color: '#4CAF50', bg: '#E8F5E9' },
+  { id: 'calm', icon: 'leaf', labelKey: 'emotionCalm', color: '#2196F3', bg: '#E3F2FD' },
+  { id: 'worried', icon: 'alert-circle', labelKey: 'emotionWorried', color: '#FF9800', bg: '#FFF3E0' },
+  { id: 'sad', icon: 'sad', labelKey: 'emotionSad', color: '#9C27B0', bg: '#F3E5F5' },
+  { id: 'stressed', icon: 'thunderstorm', labelKey: 'emotionStressed', color: '#F44336', bg: '#FFEBEE' },
 ];
 
 export default function DiarioScreen() {
   const router = useRouter();
   const { colors, shadows } = useTheme();
   const { currentDog } = useAuth();
+  const { t, language } = useLanguage();
   const [selected, setSelected] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
@@ -32,6 +34,8 @@ export default function DiarioScreen() {
   const [insight, setInsight] = useState('');
   const [insightLoading, setInsightLoading] = useState(false);
   const [entriesCount, setEntriesCount] = useState(0);
+
+  const EMOTIONS = useMemo(() => EMOTION_KEYS.map(e => ({ ...e, label: t(e.labelKey) })), [language]);
 
   const loadData = useCallback(async () => {
     try {
@@ -81,7 +85,7 @@ export default function DiarioScreen() {
       setTodayLogged(true);
       loadData();
     } catch (e) {
-      Alert.alert('Error', 'No se pudo guardar la entrada');
+      Alert.alert(t('error'), t('diaryError'));
     } finally {
       setSaving(false);
     }
@@ -101,7 +105,7 @@ export default function DiarioScreen() {
     let max = 0; let dominant = '';
     Object.entries(weekEmotions).forEach(([k, v]) => { if (v > max) { max = v; dominant = k; } });
     return EMOTIONS.find(e => e.id === dominant);
-  }, [weekEmotions]);
+  }, [weekEmotions, EMOTIONS]);
 
   return (
     <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -109,14 +113,14 @@ export default function DiarioScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn} data-testid="diary-back-btn">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Diario de Emociones</Text>
+        <Text style={s.headerTitle}>{t('emotionDiary')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Today's entry */}
         <Card style={s.todayCard}>
-          <Text style={s.todayTitle}>{todayLogged ? 'Hoy te sientes...' : 'Como os sentis hoy?'}</Text>
+          <Text style={s.todayTitle}>{todayLogged ? t('todayYouFeel') : t('howDoYouFeel')}</Text>
           <View style={s.emotionsRow}>
             {EMOTIONS.map(em => (
               <TouchableOpacity
@@ -132,7 +136,7 @@ export default function DiarioScreen() {
           </View>
           <TextInput
             style={s.noteInput}
-            placeholder="Anade una nota (opcional)..."
+            placeholder={t('addNotePlaceholder')}
             placeholderTextColor={colors.gray}
             value={note}
             onChangeText={setNote}
@@ -145,7 +149,7 @@ export default function DiarioScreen() {
             disabled={!selected || saving}
             data-testid="save-diary-btn"
           >
-            <Text style={s.saveBtnText}>{saving ? 'Guardando...' : todayLogged ? 'Actualizar' : 'Guardar'}</Text>
+            <Text style={s.saveBtnText}>{saving ? t('saving') : todayLogged ? t('update') : t('save')}</Text>
           </TouchableOpacity>
         </Card>
 
@@ -154,10 +158,10 @@ export default function DiarioScreen() {
           <Card style={s.insightCard}>
             <View style={s.insightHeader}>
               <Ionicons name="sparkles" size={20} color={colors.accent} />
-              <Text style={s.insightTitle}>Insight Semanal</Text>
+              <Text style={s.insightTitle}>{t('weeklyInsight')}</Text>
             </View>
             {insightLoading ? (
-              <Text style={s.insightText}>Analizando tu semana...</Text>
+              <Text style={s.insightText}>{t('analyzingWeek')}</Text>
             ) : (
               <Text style={s.insightText}>{insight}</Text>
             )}
@@ -167,7 +171,7 @@ export default function DiarioScreen() {
         {/* Week overview */}
         {entries.length > 0 && (
           <>
-            <Text style={s.sectionTitle}>Esta semana</Text>
+            <Text style={s.sectionTitle}>{t('thisWeek')}</Text>
             <View style={s.weekRow}>
               {EMOTIONS.map(em => {
                 const count = weekEmotions[em.id] || 0;
@@ -183,7 +187,7 @@ export default function DiarioScreen() {
             </View>
             {dominantEmotion && (
               <Text style={s.dominantText}>
-                Emocion predominante: <Text style={{ color: dominantEmotion.color, fontWeight: '700' }}>{dominantEmotion.label}</Text>
+                {t('dominantEmotion')} <Text style={{ color: dominantEmotion.color, fontWeight: '700' }}>{dominantEmotion.label}</Text>
               </Text>
             )}
           </>
@@ -192,11 +196,11 @@ export default function DiarioScreen() {
         {/* History */}
         {entries.length > 0 && (
           <>
-            <Text style={[s.sectionTitle, { marginTop: Spacing.lg }]}>Historial</Text>
+            <Text style={[s.sectionTitle, { marginTop: Spacing.lg }]}>{t('history')}</Text>
             {entries.slice(0, 14).map((entry, idx) => {
               const em = EMOTIONS.find(e => e.id === entry.emotion);
               const date = new Date(entry.created_at);
-              const dayStr = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+              const dayStr = date.toLocaleDateString(language === 'en' ? 'en-US' : language === 'it' ? 'it-IT' : 'es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
               return (
                 <View key={entry.id} style={[s.historyItem, idx < Math.min(entries.length, 14) - 1 && s.historyBorder]}>
                   <View style={[s.historyDot, { backgroundColor: em?.bg || colors.grayLight }]}>
@@ -218,7 +222,7 @@ export default function DiarioScreen() {
         {entries.length === 0 && (
           <Card style={s.emptyCard}>
             <Ionicons name="journal" size={40} color={colors.gray} />
-            <Text style={s.emptyText}>Empieza tu diario registrando como os sentis hoy. Heimdall analizara tus emociones cada semana.</Text>
+            <Text style={s.emptyText}>{t('diaryEmpty')}</Text>
           </Card>
         )}
       </ScrollView>
