@@ -56,12 +56,12 @@ export default function PrivacidadScreen() {
         ))}
 
         <View style={s.linksSection}>
-          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-hani.app/terms')} data-testid="terms-link">
+          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-ai.tech/politica-de-privacidad/')} data-testid="terms-link">
             <Ionicons name="document-text-outline" size={20} color={colors.primary} />
             <Text style={s.linkText}>{t('termsOfService')}</Text>
             <Ionicons name="open-outline" size={16} color={colors.gray} />
           </TouchableOpacity>
-          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-hani.app/privacy')} data-testid="privacy-policy-link">
+          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-ai.tech/politica-de-privacidad/')} data-testid="privacy-policy-link">
             <Ionicons name="shield-outline" size={20} color={colors.primary} />
             <Text style={s.linkText}>{t('privacyPolicy')}</Text>
             <Ionicons name="open-outline" size={16} color={colors.gray} />
