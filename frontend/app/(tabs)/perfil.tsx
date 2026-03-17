@@ -57,6 +57,10 @@ export default function PerfilScreen() {
   const [editWeight, setEditWeight] = useState('');
   const [editBreed, setEditBreed] = useState('');
   const [editChip, setEditChip] = useState('');
+  const [editPetType, setEditPetType] = useState('dog');
+  const [editSex, setEditSex] = useState('');
+  const [editNeutered, setEditNeutered] = useState(false);
+  const [editAllergies, setEditAllergies] = useState('');
   const [saving, setSaving] = useState(false);
   const [gamification, setGamification] = useState<GamificationData | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -82,6 +86,10 @@ export default function PerfilScreen() {
       setEditName(currentDog.name || ''); setEditAge(currentDog.age?.toString() || '');
       setEditWeight(currentDog.weight?.toString() || ''); setEditBreed(currentDog.breed || '');
       setEditChip(currentDog.chip_id || '');
+      setEditPetType((currentDog as any).pet_type || 'dog');
+      setEditSex((currentDog as any).sex || '');
+      setEditNeutered((currentDog as any).neutered || false);
+      setEditAllergies((currentDog as any).allergies || '');
     }
   }, [currentDog]);
 
@@ -196,9 +204,10 @@ export default function PerfilScreen() {
       const headers = await getHeaders();
       await axios.put(`${BACKEND_URL}/api/dogs/${currentDog.id}`, {
         name: editName, age: parseInt(editAge) || 0, weight: parseFloat(editWeight) || 0,
-        breed: editBreed, chip_id: editChip,
+        breed: editBreed, chip_id: editChip, pet_type: editPetType, sex: editSex,
+        neutered: editNeutered, allergies: editAllergies,
       }, { headers });
-      setCurrentDog({ ...currentDog, name: editName, age: parseInt(editAge) || 0, weight: parseFloat(editWeight) || 0, breed: editBreed, chip_id: editChip });
+      setCurrentDog({ ...currentDog, name: editName, age: parseInt(editAge) || 0, weight: parseFloat(editWeight) || 0, breed: editBreed, chip_id: editChip, pet_type: editPetType as any, sex: editSex as any, neutered: editNeutered as any, allergies: editAllergies as any });
       await refreshDogs();
       setShowEditModal(false);
     } catch (error) { Alert.alert('Error', 'No se pudo guardar'); }
@@ -478,7 +487,7 @@ export default function PerfilScreen() {
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}>
         <View style={styles.modalOverlay}><View style={[styles.modalContent, { maxHeight: '80%' }]}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('editDogProfile')}</Text><TouchableOpacity onPress={() => setShowEditModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
-          <ScrollView style={{ maxHeight: 350 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <ScrollView style={{ maxHeight: 450 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <TouchableOpacity style={{ alignSelf: 'center', marginBottom: Spacing.md }} onPress={pickImage}>
               {dogImage ? <Image source={{ uri: dogImage }} style={{ width: 90, height: 90, borderRadius: 45 }} /> : <View style={{ width: 90, height: 90, borderRadius: 45, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="paw" size={36} color={colors.white} /></View>}
             </TouchableOpacity>
@@ -489,6 +498,52 @@ export default function PerfilScreen() {
             </View>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('dogBreed')}</Text><TextInput style={styles.input} value={editBreed} onChangeText={setEditBreed} /></View>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('chipId')}</Text><TextInput style={styles.input} value={editChip} onChangeText={setEditChip} /></View>
+            {/* Pet Type */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{language === 'en' ? 'Pet type' : language === 'it' ? 'Tipo animale' : 'Tipo de mascota'}</Text>
+              <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                {[
+                  { value: 'dog', label: language === 'en' ? 'Dog' : language === 'it' ? 'Cane' : 'Perro', icon: '🐕' },
+                  { value: 'cat', label: language === 'en' ? 'Cat' : language === 'it' ? 'Gatto' : 'Gato', icon: '🐈' },
+                  { value: 'rodent', label: language === 'en' ? 'Rodent' : language === 'it' ? 'Roditore' : 'Roedor', icon: '🐹' },
+                  { value: 'bird', label: language === 'en' ? 'Bird' : language === 'it' ? 'Uccello' : 'Pájaro', icon: '🐦' },
+                ].map(opt => (
+                  <TouchableOpacity key={opt.value} data-testid={`pet-type-${opt.value}`}
+                    style={[styles.unitBtn, editPetType === opt.value && styles.unitBtnActive]}
+                    onPress={() => setEditPetType(opt.value)}>
+                    <Text style={[styles.unitBtnText, editPetType === opt.value && { color: colors.white }]}>{opt.icon} {opt.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            {/* Sex */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{language === 'en' ? 'Sex' : language === 'it' ? 'Sesso' : 'Sexo'}</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {[
+                  { value: 'male', label: language === 'en' ? 'Male' : language === 'it' ? 'Maschio' : 'Macho' },
+                  { value: 'female', label: language === 'en' ? 'Female' : language === 'it' ? 'Femmina' : 'Hembra' },
+                ].map(opt => (
+                  <TouchableOpacity key={opt.value} data-testid={`pet-sex-${opt.value}`}
+                    style={[styles.unitBtn, editSex === opt.value && styles.unitBtnActive]}
+                    onPress={() => setEditSex(opt.value)}>
+                    <Text style={[styles.unitBtnText, editSex === opt.value && { color: colors.white }]}>{opt.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            {/* Neutered */}
+            <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+              <Text style={styles.inputLabel}>{language === 'en' ? 'Neutered/Spayed' : language === 'it' ? 'Sterilizzato/a' : 'Esterilizado/a'}</Text>
+              <Switch value={editNeutered} onValueChange={setEditNeutered} trackColor={{ true: colors.primary }} data-testid="pet-neutered-switch" />
+            </View>
+            {/* Allergies */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{language === 'en' ? 'Allergies' : language === 'it' ? 'Allergie' : 'Alergias'}</Text>
+              <TextInput style={[styles.input, { minHeight: 60 }]} value={editAllergies} onChangeText={setEditAllergies} multiline
+                placeholder={language === 'en' ? 'None known' : language === 'it' ? 'Nessuna nota' : 'Ninguna conocida'} placeholderTextColor={colors.gray}
+                data-testid="pet-allergies-input" />
+            </View>
           </ScrollView>
           <Button title={saving ? '...' : t('save')} onPress={handleSaveProfile} loading={saving} disabled={saving} style={{ marginTop: Spacing.md }} />
         </View></View>

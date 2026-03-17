@@ -7,7 +7,7 @@ import requests
 import os
 
 # Use the public URL for testing
-BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://hani-learning.preview.emergentagent.com')
+BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://pet-profile-edit.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "testlesson@test.com"

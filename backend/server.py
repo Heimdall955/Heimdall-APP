@@ -148,6 +148,8 @@ class DogUpdate(BaseModel):
     breed: Optional[str] = None
     chip_id: Optional[str] = None
     avatar: Optional[str] = None
+    neutered: Optional[bool] = None
+    allergies: Optional[str] = None
 
 class Dog(BaseModel):
     id: str
@@ -656,6 +658,14 @@ async def update_dog(dog_id: str, data: DogUpdate, user: User = Depends(require_
         update_data["chip_id"] = data.chip_id
     if data.avatar is not None:
         update_data["photo_url"] = data.avatar
+    if data.pet_type is not None:
+        update_data["pet_type"] = data.pet_type
+    if data.sex is not None:
+        update_data["sex"] = data.sex
+    if data.neutered is not None:
+        update_data["neutered"] = data.neutered
+    if data.allergies is not None:
+        update_data["allergies"] = data.allergies
     
     try:
         result = supabase.table("dogs").update(update_data).eq("id", dog_id).eq("user_id", user.user_id).execute()
@@ -1732,10 +1742,27 @@ async def get_clinical_file(dog_id: str, user: User = Depends(require_auth)):
         "blood_type": "", "neutered": False, "insurance": ""
     }
     try:
-        result = supabase.table("clinical_files").select("*").eq("dog_id", dog_id).execute()
+        result = supabase.table("clinical_files").select("*").eq("dog_id", dog_id).eq("type", "profile").execute()
         if result.data and len(result.data) > 0:
             data = result.data[0]
-            return {k: v for k, v in data.items() if k != "id"}
+            # Parse profile data from notes JSON
+            import json as json_mod
+            try:
+                profile = json_mod.loads(data.get("notes", "{}"))
+            except Exception:
+                profile = {}
+            return {
+                "dog_id": dog_id,
+                "country": profile.get("country", ""),
+                "vet_name": data.get("vet_name", "") or profile.get("vet_name", ""),
+                "vet_phone": profile.get("vet_phone", ""),
+                "allergies": profile.get("allergies", ""),
+                "chronic_conditions": profile.get("chronic_conditions", ""),
+                "current_medication": profile.get("current_medication", ""),
+                "blood_type": profile.get("blood_type", ""),
+                "neutered": profile.get("neutered", False),
+                "insurance": profile.get("insurance", ""),
+            }
         return defaults
     except Exception as e:
         logger.error(f"Error getting clinical file: {e}")
@@ -1744,17 +1771,28 @@ async def get_clinical_file(dog_id: str, user: User = Depends(require_auth)):
 @api_router.put("/dogs/{dog_id}/clinical")
 async def update_clinical_file(dog_id: str, data: ClinicalFileUpdate, user: User = Depends(require_auth)):
     try:
+        import json as json_mod
         now = datetime.now(timezone.utc).isoformat()
-        update_data = {k: v for k, v in data.dict().items() if v is not None}
-        update_data["updated_at"] = now
+        profile_data = {k: v for k, v in data.dict().items() if v is not None}
+        notes_json = json_mod.dumps(profile_data, ensure_ascii=False)
         
-        existing = supabase.table("clinical_files").select("dog_id").eq("dog_id", dog_id).execute()
+        existing = supabase.table("clinical_files").select("id").eq("dog_id", dog_id).eq("type", "profile").execute()
         if existing.data and len(existing.data) > 0:
-            supabase.table("clinical_files").update(update_data).eq("dog_id", dog_id).execute()
+            supabase.table("clinical_files").update({
+                "vet_name": profile_data.get("vet_name", ""),
+                "notes": notes_json,
+                "date": now,
+            }).eq("dog_id", dog_id).eq("type", "profile").execute()
         else:
-            update_data["dog_id"] = dog_id
-            update_data["created_at"] = now
-            supabase.table("clinical_files").insert(update_data).execute()
+            supabase.table("clinical_files").insert({
+                "dog_id": dog_id,
+                "type": "profile",
+                "title": "Clinical Profile",
+                "vet_name": profile_data.get("vet_name", ""),
+                "notes": notes_json,
+                "date": now,
+                "created_at": now,
+            }).execute()
         
         return {"message": "Ficha clínica actualizada"}
     except Exception as e:
@@ -2846,7 +2884,7 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict 
     claims = {
         "iss": credentials_info["client_email"],
         "aud": "google",
-        "origins": ["https://hani-learning.preview.emergentagent.com"],
+        "origins": ["https://pet-profile-edit.preview.emergentagent.com"],
         "typ": "savetowallet",
         "payload": {
             "genericClasses": [generic_class],
@@ -2924,7 +2962,7 @@ async def health_check():
 
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else []
 # Always allow the preview/production URL
-PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://hani-learning.preview.emergentagent.com")
+PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://pet-profile-edit.preview.emergentagent.com")
 if PREVIEW_URL and PREVIEW_URL not in ALLOWED_ORIGINS:
     ALLOWED_ORIGINS.append(PREVIEW_URL)
 
