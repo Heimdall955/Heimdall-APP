@@ -17,28 +17,30 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Sistema de gamificacion (Huesos/XP/Achievements)
 - Google Wallet (HANI Passport)
 - Leaderboard global / Weekly Summary
-- Historial clinico con selector de fecha calendario (17 Mar 2026)
-- Eventos medicos visibles en perfil sin entrar al detalle (17 Mar 2026)
+- Historial clinico con selector de fecha calendario
+- Eventos medicos visibles en perfil sin entrar al detalle
 - Suscripcion PRO con diseno dorado premium
 - Modo Oscuro/Claro con persistencia
 - Rutas GPS v4
 - Autenticacion Biometrica
 - Progreso lecciones + Mi Progreso
-- Diario de Emociones con historial visible de notas (17 Mar 2026)
+- Diario de Emociones con historial visible de notas
 - Chaleco BLE ESP32 (pendiente EAS Build)
-- Notificaciones push locales
+- Notificaciones push locales traducidas (es/en/it) (17 Mar 2026)
 - Pantalla de Privacidad (enlace real: heimdall-ai.tech)
 - Pantalla de Ayuda con FAQ
 - Banner "Pack Chaleco" en salud cuando no esta conectado
 - Traduccion completa i18n (es/en/it) en todo el contenido
-- Modal Editar Mascota completo con campos: tipo, sexo, esterilizado, alergias (17 Mar 2026)
-- Componente CalendarPicker personalizado para seleccion de fechas (17 Mar 2026)
+- Modal Editar Mascota completo con campos: tipo, sexo, esterilizado, alergias
+- Componente CalendarPicker personalizado para seleccion de fechas
+- Modal notificaciones traducido (es/en/it) (17 Mar 2026)
 
 ## Archivos Clave
+- frontend/services/NotificationService.ts (notificaciones i18n)
 - frontend/components/CalendarPicker.tsx (selector de fecha con calendario)
 - frontend/app/historial-medico.tsx (historial medico con CalendarPicker)
 - frontend/app/diario.tsx (diario de emociones con historial visible)
-- frontend/app/(tabs)/perfil.tsx (perfil con eventos medicos y modal editar mascota)
+- frontend/app/(tabs)/perfil.tsx (perfil con eventos medicos, modal editar mascota, notificaciones)
 - frontend/app/onboarding-mascota.tsx (onboarding multi-mascota)
 - frontend/app/pro.tsx (diseno dorado premium)
 - backend/server.py (endpoints con fallback graceful)

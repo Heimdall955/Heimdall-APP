@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { SecureStore } from '../utils/secureStore';
 
 const PREFS_KEY = '@heimdall_notification_prefs';
 
@@ -20,34 +21,88 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   miss_you: true,
 };
 
-// Notification content templates
-const TRAINING_MESSAGES = [
-  { title: 'Hora de entrenar!', body: 'Tu perro te espera para practicar. Cada sesion cuenta!' },
-  { title: 'Sesion de hoy', body: 'Un ejercicio rapido al dia marca la diferencia. Vamos!' },
-  { title: 'Tu perro te necesita', body: 'Hoy es un gran dia para aprender algo nuevo juntos.' },
-  { title: 'Entrenamiento pendiente', body: 'Solo 5 minutos de practica pueden hacer magia. Entra!' },
-];
+type Lang = 'es' | 'en' | 'it';
 
-const EMOTION_MESSAGES = [
-  { title: 'Como estais hoy?', body: 'Registra como os sentis tu y tu perro en el diario.' },
-  { title: 'Diario de emociones', body: 'No olvides registrar vuestro dia. Heimdall analiza los patrones!' },
-];
+const MESSAGES: Record<string, Record<Lang, { title: string; body: string }[]>> = {
+  training: {
+    es: [
+      { title: 'Hora de entrenar!', body: 'Tu perro te espera para practicar. Cada sesion cuenta!' },
+      { title: 'Sesion de hoy', body: 'Un ejercicio rapido al dia marca la diferencia. Vamos!' },
+      { title: 'Tu perro te necesita', body: 'Hoy es un gran dia para aprender algo nuevo juntos.' },
+      { title: 'Entrenamiento pendiente', body: 'Solo 5 minutos de practica pueden hacer magia. Entra!' },
+    ],
+    en: [
+      { title: 'Time to train!', body: 'Your pet is waiting to practice. Every session counts!' },
+      { title: "Today's session", body: 'A quick daily exercise makes all the difference. Let\'s go!' },
+      { title: 'Your pet needs you', body: 'Today is a great day to learn something new together.' },
+      { title: 'Training pending', body: 'Just 5 minutes of practice can work wonders. Come on in!' },
+    ],
+    it: [
+      { title: 'Ora di allenarsi!', body: 'Il tuo animale ti aspetta per esercitarsi. Ogni sessione conta!' },
+      { title: 'Sessione di oggi', body: 'Un esercizio veloce al giorno fa la differenza. Andiamo!' },
+      { title: 'Il tuo animale ha bisogno di te', body: 'Oggi e un ottimo giorno per imparare qualcosa di nuovo insieme.' },
+      { title: 'Allenamento in sospeso', body: 'Solo 5 minuti di pratica possono fare magia. Entra!' },
+    ],
+  },
+  emotion: {
+    es: [
+      { title: 'Como estais hoy?', body: 'Registra como os sentis tu y tu perro en el diario.' },
+      { title: 'Diario de emociones', body: 'No olvides registrar vuestro dia. Heimdall analiza los patrones!' },
+    ],
+    en: [
+      { title: 'How are you today?', body: 'Log how you and your pet are feeling in the diary.' },
+      { title: 'Emotion diary', body: "Don't forget to log your day. Heimdall analyzes patterns!" },
+    ],
+    it: [
+      { title: 'Come state oggi?', body: 'Registra come vi sentite tu e il tuo animale nel diario.' },
+      { title: 'Diario delle emozioni', body: 'Non dimenticare di registrare la giornata. Heimdall analizza i pattern!' },
+    ],
+  },
+  streak: {
+    es: [
+      { title: 'Tu racha esta en peligro!', body: 'Entra hoy para mantener tu racha. No la pierdas!' },
+      { title: 'No rompas la cadena!', body: 'Has avanzado mucho. Un ejercicio rapido y tu racha sigue viva.' },
+    ],
+    en: [
+      { title: 'Your streak is in danger!', body: 'Log in today to keep your streak. Don\'t lose it!' },
+      { title: "Don't break the chain!", body: "You've come so far. A quick exercise and your streak stays alive." },
+    ],
+    it: [
+      { title: 'La tua serie e in pericolo!', body: 'Entra oggi per mantenere la tua serie. Non perderla!' },
+      { title: 'Non spezzare la catena!', body: 'Hai fatto tanta strada. Un esercizio veloce e la serie continua.' },
+    ],
+  },
+  miss_you: {
+    es: [
+      { title: 'Te echamos de menos', body: 'Hace dias que no entrenas. Tu perro y Heimdall te esperan!' },
+      { title: 'Heimdall te espera', body: 'Vuelve cuando quieras, aqui seguimos para ayudarte.' },
+    ],
+    en: [
+      { title: 'We miss you', body: "It's been days since you trained. Your pet and Heimdall are waiting!" },
+      { title: 'Heimdall is waiting', body: 'Come back whenever you want, we are here to help.' },
+    ],
+    it: [
+      { title: 'Ci manchi', body: 'Sono giorni che non ti alleni. Il tuo animale e Heimdall ti aspettano!' },
+      { title: 'Heimdall ti aspetta', body: 'Torna quando vuoi, siamo qui per aiutarti.' },
+    ],
+  },
+};
 
-const STREAK_MESSAGES = [
-  { title: 'Tu racha esta en peligro!', body: 'Entra hoy para mantener tu racha. No la pierdas!' },
-  { title: 'No rompas la cadena!', body: 'Has avanzado mucho. Un ejercicio rapido y tu racha sigue viva.' },
-];
-
-const MISS_YOU_MESSAGES = [
-  { title: 'Te echamos de menos', body: 'Hace dias que no entrenas. Tu perro y Heimdall te esperan!' },
-  { title: 'Heimdall te espera', body: 'Vuelve cuando quieras, aqui seguimos para ayudarte.' },
-];
-
-function getRandomMessage(messages: { title: string; body: string }[]) {
-  return messages[Math.floor(Math.random() * messages.length)];
+function getRandom(msgs: { title: string; body: string }[]) {
+  return msgs[Math.floor(Math.random() * msgs.length)];
 }
 
 class NotificationService {
+  private async getLang(): Promise<Lang> {
+    try {
+      const lang = await SecureStore.getItemAsync('app_language');
+      if (lang === 'en' || lang === 'it') return lang;
+      return 'es';
+    } catch {
+      return 'es';
+    }
+  }
+
   async init() {
     if (Platform.OS === 'web') return;
 
@@ -68,14 +123,20 @@ class NotificationService {
     }
 
     if (Platform.OS === 'android') {
+      const lang = await this.getLang();
+      const channelNames: Record<Lang, { training: string; reminders: string }> = {
+        es: { training: 'Entrenamiento', reminders: 'Recordatorios' },
+        en: { training: 'Training', reminders: 'Reminders' },
+        it: { training: 'Allenamento', reminders: 'Promemoria' },
+      };
       await Notifications.setNotificationChannelAsync('training', {
-        name: 'Entrenamiento',
+        name: channelNames[lang].training,
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#4CAF50',
       });
       await Notifications.setNotificationChannelAsync('reminders', {
-        name: 'Recordatorios',
+        name: channelNames[lang].reminders,
         importance: Notifications.AndroidImportance.DEFAULT,
         lightColor: '#2196F3',
       });
@@ -102,13 +163,12 @@ class NotificationService {
     if (Platform.OS === 'web') return;
 
     const p = prefs || await this.getPrefs();
+    const lang = await this.getLang();
 
-    // Cancel all existing scheduled notifications
     await Notifications.cancelAllScheduledNotificationsAsync();
 
-    // 1) Training reminder - daily at 10:00
     if (p.training_reminder) {
-      const msg = getRandomMessage(TRAINING_MESSAGES);
+      const msg = getRandom(MESSAGES.training[lang]);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: msg.title,
@@ -116,17 +176,12 @@ class NotificationService {
           data: { screen: '/educacion' },
           ...(Platform.OS === 'android' ? { channelId: 'training' } : {}),
         },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour: 10,
-          minute: 0,
-        },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 10, minute: 0 },
       });
     }
 
-    // 2) Emotion diary - daily at 20:00
     if (p.emotion_diary) {
-      const msg = getRandomMessage(EMOTION_MESSAGES);
+      const msg = getRandom(MESSAGES.emotion[lang]);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: msg.title,
@@ -134,17 +189,12 @@ class NotificationService {
           data: { screen: '/diario' },
           ...(Platform.OS === 'android' ? { channelId: 'reminders' } : {}),
         },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour: 20,
-          minute: 0,
-        },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 20, minute: 0 },
       });
     }
 
-    // 3) Streak warning - daily at 21:00
     if (p.streak_warning) {
-      const msg = getRandomMessage(STREAK_MESSAGES);
+      const msg = getRandom(MESSAGES.streak[lang]);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: msg.title,
@@ -152,17 +202,12 @@ class NotificationService {
           data: { screen: '/educacion' },
           ...(Platform.OS === 'android' ? { channelId: 'training' } : {}),
         },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour: 21,
-          minute: 0,
-        },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 21, minute: 0 },
       });
     }
 
-    // 4) Miss you - weekly (every 3 days at 18:00)
     if (p.miss_you) {
-      const msg = getRandomMessage(MISS_YOU_MESSAGES);
+      const msg = getRandom(MESSAGES.miss_you[lang]);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: msg.title,
@@ -170,17 +215,11 @@ class NotificationService {
           data: { screen: '/' },
           ...(Platform.OS === 'android' ? { channelId: 'reminders' } : {}),
         },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
-          weekday: 4,
-          hour: 18,
-          minute: 0,
-        },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.WEEKLY, weekday: 4, hour: 18, minute: 0 },
       });
     }
   }
 
-  // Send instant notification (for achievements)
   async sendAchievementNotification(title: string, body: string) {
     if (Platform.OS === 'web') return;
     const prefs = await this.getPrefs();
@@ -193,7 +232,7 @@ class NotificationService {
         data: { screen: '/perfil' },
         ...(Platform.OS === 'android' ? { channelId: 'training' } : {}),
       },
-      trigger: null, // immediate
+      trigger: null,
     });
   }
 }

@@ -70,7 +70,8 @@
           "icon": "./assets/images/heimdall-logo.png",
           "color": "#4ABDAC"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

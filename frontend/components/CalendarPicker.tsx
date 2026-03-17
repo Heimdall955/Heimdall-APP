@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
-import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 
 interface CalendarPickerProps {
   value: string; // YYYY-MM-DD

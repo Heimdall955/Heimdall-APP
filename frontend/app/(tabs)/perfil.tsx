@@ -261,7 +261,7 @@ export default function PerfilScreen() {
     } catch (e) { console.log('Share error:', e); }
   };
 
-  const changeLanguage = async (newLang: Language) => { await setLanguage(newLang); setShowLanguageModal(false); };
+  const changeLanguage = async (newLang: Language) => { await setLanguage(newLang); setShowLanguageModal(false); notificationService.init().then(() => notificationService.scheduleAll()); };
   const formatAge = (months: number) => {
     const y = Math.floor(months / 12); const m = months % 12;
     if (y === 0) return `${m} ${t('months')}`; if (m === 0) return `${y} ${t('years')}`;
@@ -654,14 +654,24 @@ export default function PerfilScreen() {
         <View style={styles.modalOverlay}><View style={styles.modalContent}>
           <View style={styles.modalHeader}><Text style={styles.modalTitle}>{t('notifications')}</Text><TouchableOpacity onPress={() => setShowNotificationsModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
           <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, marginBottom: Spacing.lg }}>
-            Elige que notificaciones quieres recibir para motivarte cada dia.
+            {language === 'en' ? 'Choose which notifications you want to receive to motivate you every day.' : language === 'it' ? 'Scegli quali notifiche vuoi ricevere per motivarti ogni giorno.' : 'Elige que notificaciones quieres recibir para motivarte cada dia.'}
           </Text>
           {([
-            { key: 'training_reminder' as const, icon: 'barbell', color: '#4CAF50', label: 'Recordatorio de entrenamiento', desc: 'Cada dia a las 10:00' },
-            { key: 'emotion_diary' as const, icon: 'journal', color: '#2196F3', label: 'Diario de emociones', desc: 'Cada dia a las 20:00' },
-            { key: 'streak_warning' as const, icon: 'flame', color: '#FF9800', label: 'Racha en peligro', desc: 'Cada dia a las 21:00' },
-            { key: 'achievements' as const, icon: 'trophy', color: '#9C27B0', label: 'Logros desbloqueados', desc: 'Cuando desbloqueas un logro' },
-            { key: 'miss_you' as const, icon: 'heart', color: '#FF4B4B', label: 'Heimdall te echa de menos', desc: 'Si llevas dias sin entrar' },
+            { key: 'training_reminder' as const, icon: 'barbell', color: '#4CAF50',
+              label: language === 'en' ? 'Training reminder' : language === 'it' ? 'Promemoria allenamento' : 'Recordatorio de entrenamiento',
+              desc: language === 'en' ? 'Every day at 10:00' : language === 'it' ? 'Ogni giorno alle 10:00' : 'Cada dia a las 10:00' },
+            { key: 'emotion_diary' as const, icon: 'journal', color: '#2196F3',
+              label: language === 'en' ? 'Emotion diary' : language === 'it' ? 'Diario emozioni' : 'Diario de emociones',
+              desc: language === 'en' ? 'Every day at 20:00' : language === 'it' ? 'Ogni giorno alle 20:00' : 'Cada dia a las 20:00' },
+            { key: 'streak_warning' as const, icon: 'flame', color: '#FF9800',
+              label: language === 'en' ? 'Streak in danger' : language === 'it' ? 'Serie in pericolo' : 'Racha en peligro',
+              desc: language === 'en' ? 'Every day at 21:00' : language === 'it' ? 'Ogni giorno alle 21:00' : 'Cada dia a las 21:00' },
+            { key: 'achievements' as const, icon: 'trophy', color: '#9C27B0',
+              label: language === 'en' ? 'Achievements unlocked' : language === 'it' ? 'Traguardi sbloccati' : 'Logros desbloqueados',
+              desc: language === 'en' ? 'When you unlock an achievement' : language === 'it' ? 'Quando sblocchi un traguardo' : 'Cuando desbloqueas un logro' },
+            { key: 'miss_you' as const, icon: 'heart', color: '#FF4B4B',
+              label: language === 'en' ? 'Heimdall misses you' : language === 'it' ? 'Heimdall ti manca' : 'Heimdall te echa de menos',
+              desc: language === 'en' ? "If you haven't visited in days" : language === 'it' ? 'Se non entri da giorni' : 'Si llevas dias sin entrar' },
           ]).map(item => (
             <View key={item.key} style={[styles.settingRow, { paddingVertical: Spacing.md }]} data-testid={`notif-toggle-${item.key}`}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 }}>
