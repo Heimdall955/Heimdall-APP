@@ -30,17 +30,11 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Pantalla de Ayuda con FAQ
 - Banner "Pack Chaleco" en salud cuando no esta conectado
 - Traduccion completa i18n (es/en/it) en todo el contenido
-
-## SQL Pendiente para Supabase
-```sql
-ALTER TABLE dogs ADD COLUMN IF NOT EXISTS pet_type VARCHAR DEFAULT 'dog';
-ALTER TABLE dogs ADD COLUMN IF NOT EXISTS sex VARCHAR DEFAULT '';
-ALTER TABLE dogs ADD COLUMN IF NOT EXISTS neutered BOOLEAN DEFAULT false;
-ALTER TABLE dogs ADD COLUMN IF NOT EXISTS allergies TEXT DEFAULT '';
-```
+- **Modal Editar Mascota completo** con campos: tipo mascota, sexo, esterilizado, alergias (17 Mar 2026)
 
 ## Archivos Clave
-- frontend/app/onboarding-mascota.tsx (nuevo - onboarding multi-mascota)
+- frontend/app/(tabs)/perfil.tsx (modal editar mascota con todos los campos)
+- frontend/app/onboarding-mascota.tsx (onboarding multi-mascota)
 - frontend/app/pro.tsx (diseno dorado premium)
 - frontend/app/privacidad.tsx (enlace heimdall-ai.tech)
 - frontend/app/ayuda.tsx (FAQ)
@@ -48,6 +42,6 @@ ALTER TABLE dogs ADD COLUMN IF NOT EXISTS allergies TEXT DEFAULT '';
 - backend/server.py (endpoints con fallback graceful)
 
 ## Tareas Pendientes
-- P2: EAS Development Build (Bluetooth real)
+- P1: EAS Development Build (Bluetooth real)
 - P2: RevenueCat produccion
 - P2: Google Play Store publicacion
