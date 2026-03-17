@@ -187,22 +187,54 @@ export default function HomeScreen() {
           </Card>
         </View>
 
-        {/* Emotion Diary Card */}
-        <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} data-testid="emotion-diary-card">
-          <Card style={{ padding: Spacing.md, flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
-            <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: todayEmotion ? '#E8F5E9' : colors.accentLight, alignItems: 'center', justifyContent: 'center' }}>
-              <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={26} color={todayEmotion ? '#4CAF50' : colors.accent} />
+        {/* Emotion Diary Banner */}
+        <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} activeOpacity={0.85} data-testid="emotion-diary-card">
+          <View style={{ backgroundColor: todayEmotion ? '#0D2818' : '#1A0A2E', borderRadius: BorderRadius.xl, padding: Spacing.lg, overflow: 'hidden' }}>
+            {/* Decorative circles */}
+            <View style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: todayEmotion ? '#4CAF5015' : '#9C27B015' }} />
+            <View style={{ position: 'absolute', bottom: -30, left: -10, width: 80, height: 80, borderRadius: 40, backgroundColor: todayEmotion ? '#4CAF5010' : '#9C27B010' }} />
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: todayEmotion ? '#4CAF5025' : '#9C27B025', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: todayEmotion ? '#4CAF5040' : '#9C27B040' }}>
+                <Ionicons name={todayEmotion ? 'checkmark-circle' : 'journal'} size={24} color={todayEmotion ? '#66BB6A' : '#CE93D8'} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: '#F5F5F5' }}>
+                  {todayEmotion ? t('todayYouFeel') : t('howDoYouFeel')}
+                </Text>
+                <Text style={{ fontSize: FontSizes.xs, color: todayEmotion ? '#81C784' : '#B39DDB', marginTop: 2 }}>
+                  {todayEmotion ? t('emotionDiary') : t('diaryEmpty').substring(0, 50) + '...'}
+                </Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: colors.text }}>
-                {todayEmotion ? 'Ya registraste hoy' : 'Como os sentis hoy?'}
-              </Text>
-              <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, marginTop: 2 }}>
-                {todayEmotion ? 'Toca para ver tu diario completo' : 'Registra tus emociones y las de tu perro'}
+
+            {/* Emotion icons row */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14, paddingHorizontal: 8 }}>
+              {[
+                { icon: 'happy', color: '#4CAF50', id: 'happy' },
+                { icon: 'leaf', color: '#2196F3', id: 'calm' },
+                { icon: 'alert-circle', color: '#FF9800', id: 'worried' },
+                { icon: 'sad', color: '#9C27B0', id: 'sad' },
+                { icon: 'thunderstorm', color: '#F44336', id: 'stressed' },
+              ].map(e => (
+                <View key={e.id} style={{
+                  width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: todayEmotion === e.id ? e.color + '30' : '#FFFFFF08',
+                  borderWidth: todayEmotion === e.id ? 1.5 : 0, borderColor: e.color,
+                }}>
+                  <Ionicons name={e.icon as any} size={22} color={todayEmotion === e.id ? e.color : '#666'} />
+                </View>
+              ))}
+            </View>
+
+            {/* CTA */}
+            <View style={{ backgroundColor: todayEmotion ? '#4CAF5020' : '#9C27B020', borderRadius: 12, paddingVertical: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: todayEmotion ? '#4CAF5030' : '#9C27B030' }}>
+              <Ionicons name={todayEmotion ? 'eye' : 'add-circle'} size={18} color={todayEmotion ? '#66BB6A' : '#CE93D8'} />
+              <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: todayEmotion ? '#66BB6A' : '#CE93D8' }}>
+                {todayEmotion ? t('weeklyInsight') : t('emotionDiary')}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.gray} />
-          </Card>
+          </View>
         </TouchableOpacity>
 
         {/* Weekly Summary */}
