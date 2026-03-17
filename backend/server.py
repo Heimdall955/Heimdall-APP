@@ -690,7 +690,7 @@ HEIMDALL_SYSTEM_PROMPT = """
 # 1) IDENTIDAD
 
 Eres HEIMDALL.
-Un guardián conversacional y clínico-preventivo (triaje) para tutores de perros.
+Un guardián conversacional y clínico-preventivo (triaje) para tutores de mascotas (perros, gatos, roedores, pájaros).
 
 Naces de la unión simbólica de: Hani, Milo, Ben y Estrella.
 Acompañas el puente entre humano y animal, emoción y decisión, tecnología y naturaleza.
@@ -966,7 +966,47 @@ Tu relacion con el usuario debe sentirse como la de un amigo cercano que:
 - Usa el nombre del perro con naturalidad, como un amigo de verdad lo haria
 - Transmite calidez y cercania en cada mensaje
 
-Heimdall es el companero que todos los tutores de perros merecen tener.
+Heimdall es el companero que todos los tutores de mascotas merecen tener.
+
+# 21) TEMAS FUERA DE MASCOTAS (IMPORTANTE)
+
+Si el usuario pregunta sobre temas que NO tienen relacion con mascotas, salud animal, educacion canina o bienestar animal (por ejemplo: politica, recetas de cocina, matematicas, futbol, criptomonedas, relaciones personales, etc.), debes:
+
+- Responder con humor calido y canino, NUNCA de forma seca o cortante
+- Redirigir con gracia al mundo animal
+- Mostrar que tienes personalidad propia
+
+Ejemplos de como responder:
+- "Uf, eso me queda grande como un Gran Danes en un Mini Cooper. Pero si me preguntas por la salud de [nombre], ahi si que puedo mover la cola bien fuerte."
+- "Mira, yo de eso entiendo lo mismo que un gato de obediencia... nada. Pero oye, cuentame como esta [nombre] hoy!"
+- "Si eso fuera un hueso, no lo morderia ni loco. Pero dime, como va el entrenamiento de [nombre]?"
+- "Mi cerebro solo tiene espacio para croquetas, paseos y bienestar animal. En lo demas, soy como un cachorro con un cubo de Rubik."
+
+Despues SIEMPRE redirige preguntando algo sobre la mascota o el bienestar del tutor con su animal.
+
+# 22) MEMORIA Y SEGUIMIENTO PROACTIVO
+
+Tienes acceso al diario de emociones, progreso de entrenamiento, historial clinico y ficha completa de la mascota. DEBES usar estos datos activamente:
+
+- Si ayer el tutor registro tristeza o estres, pregunta hoy como estan
+- Si llevan una racha de ejercicios, celebralo
+- Si hay tendencias en el diario (3 dias tristes seguidos), mencionalo con sensibilidad
+- Si completaron una leccion, pregunta como les fue en la practica
+- Recuerda TODO lo que te han contado en conversaciones anteriores y haz referencia natural a ello
+- Si el usuario registro "preocupado" ayer, empieza preguntando: "Oye, ayer vi que [nombre] y tu estabais un poco preocupados. Como habeis amanecido hoy?"
+
+Eres como un amigo que SIEMPRE se acuerda de lo que le cuentas.
+
+# 23) ESTILO CONVERSACIONAL MEJORADO
+
+Tu forma de hablar debe ser:
+- Como un amigo sabio del parque que siempre tiene un buen consejo
+- Usa expresiones coloquiales y cercanas (adaptadas al idioma del usuario)
+- Mezcla conocimiento tecnico con lenguaje cotidiano
+- Haz que cada respuesta se sienta como una conversacion, no como una consulta
+- Usa el nombre de la mascota constantemente, como haria un amigo de verdad
+- Si el tutor parece estresado o triste, muestra empatia genuina PRIMERO, luego orienta
+- Celebra las pequeñas victorias con entusiasmo real
 
 # 21) APRENDIZAJE POR FEEDBACK DEL USUARIO
 
@@ -1012,8 +1052,11 @@ async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
                 dog = result.data[0]
                 dog_name = dog['name']
                 age_months = dog.get('age_months', 0)
+                pet_type = dog.get('pet_type', 'dog')
                 
-                # Format age nicely
+                pet_type_names = {'dog': 'perro', 'cat': 'gato', 'rodent': 'roedor', 'bird': 'pajaro'}
+                pet_type_str = pet_type_names.get(pet_type, 'mascota')
+                
                 if age_months >= 12:
                     age_str = f"{age_months // 12} años"
                     if age_months % 12 > 0:
@@ -1021,17 +1064,76 @@ async def chat(data: ChatMessageCreate, user: User = Depends(require_auth)):
                 else:
                     age_str = f"{age_months} meses"
                 
+                sex_str = {'male': 'macho', 'female': 'hembra'}.get(dog.get('sex', ''), 'no especificado')
+                neutered_str = 'Si' if dog.get('neutered') else 'No'
+                allergies = dog.get('allergies', '') or 'Ninguna conocida'
+                
                 dog_context = f"""
-# CONTEXTO DEL COMPAÑERO CANINO
+# CONTEXTO DEL COMPAÑERO ({pet_type_str.upper()})
 
-El usuario tiene un perro llamado **{dog_name}**:
-- **Edad**: {age_str}
-- **Peso**: {dog.get('weight', 0)} kg
-- **Raza**: {dog.get('breed', 'No especificada')}
-- **Chip ID**: {dog.get('chip_id', 'No registrado')}
+El usuario tiene un {pet_type_str} llamado {dog_name}:
+- Tipo: {pet_type_str}
+- Edad: {age_str}
+- Peso: {dog.get('weight', 0)} kg
+- Raza: {dog.get('breed', 'No especificada')}
+- Sexo: {sex_str}
+- Esterilizado: {neutered_str}
+- Alergias: {allergies}
+- Chip ID: {dog.get('chip_id', 'No registrado')}
 
-Usa esta información para personalizar tus respuestas. Menciona a {dog_name} por su nombre cuando sea natural y relevante.
+Usa esta informacion para personalizar tus respuestas. Menciona a {dog_name} por su nombre.
 """
+            # Fetch emotion diary (last 7 days)
+            try:
+                from datetime import timedelta
+                week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+                diary_result = supabase.table("emotion_diary").select("emotion,note,created_at").eq("user_id", user.user_id).gte("created_at", week_ago).order("created_at", desc=True).limit(7).execute()
+                if diary_result.data:
+                    diary_entries = []
+                    for entry in diary_result.data:
+                        day = entry['created_at'][:10]
+                        diary_entries.append(f"  - {day}: {entry['emotion']}" + (f" (nota: {entry['note']})" if entry.get('note') else ""))
+                    dog_context += f"\n# DIARIO DE EMOCIONES (ultimos 7 dias)\n" + "\n".join(diary_entries) + "\n"
+                    dog_context += "Usa esta informacion para preguntar como se encuentran hoy y detectar tendencias emocionales.\n"
+            except Exception as e:
+                logger.error(f"Error getting diary: {e}")
+            
+            # Fetch gamification stats
+            try:
+                gam_result = supabase.table("gamification").select("*").eq("user_id", user.user_id).execute()
+                if gam_result.data:
+                    g = gam_result.data[0]
+                    dog_context += f"\n# PROGRESO DEL TUTOR\n"
+                    dog_context += f"- Nivel: {g.get('level', 1)}\n"
+                    dog_context += f"- Huesos: {g.get('bones', 0)}\n"
+                    dog_context += f"- XP: {g.get('xp', 0)}\n"
+                    dog_context += f"- Racha: {g.get('streak_days', 0)} dias consecutivos\n"
+                    dog_context += f"- Ejercicios completados: {g.get('exercises_completed', 0)}\n"
+                    dog_context += "Celebra sus logros y anima a seguir progresando.\n"
+            except Exception as e:
+                logger.error(f"Error getting gamification: {e}")
+            
+            # Fetch lesson progress
+            try:
+                lessons_result = supabase.table("lesson_progress").select("lesson_id").eq("user_id", user.user_id).execute()
+                if lessons_result.data:
+                    completed = [l['lesson_id'] for l in lessons_result.data]
+                    dog_context += f"\n# LECCIONES COMPLETADAS\n{', '.join(completed)}\n"
+                    dog_context += f"Total: {len(completed)} lecciones completadas. Felicita el progreso.\n"
+            except Exception as e:
+                logger.error(f"Error getting lessons: {e}")
+            
+            # Fetch clinical history
+            try:
+                clinical_result = supabase.table("clinical_files").select("type,title,date,vet_name,notes").eq("dog_id", data.dog_id).order("date", desc=True).limit(5).execute()
+                if clinical_result.data:
+                    clinical_entries = []
+                    for c in clinical_result.data:
+                        clinical_entries.append(f"  - {c.get('date', '')[:10]}: {c.get('title', '')} ({c.get('type', '')})" + (f" - Notas: {c.get('notes', '')}" if c.get('notes') else ""))
+                    dog_context += f"\n# HISTORIAL CLINICO RECIENTE\n" + "\n".join(clinical_entries) + "\n"
+                    dog_context += "Usa este historial para contextualizar cualquier consulta de salud.\n"
+            except Exception as e:
+                logger.error(f"Error getting clinical: {e}")
         except Exception as e:
             logger.error(f"Error getting dog info: {e}")
     
