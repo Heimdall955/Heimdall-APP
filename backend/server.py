@@ -304,12 +304,18 @@ async def get_current_user(request: Request) -> Optional[User]:
     
     user_id = session["user_id"]
     
+    # Return cached user if fresh (< 5 min)
+    cached = session.get("_cached_user")
+    cached_at = session.get("_cached_at", 0)
+    if cached and (time.time() - cached_at) < 300:
+        return cached
+    
     # Get user from Supabase
     try:
         result = supabase.table("users").select("*").eq("id", user_id).execute()
         if result.data and len(result.data) > 0:
             user_data = result.data[0]
-            return User(
+            user = User(
                 user_id=str(user_data["id"]),
                 email=user_data["email"],
                 name=user_data.get("name", ""),
@@ -317,6 +323,9 @@ async def get_current_user(request: Request) -> Optional[User]:
                 language=user_data.get("language", "es"),
                 created_at=datetime.fromisoformat(user_data["created_at"].replace("Z", "+00:00")) if user_data.get("created_at") else datetime.now(timezone.utc)
             )
+            session["_cached_user"] = user
+            session["_cached_at"] = time.time()
+            return user
     except Exception as e:
         logger.error(f"Error getting user: {e}")
     

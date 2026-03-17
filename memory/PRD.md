@@ -26,24 +26,25 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Progreso lecciones + Mi Progreso
 - Diario de Emociones con historial visible de notas
 - Chaleco BLE ESP32 (pendiente EAS Build)
-- Notificaciones push locales traducidas (es/en/it) (17 Mar 2026)
+- Notificaciones push locales traducidas (es/en/it)
 - Pantalla de Privacidad (enlace real: heimdall-ai.tech)
 - Pantalla de Ayuda con FAQ
 - Banner "Pack Chaleco" en salud cuando no esta conectado
 - Traduccion completa i18n (es/en/it) en todo el contenido
 - Modal Editar Mascota completo con campos: tipo, sexo, esterilizado, alergias
 - Componente CalendarPicker personalizado para seleccion de fechas
-- Modal notificaciones traducido (es/en/it) (17 Mar 2026)
+- Optimizacion rendimiento: cache sesion backend + llamadas paralelas frontend (17 Mar 2026)
 
 ## Archivos Clave
 - frontend/services/NotificationService.ts (notificaciones i18n)
 - frontend/components/CalendarPicker.tsx (selector de fecha con calendario)
 - frontend/app/historial-medico.tsx (historial medico con CalendarPicker)
 - frontend/app/diario.tsx (diario de emociones con historial visible)
-- frontend/app/(tabs)/perfil.tsx (perfil con eventos medicos, modal editar mascota, notificaciones)
+- frontend/app/(tabs)/perfil.tsx (perfil optimizado, eventos medicos, modal editar, notificaciones)
+- frontend/app/(tabs)/index.tsx (home con llamadas paralelas)
 - frontend/app/onboarding-mascota.tsx (onboarding multi-mascota)
 - frontend/app/pro.tsx (diseno dorado premium)
-- backend/server.py (endpoints con fallback graceful)
+- backend/server.py (cache sesion, endpoints con fallback graceful)
 
 ## Tareas Pendientes
 - P1: EAS Development Build (Bluetooth real)

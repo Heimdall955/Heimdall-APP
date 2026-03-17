@@ -103,28 +103,28 @@ export default function PerfilScreen() {
     const headers = await getHeaders();
     if (!headers.Authorization) return;
     try {
-      const [statsRes, achRes, friendsRes, settingsRes] = await Promise.all([
+      const promises: Promise<any>[] = [
         axios.get(`${BACKEND_URL}/api/gamification/stats`, { headers }).catch(() => ({ data: null })),
         axios.get(`${BACKEND_URL}/api/gamification/achievements`, { headers }).catch(() => ({ data: { achievements: [] } })),
         axios.get(`${BACKEND_URL}/api/pack/friends`, { headers }).catch(() => ({ data: { friends: [] } })),
         axios.get(`${BACKEND_URL}/api/users/settings`, { headers }).catch(() => ({ data: settings })),
-      ]);
-      if (statsRes.data) setGamification(statsRes.data);
-      setAchievements(achRes.data?.achievements || []);
-      setFriends(friendsRes.data?.friends || []);
-      setSettings(settingsRes.data);
+      ];
+      if (currentDog?.id) {
+        promises.push(
+          axios.get(`${BACKEND_URL}/api/dogs/${currentDog.id}/clinical`, { headers }).catch(() => ({ data: null })),
+          axios.get(`${BACKEND_URL}/api/medical-events/${currentDog.id}`, { headers }).catch(() => ({ data: [] })),
+        );
+      }
+      const results = await Promise.all(promises);
+      if (results[0].data) setGamification(results[0].data);
+      setAchievements(results[1].data?.achievements || []);
+      setFriends(results[2].data?.friends || []);
+      setSettings(results[3].data);
+      if (currentDog?.id) {
+        if (results[4]?.data) setClinical(prev => ({ ...prev, ...results[4].data }));
+        setMedicalEvents(results[5]?.data || []);
+      }
     } catch (error) { console.log('Error loading profile data:', error); }
-    // Load clinical if dog exists
-    if (currentDog?.id) {
-      try {
-        const res = await axios.get(`${BACKEND_URL}/api/dogs/${currentDog.id}/clinical`, { headers });
-        if (res.data) setClinical(prev => ({ ...prev, ...res.data }));
-      } catch (e) { console.log('Clinical load error:', e); }
-      try {
-        const evRes = await axios.get(`${BACKEND_URL}/api/medical-events/${currentDog.id}`, { headers });
-        setMedicalEvents(evRes.data || []);
-      } catch (e) { console.log('Medical events load error:', e); }
-    }
   };
 
   const loadDogImage = async () => {
