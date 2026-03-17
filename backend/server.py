@@ -131,15 +131,19 @@ class DogCreate(BaseModel):
     name: str
     age: int  # in months
     weight: float  # in kg
+    pet_type: Optional[str] = 'dog'  # dog, cat, rodent, bird
     sex: Optional[str] = None
     breed: Optional[str] = None
     chip_id: Optional[str] = None
     avatar: Optional[str] = None
+    neutered: Optional[bool] = False
+    allergies: Optional[str] = None
 
 class DogUpdate(BaseModel):
     name: Optional[str] = None
     age: Optional[int] = None
     weight: Optional[float] = None
+    pet_type: Optional[str] = None
     sex: Optional[str] = None
     breed: Optional[str] = None
     chip_id: Optional[str] = None
@@ -542,9 +546,24 @@ async def create_dog(data: DogCreate, user: User = Depends(require_auth)):
         "created_at": now,
         "updated_at": now
     }
+    # Add extended columns (may not exist in DB yet)
+    extended_cols = {}
+    if data.pet_type:
+        extended_cols["pet_type"] = data.pet_type
+    if data.sex:
+        extended_cols["sex"] = data.sex
+    if data.neutered is not None:
+        extended_cols["neutered"] = data.neutered
+    if data.allergies:
+        extended_cols["allergies"] = data.allergies
     
     try:
-        result = supabase.table("dogs").insert(dog_doc).execute()
+        try:
+            full_doc = {**dog_doc, **extended_cols}
+            result = supabase.table("dogs").insert(full_doc).execute()
+        except Exception:
+            # Fallback: only use base columns
+            result = supabase.table("dogs").insert(dog_doc).execute()
         dog_id = result.data[0]["id"]
         
         return {
@@ -574,9 +593,13 @@ async def get_dogs(user: User = Depends(require_auth)):
                 "name": dog["name"],
                 "age": dog.get("age_months", 0),
                 "weight": float(dog.get("weight", 0)),
+                "pet_type": dog.get("pet_type", "dog"),
+                "sex": dog.get("sex"),
                 "breed": dog.get("breed"),
                 "chip_id": dog.get("chip_id"),
                 "avatar": dog.get("photo_url"),
+                "neutered": dog.get("neutered", False),
+                "allergies": dog.get("allergies", ""),
                 "created_at": dog.get("created_at"),
                 "updated_at": dog.get("updated_at")
             })

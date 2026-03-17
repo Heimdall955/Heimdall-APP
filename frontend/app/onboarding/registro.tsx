@@ -79,7 +79,7 @@ export default function RegistroScreen() {
         }
       } else {
         await register(email, password, name);
-        router.push('/onboarding/perro');
+        router.push('/onboarding-mascota');
       }
     } catch (error: any) {
       Alert.alert(

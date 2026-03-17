@@ -15,10 +15,13 @@ export interface Dog {
   name: string;
   age: number; // in months
   weight: number; // in kg
+  pet_type?: 'dog' | 'cat' | 'rodent' | 'bird';
   sex?: 'male' | 'female';
   breed?: string;
   chip_id?: string;
   avatar?: string;
+  neutered?: boolean;
+  allergies?: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,7 +1,7 @@
 # Heimdall (HANI) - PRD
 
 ## Descripcion
-App premium para monitoreo de salud canina, educacion y conexion con chaleco inteligente ESP32.
+App premium para monitoreo de salud animal, educacion y conexion con chaleco inteligente ESP32.
 
 ## Stack Tecnico
 - **Frontend:** React Native / Expo SDK 54 / Expo Router
@@ -10,44 +10,44 @@ App premium para monitoreo de salud canina, educacion y conexion con chaleco int
 - **Hardware:** ESP32 BLE (chaleco inteligente)
 
 ## Funcionalidades Implementadas
-- Onboarding usuario/perro con seleccion de idioma (es/en/it)
+- Onboarding usuario/mascota con seleccion de idioma (es/en/it)
+- **Onboarding Mascota Multi-tipo** (perro/gato/roedor/pajaro) - 3 pasos con datos completos (17 Mar 2026)
 - Navegacion de 5 tabs (Inicio, Salud, Educacion, Chat, Perfil)
 - Chat IA ilimitado con aprendizaje adaptativo
 - Sistema de gamificacion (Huesos/XP/Achievements)
 - Google Wallet (HANI Passport)
 - Leaderboard global / Weekly Summary
 - Historial clinico
+- Suscripcion PRO con diseno dorado premium
 - Modo Oscuro/Claro con persistencia
-- Rutas GPS v4: mapa claro, tabs rediseñados, podometro, senderos OSM
+- Rutas GPS v4
 - Autenticacion Biometrica
 - Progreso lecciones + Mi Progreso
 - Diario de Emociones
-- Chaleco BLE ESP32 sin simulacion (pendiente EAS Build)
-- Ejercicios UI rediseñada
-- Notificaciones push locales con toggles individuales
-- Pantalla de Privacidad y Datos
-- Pantalla de Centro de Ayuda con FAQ
+- Chaleco BLE ESP32 (pendiente EAS Build)
+- Notificaciones push locales
+- Pantalla de Privacidad (enlace real: heimdall-ai.tech)
+- Pantalla de Ayuda con FAQ
+- Banner "Pack Chaleco" en salud cuando no esta conectado
+- Traduccion completa i18n (es/en/it) en todo el contenido
 
-## Traduccion i18n COMPLETA (16 Mar 2026)
-- Programas guiados: educacion-basica, calma-control, socializacion, mundo-cachorro (programsContent.ts)
-- Ejercicios: 5 tipos (exercisesContent.ts)
-- Juegos: 2 tipos (gamesContent.ts)
-- Diario de Emociones: labels, textos, placeholders
-- Pantalla PRO, Privacidad, Ayuda
+## SQL Pendiente para Supabase
+```sql
+ALTER TABLE dogs ADD COLUMN IF NOT EXISTS pet_type VARCHAR DEFAULT 'dog';
+ALTER TABLE dogs ADD COLUMN IF NOT EXISTS sex VARCHAR DEFAULT '';
+ALTER TABLE dogs ADD COLUMN IF NOT EXISTS neutered BOOLEAN DEFAULT false;
+ALTER TABLE dogs ADD COLUMN IF NOT EXISTS allergies TEXT DEFAULT '';
+```
 
-## Pantalla PRO Premium (16 Mar 2026)
-- Diseno dorado premium sobre fondo negro (#0D0D0D)
-- 2 planes: Heimdall Basico / Heimdall Guardian (Recomendado)
-- 7 features exclusivas del Guardian
-- Precios: 4,90 EUR/mes o 39,90 EUR/ano (ahorra 32%)
-- 7 dias gratis de prueba
-- Timeline visual del proceso de suscripcion
-- Cita motivacional: "Heimdall ilumina lo que no siempre sabemos ver"
-- Todo traducido en es/en/it
-- Integrado con RevenueCat (modo demo hasta configurar claves reales)
+## Archivos Clave
+- frontend/app/onboarding-mascota.tsx (nuevo - onboarding multi-mascota)
+- frontend/app/pro.tsx (diseno dorado premium)
+- frontend/app/privacidad.tsx (enlace heimdall-ai.tech)
+- frontend/app/ayuda.tsx (FAQ)
+- frontend/data/programsContent.ts (programas traducidos)
+- backend/server.py (endpoints con fallback graceful)
 
 ## Tareas Pendientes
-### P2 - EAS Development Build (Bluetooth real)
-### P2 - RevenueCat produccion (configurar claves reales)
-### P2 - Google Play Store publicacion
-### P2 - Crear tablas user_settings, pack_friends, clinical_files en Supabase
+- P2: EAS Development Build (Bluetooth real)
+- P2: RevenueCat produccion
+- P2: Google Play Store publicacion

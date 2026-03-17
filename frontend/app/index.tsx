@@ -73,7 +73,7 @@ export default function Index() {
       if (dogs.length > 0) {
         router.replace('/(tabs)');
       } else {
-        router.replace('/onboarding/perro');
+        router.replace('/onboarding-mascota');
       }
     }
   }, [navigationState, dogs, isAuthenticated]);
