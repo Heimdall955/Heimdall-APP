@@ -23,7 +23,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Rutas GPS v4
 - Autenticacion Biometrica
 - Progreso lecciones + Mi Progreso
-- Diario de Emociones
+- Diario de Emociones con historial visible de notas (17 Mar 2026)
 - Chaleco BLE ESP32 (pendiente EAS Build)
 - Notificaciones push locales
 - Pantalla de Privacidad (enlace real: heimdall-ai.tech)
@@ -33,6 +33,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - **Modal Editar Mascota completo** con campos: tipo mascota, sexo, esterilizado, alergias (17 Mar 2026)
 
 ## Archivos Clave
+- frontend/app/diario.tsx (diario de emociones con historial visible)
 - frontend/app/(tabs)/perfil.tsx (modal editar mascota con todos los campos)
 - frontend/app/onboarding-mascota.tsx (onboarding multi-mascota)
 - frontend/app/pro.tsx (diseno dorado premium)
