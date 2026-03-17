@@ -161,6 +161,28 @@ export default function SaludScreen() {
           </TouchableOpacity>
         </Card>
 
+        {/* Vest Coming Soon Banner - shown when vest not connected */}
+        {!isConnected && (
+          <TouchableOpacity onPress={() => router.push('/chaleco')} activeOpacity={0.85} data-testid="vest-coming-soon-banner">
+            <View style={styles.vestBanner}>
+              <View style={styles.vestBannerIcon}>
+                <Ionicons name="shirt" size={28} color="#C8A960" />
+              </View>
+              <View style={styles.vestBannerContent}>
+                <View style={styles.vestBannerBadge}>
+                  <Text style={styles.vestBannerBadgeText}>{t('demoData')}</Text>
+                </View>
+                <Text style={styles.vestBannerTitle}>{t('vestComingSoon')}</Text>
+                <Text style={styles.vestBannerDesc}>{t('vestComingSoonDesc')}</Text>
+                <View style={styles.vestBannerBtn}>
+                  <Ionicons name="bluetooth" size={16} color="#0D0D0D" />
+                  <Text style={styles.vestBannerBtnText}>{t('vestGetPack')}</Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+
         {/* Health Status */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('vitalSigns')}</Text>
@@ -379,6 +401,71 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   },
   sensorsButtonTextActive: {
     color: C.white,
+  },
+  vestBanner: {
+    backgroundColor: '#0D0D0D',
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: '#C8A96030',
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  vestBannerIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#C8A96015',
+    borderWidth: 1.5,
+    borderColor: '#C8A96040',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vestBannerContent: {
+    flex: 1,
+  },
+  vestBannerBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FF980020',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginBottom: 6,
+  },
+  vestBannerBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FF9800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  vestBannerTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: '700',
+    color: '#E8D5A3',
+    marginBottom: 4,
+  },
+  vestBannerDesc: {
+    fontSize: FontSizes.xs,
+    color: '#8A8070',
+    lineHeight: 18,
+    marginBottom: Spacing.sm,
+  },
+  vestBannerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: '#C8A960',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  vestBannerBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0D0D0D',
   },
   section: {
     marginBottom: Spacing.lg,

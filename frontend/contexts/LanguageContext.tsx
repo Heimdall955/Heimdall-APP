@@ -451,8 +451,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     theme: 'Tema',
     appearance: 'Apariencia',
 
-    // Diary
-    emotionDiary: 'Diario de Emociones',
+    // Health vest banner
+    vestComingSoon: 'Proximamente con el Pack Chaleco',
+    vestComingSoonDesc: 'Las metricas que ves son de ejemplo. Conecta el chaleco Heimdall ESP32 para monitorizar a tu perro en tiempo real.',
+    vestGetPack: 'Descubrir Pack Chaleco',
+    demoData: 'Datos de ejemplo',
     howDoYouFeel: '¿Cómo os sentís hoy?',
     todayYouFeel: 'Hoy te sientes...',
     addNotePlaceholder: 'Añade una nota (opcional)...',
@@ -910,8 +913,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     theme: 'Theme',
     appearance: 'Appearance',
 
-    // Diary
-    emotionDiary: 'Emotion Diary',
+    // Health vest banner
+    vestComingSoon: 'Coming soon with the Vest Pack',
+    vestComingSoonDesc: 'The metrics you see are examples. Connect the Heimdall ESP32 vest to monitor your dog in real time.',
+    vestGetPack: 'Discover Vest Pack',
+    demoData: 'Sample data',
     howDoYouFeel: 'How are you feeling today?',
     todayYouFeel: 'Today you feel...',
     addNotePlaceholder: 'Add a note (optional)...',
@@ -1369,8 +1375,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     theme: 'Tema',
     appearance: 'Aspetto',
 
-    // Diary
-    emotionDiary: 'Diario delle Emozioni',
+    // Health vest banner
+    vestComingSoon: 'Prossimamente con il Pack Gilet',
+    vestComingSoonDesc: 'Le metriche che vedi sono di esempio. Collega il gilet Heimdall ESP32 per monitorare il tuo cane in tempo reale.',
+    vestGetPack: 'Scopri Pack Gilet',
+    demoData: 'Dati di esempio',
     howDoYouFeel: 'Come vi sentite oggi?',
     todayYouFeel: 'Oggi ti senti...',
     addNotePlaceholder: 'Aggiungi una nota (opzionale)...',
