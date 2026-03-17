@@ -44,7 +44,7 @@ export default function DiarioScreen() {
       const headers = { Authorization: `Bearer ${token}` };
       const [todayRes, entriesRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/api/diary/today`, { headers }),
-        axios.get(`${BACKEND_URL}/api/diary?days=30`, { headers }),
+        axios.get(`${BACKEND_URL}/api/diary?days=90`, { headers }),
       ]);
       if (todayRes.data.logged_today) {
         setTodayLogged(true);
@@ -197,22 +197,31 @@ export default function DiarioScreen() {
         {entries.length > 0 && (
           <>
             <Text style={[s.sectionTitle, { marginTop: Spacing.lg }]}>{t('history')}</Text>
-            {entries.slice(0, 14).map((entry, idx) => {
+            <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, marginBottom: Spacing.md }}>
+              {entries.length} {language === 'en' ? 'entries' : language === 'it' ? 'registri' : 'registros'}
+            </Text>
+            {entries.map((entry, idx) => {
               const em = EMOTIONS.find(e => e.id === entry.emotion);
               const date = new Date(entry.created_at);
-              const dayStr = date.toLocaleDateString(language === 'en' ? 'en-US' : language === 'it' ? 'it-IT' : 'es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+              const dayStr = date.toLocaleDateString(language === 'en' ? 'en-US' : language === 'it' ? 'it-IT' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+              const isToday = new Date().toDateString() === date.toDateString();
               return (
-                <View key={entry.id} style={[s.historyItem, idx < Math.min(entries.length, 14) - 1 && s.historyBorder]}>
-                  <View style={[s.historyDot, { backgroundColor: em?.bg || colors.grayLight }]}>
-                    <Ionicons name={(em?.icon || 'ellipse') as any} size={18} color={em?.color || colors.gray} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                      <Text style={[s.historyEmotion, { color: em?.color }]}>{em?.label || entry.emotion}</Text>
-                      <Text style={s.historyDate}>{dayStr}</Text>
+                <View key={entry.id || idx} style={[s.historyCard, { borderLeftColor: em?.color || colors.grayLight }]} data-testid={`diary-entry-${idx}`}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: entry.note ? 8 : 0 }}>
+                    <View style={[s.historyDot, { backgroundColor: em?.bg || colors.grayLight }]}>
+                      <Ionicons name={(em?.icon || 'ellipse') as any} size={18} color={em?.color || colors.gray} />
                     </View>
-                    {entry.note && <Text style={s.historyNote}>{entry.note}</Text>}
+                    <View style={{ flex: 1, marginLeft: Spacing.sm }}>
+                      <Text style={[s.historyEmotion, { color: em?.color }]}>{em?.label || entry.emotion}</Text>
+                      <Text style={s.historyDate}>{isToday ? (language === 'en' ? 'Today' : language === 'it' ? 'Oggi' : 'Hoy') : dayStr}</Text>
+                    </View>
                   </View>
+                  {entry.note ? (
+                    <View style={[s.historyNoteBox, { backgroundColor: em?.bg || colors.grayLight }]}>
+                      <Ionicons name="chatbubble-outline" size={14} color={em?.color || colors.gray} style={{ marginTop: 2 }} />
+                      <Text style={s.historyNoteText}>{entry.note}</Text>
+                    </View>
+                  ) : null}
                 </View>
               );
             })}
@@ -259,12 +268,12 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   weekCount: { fontSize: FontSizes.sm, fontWeight: '700', color: '#FFF' },
   dominantText: { fontSize: FontSizes.sm, color: C.textSecondary, textAlign: 'center', marginBottom: Spacing.md },
 
-  historyItem: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm },
-  historyBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.grayLight },
+  historyCard: { flexDirection: 'column', padding: Spacing.md, marginBottom: Spacing.sm, backgroundColor: C.white, borderRadius: BorderRadius.lg, borderLeftWidth: 4, ...S.small },
   historyDot: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  historyEmotion: { fontSize: FontSizes.md, fontWeight: '600' },
-  historyDate: { fontSize: FontSizes.sm, color: C.textSecondary },
-  historyNote: { fontSize: FontSizes.sm, color: C.textSecondary, marginTop: 2 },
+  historyEmotion: { fontSize: FontSizes.md, fontWeight: '700' },
+  historyDate: { fontSize: FontSizes.xs, color: C.textSecondary, marginTop: 1 },
+  historyNoteBox: { flexDirection: 'row', gap: 8, padding: Spacing.sm, borderRadius: BorderRadius.md, marginTop: 4 },
+  historyNoteText: { fontSize: FontSizes.sm, color: C.text, flex: 1, lineHeight: 20 },
 
   emptyCard: { alignItems: 'center', paddingVertical: Spacing.xl, gap: Spacing.md },
   emptyText: { fontSize: FontSizes.md, color: C.textSecondary, textAlign: 'center', lineHeight: 22 },
