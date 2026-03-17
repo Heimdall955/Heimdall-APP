@@ -244,12 +244,18 @@ FREE_LIMITS = {
 }
 
 def is_pro_user(user_id: str) -> bool:
+    # Permanent PRO for Google Play review account
+    if user_id in _permanent_pro_users:
+        return True
     if user_id in pro_users:
         info = pro_users[user_id]
         if info.get("active_until") and info["active_until"] > datetime.now(timezone.utc):
             return True
         del pro_users[user_id]
     return False
+
+# Google Play review account - permanent PRO access
+_permanent_pro_users = {"f0aa1ff8-52b2-4b7a-b7b6-fcc08632fdfe"}
 
 def get_daily_usage(user_id: str) -> dict:
     today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
