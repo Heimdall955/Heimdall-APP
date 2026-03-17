@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, Button, Input } from '../components/ui';
 import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
+import CalendarPicker from '../components/CalendarPicker';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
@@ -337,18 +338,18 @@ export default function HistorialMedicoScreen() {
               numberOfLines={3}
             />
 
-            <Input
+            <CalendarPicker
               label="Fecha *"
-              placeholder="YYYY-MM-DD"
               value={date}
-              onChangeText={setDate}
+              onSelect={setDate}
+              placeholder="Seleccionar fecha"
             />
 
-            <Input
+            <CalendarPicker
               label="Próxima fecha (opcional)"
-              placeholder="YYYY-MM-DD"
               value={nextDate}
-              onChangeText={setNextDate}
+              onSelect={setNextDate}
+              placeholder="Seleccionar próxima fecha"
             />
 
             <Button

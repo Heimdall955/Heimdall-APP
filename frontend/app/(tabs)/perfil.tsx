@@ -66,6 +66,7 @@ export default function PerfilScreen() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [inviteName, setInviteName] = useState('');
+  const [medicalEvents, setMedicalEvents] = useState<any[]>([]);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricType, setBiometricType] = useState('');
@@ -119,6 +120,10 @@ export default function PerfilScreen() {
         const res = await axios.get(`${BACKEND_URL}/api/dogs/${currentDog.id}/clinical`, { headers });
         if (res.data) setClinical(prev => ({ ...prev, ...res.data }));
       } catch (e) { console.log('Clinical load error:', e); }
+      try {
+        const evRes = await axios.get(`${BACKEND_URL}/api/medical-events/${currentDog.id}`, { headers });
+        setMedicalEvents(evRes.data || []);
+      } catch (e) { console.log('Medical events load error:', e); }
     }
   };
 
@@ -420,6 +425,47 @@ export default function PerfilScreen() {
               <Ionicons name="chevron-forward" size={18} color={colors.primary} />
             </TouchableOpacity>
           </Card>
+
+          {/* Medical Events Preview */}
+          {medicalEvents.length > 0 && (
+            <View style={{ marginTop: Spacing.md }} data-testid="medical-events-preview">
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm }}>
+                <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>
+                  {language === 'en' ? 'Medical History' : language === 'it' ? 'Storia medica' : 'Historial Médico'} ({medicalEvents.length})
+                </Text>
+                <TouchableOpacity onPress={() => router.push('/historial-medico')} data-testid="view-all-medical-btn">
+                  <Text style={{ fontSize: FontSizes.xs, color: colors.primary, fontWeight: '600' }}>
+                    {language === 'en' ? 'View all' : language === 'it' ? 'Vedi tutto' : 'Ver todo'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {medicalEvents.slice(0, 5).map((ev: any, idx: number) => {
+                const typeConfig: Record<string, { icon: string; color: string }> = {
+                  vaccine: { icon: 'medical', color: colors.success },
+                  checkup: { icon: 'clipboard', color: colors.info },
+                  deworming: { icon: 'bug', color: colors.warning },
+                  medication: { icon: 'medkit', color: '#9b59b6' },
+                  note: { icon: 'document-text', color: colors.gray },
+                };
+                const cfg = typeConfig[ev.type] || typeConfig.note;
+                const dateStr = (() => { try { return new Date(ev.date || ev.event_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return '--'; } })();
+                return (
+                  <Card key={ev.id || idx} style={{ marginBottom: Spacing.xs, padding: Spacing.sm }} data-testid={`medical-event-${idx}`}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: cfg.color + '20', alignItems: 'center', justifyContent: 'center' }}>
+                        <Ionicons name={cfg.icon as any} size={18} color={cfg.color} />
+                      </View>
+                      <View style={{ flex: 1, marginLeft: Spacing.sm }}>
+                        <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text }}>{ev.title}</Text>
+                        <Text style={{ fontSize: FontSizes.xs, color: colors.textSecondary }}>{dateStr}</Text>
+                      </View>
+                    </View>
+                    {ev.description ? <Text style={{ fontSize: FontSizes.xs, color: colors.textSecondary, marginTop: 4, marginLeft: 48 }}>{ev.description}</Text> : null}
+                  </Card>
+                );
+              })}
+            </View>
+          )}
         </View>
 
         {/* PRO Card */}
