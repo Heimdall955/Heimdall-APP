@@ -1479,6 +1479,83 @@ async def upload_and_analyze(
         raise HTTPException(status_code=500, detail="Error al procesar el archivo")
 
 
+class Base64UploadRequest(BaseModel):
+    image_base64: str
+    dog_id: str = ""
+    message: str = ""
+    language: str = "Spanish"
+
+@api_router.post("/chat/upload-base64")
+async def upload_base64_image(data: Base64UploadRequest, user: User = Depends(require_auth)):
+    """Upload image as base64 - more reliable on mobile"""
+    if not is_pro_user(user.user_id):
+        usage = get_daily_usage(user.user_id)
+        if usage["photos"] >= FREE_LIMITS["photos"]:
+            raise HTTPException(status_code=403, detail="LIMIT_PHOTOS")
+    
+    try:
+        # Decode base64
+        b64_data = data.image_base64
+        if "base64," in b64_data:
+            b64_data = b64_data.split("base64,")[1]
+        file_bytes = base64.b64decode(b64_data)
+        
+        # Detect language
+        user_text = data.message or ""
+        try:
+            from langdetect import detect
+            if user_text:
+                lang_code = detect(user_text)
+                detected_language = "English" if lang_code == 'en' else "italiano" if lang_code == 'it' else "español"
+            else:
+                detected_language = data.language if data.language else "español"
+        except:
+            detected_language = "español"
+        
+        # Get dog context
+        dog_context = ""
+        if data.dog_id:
+            try:
+                dog_result = supabase.table("dogs").select("*").eq("id", data.dog_id).execute()
+                if dog_result.data:
+                    dog = dog_result.data[0]
+                    dog_context = f"\nPerfil del perro: {dog.get('name', 'desconocido')}, raza: {dog.get('breed', 'desconocida')}, peso: {dog.get('weight', 'desconocido')}kg."
+            except:
+                pass
+        
+        # Analyze image
+        ai_response = await analyze_image(file_bytes, "image/jpeg", user_text, dog_context, detected_language)
+        
+        # Track usage (usage is already tracked by the get_daily_usage check)
+        
+        # Save chat messages
+        now = datetime.now(timezone.utc).isoformat()
+        user_content = f"[FOTO] imagen.jpg"
+        if data.message:
+            user_content += f"\n{data.message}"
+        
+        try:
+            if data.dog_id:
+                supabase.table("chat_messages").insert({"user_id": user.user_id, "dog_id": data.dog_id, "role": "user", "content": user_content, "created_at": now}).execute()
+                supabase.table("chat_messages").insert({"user_id": user.user_id, "dog_id": data.dog_id, "role": "assistant", "content": ai_response, "created_at": now}).execute()
+        except Exception as e:
+            logger.error(f"Error saving chat messages: {e}")
+        
+        return {
+            "id": str(uuid.uuid4()),
+            "role": "assistant",
+            "content": ai_response,
+            "file_type": "image",
+            "created_at": now
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Base64 upload error: {e}")
+        raise HTTPException(status_code=500, detail="Error al procesar la imagen")
+
+
+
 async def analyze_image(image_bytes: bytes, content_type: str, user_message: str, dog_context: str, language: str) -> str:
     """Analyze an image using GPT-4o-mini vision"""
     b64_image = base64.b64encode(image_bytes).decode("utf-8")

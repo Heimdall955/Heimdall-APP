@@ -111,6 +111,9 @@ export default function ChatScreen() {
     if (!isPro && usage.photos >= FREE_LIMITS.photos) { showProGate(labels.photoLimitMsg); return; }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.7 });
     if (!result.canceled && result.assets[0]) {
+      const userMsg: ChatMessage = { id: `temp_${Date.now()}`, user_id: user?.user_id || '', dog_id: currentDog?.id, role: 'user', content: `[FOTO] ${result.assets[0].fileName || 'foto.jpg'}${inputText ? '\n' + inputText : ''}`, created_at: new Date().toISOString(), file_type: 'image' };
+      setMessages(prev => [...prev, userMsg]); setIsLoading(true); setUploadProgress('Foto'); const msgText = inputText; setInputText('');
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
       try {
         const asset = result.assets[0];
         const w = asset.width || 800; const h = asset.height || 800;
@@ -118,14 +121,22 @@ export default function ChatScreen() {
         const manipulated = await ImageManipulator.manipulateAsync(
           asset.uri,
           [{ crop: { originX: Math.floor((w - size) / 2), originY: Math.floor((h - size) / 2), width: size, height: size } }, { resize: { width: 800 } }],
-          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
         );
-        await uploadFile(manipulated.uri, 'image', asset.fileName || 'photo.jpg');
+        const token = await SecureStore.getItemAsync('session_token');
+        const response = await axios.post(`${BACKEND_URL}/api/chat/upload-base64`, {
+          image_base64: manipulated.base64,
+          dog_id: currentDog?.id || '',
+          message: msgText || '',
+          language: getLanguageName(language),
+        }, { headers: { Authorization: `Bearer ${token}` }, timeout: 60000 });
+        setMessages(prev => [...prev, response.data]);
         setUsage(prev => ({ ...prev, photos: prev.photos + 1 }));
-      } catch (e) {
-        await uploadFile(result.assets[0].uri, 'image', result.assets[0].fileName || 'photo.jpg');
-        setUsage(prev => ({ ...prev, photos: prev.photos + 1 }));
-      }
+      } catch (error: any) {
+        if (error?.response?.status === 403) { showProGate(labels.photoLimitMsg); }
+        else { Alert.alert(t('error'), error?.response?.data?.detail || 'Error al enviar foto'); }
+        setMessages(prev => prev.filter(m => m.id !== userMsg.id));
+      } finally { setIsLoading(false); setUploadProgress(null); setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100); }
     }
   };
   const pickVideo = async () => {
