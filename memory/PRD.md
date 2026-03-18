@@ -11,10 +11,10 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 
 ## Funcionalidades Implementadas
 - Onboarding usuario/mascota con seleccion de idioma (es/en/it)
-- Onboarding Mascota Multi-tipo (perro/gato/roedor/pajaro) - sin duplicados
+- Onboarding Mascota Multi-tipo sin duplicados (verifica existencia antes de crear)
 - Navegacion de 5 tabs (Inicio, Salud, Educacion, Chat, Perfil)
-- Chat IA ilimitado con aprendizaje adaptativo
-- Upload fotos en chat con ImageManipulator (sin crop de Android)
+- Chat IA con upload de fotos via base64 (fix Android multipart) (18 Mar 2026)
+- Upload fotos en chat sin recortador de sistema (ImageManipulator)
 - Sistema de gamificacion (Huesos/XP/Achievements)
 - Google Wallet (HANI Passport)
 - Leaderboard global / Weekly Summary
@@ -35,9 +35,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Modal Editar Mascota completo con campos: tipo, sexo, esterilizado, alergias
 - Componente CalendarPicker personalizado para seleccion de fechas
 - Optimizacion rendimiento: cache sesion backend + llamadas paralelas frontend
-- Fix image picker Android en perfil y chat (18 Mar 2026)
-- Fix onboarding sin duplicados (18 Mar 2026)
-- Fix delete dog con cascade de datos relacionados (18 Mar 2026)
+- Delete dog con cascade de datos relacionados (18 Mar 2026)
 
 ## Archivos Clave
 - frontend/services/NotificationService.ts (notificaciones i18n)
@@ -45,11 +43,11 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - frontend/app/historial-medico.tsx (historial medico con CalendarPicker)
 - frontend/app/diario.tsx (diario de emociones con historial visible)
 - frontend/app/(tabs)/perfil.tsx (image picker fix, perfil optimizado, eventos medicos)
-- frontend/app/(tabs)/chat.tsx (image picker fix, upload con ImageManipulator)
+- frontend/app/(tabs)/chat.tsx (upload base64, ImageManipulator)
 - frontend/app/(tabs)/index.tsx (home con llamadas paralelas)
 - frontend/app/onboarding-mascota.tsx (onboarding sin duplicados)
 - frontend/app/pro.tsx (diseno dorado premium)
-- backend/server.py (cache sesion, cascade delete, endpoints con fallback graceful)
+- backend/server.py (upload-base64, cache sesion, cascade delete)
 
 ## Tareas Pendientes
 - P1: EAS Development Build (Bluetooth real)
