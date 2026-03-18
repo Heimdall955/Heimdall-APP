@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import * as Linking from 'expo-linking';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
@@ -193,12 +194,32 @@ export default function PerfilScreen() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) { Alert.alert('Permiso requerido'); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.5, base64: true,
+      mediaTypes: ['images'], allowsEditing: false, quality: 0.7,
     });
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setDogImage(base64Image);
-      if (currentDog?.id) await SecureStore.setItemAsync(`dog_image_${currentDog.id}`, base64Image);
+    if (!result.canceled && result.assets[0]) {
+      try {
+        const asset = result.assets[0];
+        const w = asset.width || 800;
+        const h = asset.height || 800;
+        const size = Math.min(w, h);
+        const originX = Math.floor((w - size) / 2);
+        const originY = Math.floor((h - size) / 2);
+        const manipulated = await ImageManipulator.manipulateAsync(
+          asset.uri,
+          [
+            { crop: { originX, originY, width: size, height: size } },
+            { resize: { width: 400 } },
+          ],
+          { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+        );
+        if (manipulated.base64) {
+          const base64Image = `data:image/jpeg;base64,${manipulated.base64}`;
+          setDogImage(base64Image);
+          if (currentDog?.id) await SecureStore.setItemAsync(`dog_image_${currentDog.id}`, base64Image);
+        }
+      } catch (e) {
+        console.log('Image crop error:', e);
+      }
     }
   };
 

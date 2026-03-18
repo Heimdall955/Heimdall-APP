@@ -33,14 +33,15 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Traduccion completa i18n (es/en/it) en todo el contenido
 - Modal Editar Mascota completo con campos: tipo, sexo, esterilizado, alergias
 - Componente CalendarPicker personalizado para seleccion de fechas
-- Optimizacion rendimiento: cache sesion backend + llamadas paralelas frontend (17 Mar 2026)
+- Optimizacion rendimiento: cache sesion backend + llamadas paralelas frontend
+- Fix image picker Android: recorte automatico con ImageManipulator (18 Mar 2026)
 
 ## Archivos Clave
 - frontend/services/NotificationService.ts (notificaciones i18n)
 - frontend/components/CalendarPicker.tsx (selector de fecha con calendario)
 - frontend/app/historial-medico.tsx (historial medico con CalendarPicker)
 - frontend/app/diario.tsx (diario de emociones con historial visible)
-- frontend/app/(tabs)/perfil.tsx (perfil optimizado, eventos medicos, modal editar, notificaciones)
+- frontend/app/(tabs)/perfil.tsx (image picker fix, perfil optimizado, eventos medicos)
 - frontend/app/(tabs)/index.tsx (home con llamadas paralelas)
 - frontend/app/onboarding-mascota.tsx (onboarding multi-mascota)
 - frontend/app/pro.tsx (diseno dorado premium)
