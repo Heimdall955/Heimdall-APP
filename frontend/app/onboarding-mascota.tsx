@@ -86,7 +86,10 @@ export default function OnboardingMascotaScreen() {
     setSaving(true);
     try {
       const token = await SecureStore.getItemAsync('session_token');
-      await axios.post(`${BACKEND_URL}/api/dogs`, {
+      const headers = { Authorization: `Bearer ${token}` };
+      // Check if user already has dogs - update first one instead of creating duplicate
+      const existingDogs = await axios.get(`${BACKEND_URL}/api/dogs`, { headers });
+      const dogData = {
         name: form.name.trim(),
         pet_type: form.pet_type || 'dog',
         breed: form.breed.trim() || null,
@@ -96,7 +99,12 @@ export default function OnboardingMascotaScreen() {
         neutered: form.neutered,
         chip_id: form.chip_id.trim() || null,
         allergies: form.allergies.trim() || null,
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      };
+      if (existingDogs.data && existingDogs.data.length > 0) {
+        await axios.put(`${BACKEND_URL}/api/dogs/${existingDogs.data[0].id}`, dogData, { headers });
+      } else {
+        await axios.post(`${BACKEND_URL}/api/dogs`, dogData, { headers });
+      }
       await refreshDogs();
       await setOnboardingCompleted(true);
       router.replace('/(tabs)');

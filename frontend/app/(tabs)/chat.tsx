@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import * as DocumentPicker from 'expo-document-picker';
 import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
@@ -108,13 +109,29 @@ export default function ChatScreen() {
   const pickImage = async () => {
     setShowAttachMenu(false);
     if (!isPro && usage.photos >= FREE_LIMITS.photos) { showProGate(labels.photoLimitMsg); return; }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.7 });
-    if (!result.canceled && result.assets[0]) { await uploadFile(result.assets[0].uri, 'image', result.assets[0].fileName || 'photo.jpg'); setUsage(prev => ({ ...prev, photos: prev.photos + 1 })); }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.7 });
+    if (!result.canceled && result.assets[0]) {
+      try {
+        const asset = result.assets[0];
+        const w = asset.width || 800; const h = asset.height || 800;
+        const size = Math.min(w, h);
+        const manipulated = await ImageManipulator.manipulateAsync(
+          asset.uri,
+          [{ crop: { originX: Math.floor((w - size) / 2), originY: Math.floor((h - size) / 2), width: size, height: size } }, { resize: { width: 800 } }],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        await uploadFile(manipulated.uri, 'image', asset.fileName || 'photo.jpg');
+        setUsage(prev => ({ ...prev, photos: prev.photos + 1 }));
+      } catch (e) {
+        await uploadFile(result.assets[0].uri, 'image', result.assets[0].fileName || 'photo.jpg');
+        setUsage(prev => ({ ...prev, photos: prev.photos + 1 }));
+      }
+    }
   };
   const pickVideo = async () => {
     setShowAttachMenu(false);
     if (!isPro) { showProGate(labels.videoProMsg); return; }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], allowsEditing: true, videoMaxDuration: 4, quality: 0.5 });
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], allowsEditing: false, videoMaxDuration: 4, quality: 0.5 });
     if (!result.canceled && result.assets[0]) await uploadFile(result.assets[0].uri, 'video', result.assets[0].fileName || 'video.mp4');
   };
   const pickPDF = async () => {

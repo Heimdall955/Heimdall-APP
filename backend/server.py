@@ -697,6 +697,13 @@ async def delete_dog(dog_id: str, user: User = Depends(require_auth)):
         if not check.data or len(check.data) == 0:
             raise HTTPException(status_code=404, detail="Perro no encontrado")
         
+        # Delete related data first
+        for table in ["chat_messages", "medical_events", "clinical_files", "emotion_diary"]:
+            try:
+                supabase.table(table).delete().eq("dog_id", dog_id).execute()
+            except Exception:
+                pass
+        
         supabase.table("dogs").delete().eq("id", dog_id).eq("user_id", user.user_id).execute()
         return {"message": "Perro eliminado"}
     except HTTPException:
