@@ -43,7 +43,7 @@ export default function HomeScreen() {
 
   const quickAccessItems = [
     { id: 'chaleco', icon: 'bluetooth', label: t('vest'), color: colors.primary, route: '/chaleco' },
-    { id: 'rutas', icon: 'navigate', label: t('gpsRoutes'), color: colors.accentPurple, route: '/rutas' },
+    { id: 'rutas', icon: 'walk', label: language === 'en' ? 'Walks' : language === 'it' ? 'Passeggiate' : 'Paseos', color: colors.accentPurple, route: '/rutas' },
     { id: 'historial', icon: 'medical', label: t('history'), color: colors.accentOrange, route: '/historial-medico' },
     { id: 'educacion', icon: 'school', label: t('academy'), color: colors.accentMint, route: '/(tabs)/educacion' },
     { id: 'salud', icon: 'heart', label: t('health'), color: colors.error, route: '/(tabs)/salud' },
