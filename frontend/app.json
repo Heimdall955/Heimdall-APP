@@ -39,6 +39,9 @@
         "BLUETOOTH_CONNECT",
         "BLUETOOTH_SCAN"
       ],
+      "blockedPermissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
+      ],
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
