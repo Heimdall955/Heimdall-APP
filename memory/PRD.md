@@ -11,43 +11,40 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 
 ## Funcionalidades Implementadas
 - Onboarding usuario/mascota con seleccion de idioma (es/en/it)
-- Onboarding Mascota Multi-tipo sin duplicados (verifica existencia antes de crear)
+- Onboarding Mascota Multi-tipo sin duplicados
 - Navegacion de 5 tabs (Inicio, Salud, Educacion, Chat, Perfil)
-- Chat IA con upload de fotos via base64 (fix Android multipart) (18 Mar 2026)
-- Upload fotos en chat sin recortador de sistema (ImageManipulator)
+- Chat IA con upload de fotos via base64 (fix Android)
+- Paseos con podometro, meta diaria, stats semanales, historial (18 Mar 2026)
 - Sistema de gamificacion (Huesos/XP/Achievements)
 - Google Wallet (HANI Passport)
 - Leaderboard global / Weekly Summary
 - Historial clinico con selector de fecha calendario
-- Eventos medicos visibles en perfil sin entrar al detalle
+- Eventos medicos visibles en perfil
 - Suscripcion PRO con diseno dorado premium
 - Modo Oscuro/Claro con persistencia
-- Rutas GPS v4
 - Autenticacion Biometrica
 - Progreso lecciones + Mi Progreso
 - Diario de Emociones con historial visible de notas
 - Chaleco BLE ESP32 (pendiente EAS Build)
 - Notificaciones push locales traducidas (es/en/it)
-- Pantalla de Privacidad (enlace real: heimdall-ai.tech)
-- Pantalla de Ayuda con FAQ
-- Banner "Pack Chaleco" en salud cuando no esta conectado
-- Traduccion completa i18n (es/en/it) en todo el contenido
-- Modal Editar Mascota completo con campos: tipo, sexo, esterilizado, alergias
-- Componente CalendarPicker personalizado para seleccion de fechas
-- Optimizacion rendimiento: cache sesion backend + llamadas paralelas frontend
-- Delete dog con cascade de datos relacionados (18 Mar 2026)
+- Pantalla de Privacidad y Ayuda
+- Modal Editar Mascota completo
+- CalendarPicker para fechas
+- Optimizacion rendimiento: cache sesion + llamadas paralelas
+- Delete dog con cascade
+- Sin permisos GPS/Location (Google Play compatible) (18 Mar 2026)
 
 ## Archivos Clave
-- frontend/services/NotificationService.ts (notificaciones i18n)
-- frontend/components/CalendarPicker.tsx (selector de fecha con calendario)
-- frontend/app/historial-medico.tsx (historial medico con CalendarPicker)
-- frontend/app/diario.tsx (diario de emociones con historial visible)
-- frontend/app/(tabs)/perfil.tsx (image picker fix, perfil optimizado, eventos medicos)
-- frontend/app/(tabs)/chat.tsx (upload base64, ImageManipulator)
-- frontend/app/(tabs)/index.tsx (home con llamadas paralelas)
-- frontend/app/onboarding-mascota.tsx (onboarding sin duplicados)
-- frontend/app/pro.tsx (diseno dorado premium)
-- backend/server.py (upload-base64, cache sesion, cascade delete)
+- frontend/app/rutas.tsx (paseos con podometro - reescrito)
+- frontend/app/(tabs)/chat.tsx (upload base64)
+- frontend/app/(tabs)/perfil.tsx (perfil completo)
+- frontend/app/(tabs)/index.tsx (acceso rapido paseos)
+- frontend/app/onboarding-mascota.tsx (sin duplicados)
+- backend/server.py (walks endpoints, sin routes/trails)
+
+## Permisos Android (app.json)
+- CAMERA, BLUETOOTH*, READ/WRITE_EXTERNAL_STORAGE
+- Bloqueados: ACTIVITY_RECOGNITION, ACCESS_*_LOCATION
 
 ## Tareas Pendientes
 - P1: EAS Development Build (Bluetooth real)
