@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
   const { isConnected, biometricData } = useBluetooth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { colors, shadows, isDark, toggleTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [weeklySummary, setWeeklySummary] = useState<any>(null);
