@@ -96,6 +96,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Quick Access
     vest: 'Chaleco',
     walks: 'Paseos',
+    uploadAnalysis: 'Subir análisis',
+    describeSymptom: 'Describir síntoma',
     history: 'Historial',
     academy: 'Academia',
     pro: 'PRO',
@@ -566,6 +568,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Quick Access
     vest: 'Vest',
     walks: 'Walks',
+    uploadAnalysis: 'Upload analysis',
+    describeSymptom: 'Describe symptom',
     history: 'History',
     academy: 'Academy',
     pro: 'PRO',
@@ -1031,6 +1035,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Quick Access
     vest: 'Gilet',
     walks: 'Passeggiate',
+    uploadAnalysis: 'Carica analisi',
+    describeSymptom: 'Descrivi sintomo',
     history: 'Cronologia',
     academy: 'Accademia',
     pro: 'PRO',

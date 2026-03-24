@@ -43,11 +43,10 @@ export default function HomeScreen() {
 
   const quickAccessItems = [
     { id: 'chaleco', icon: 'bluetooth', label: t('vest'), color: colors.primary, route: '/chaleco' },
-    { id: 'rutas', icon: 'walk', label: t('walks') || 'Paseos', color: colors.accentPurple, route: '/rutas' },
+    { id: 'subir-analisis', icon: 'cloud-upload', label: t('uploadAnalysis'), color: colors.accentPurple, route: '/(tabs)/chat' },
+    { id: 'describir-sintoma', icon: 'chatbubble-ellipses', label: t('describeSymptom'), color: colors.accentMint, route: '/(tabs)/chat' },
     { id: 'historial', icon: 'medical', label: t('history'), color: colors.accentOrange, route: '/historial-medico' },
-    { id: 'educacion', icon: 'school', label: t('academy'), color: colors.accentMint, route: '/(tabs)/educacion' },
     { id: 'salud', icon: 'heart', label: t('health'), color: colors.error, route: '/(tabs)/salud' },
-    { id: 'pro', icon: 'diamond', label: t('pro'), color: colors.accent, route: '/pro' },
   ];
 
   const loadGamificationStats = useCallback(async () => {

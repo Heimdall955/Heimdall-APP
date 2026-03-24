@@ -34,6 +34,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Delete dog con cascade
 - Sin permisos GPS/Location (Google Play compatible) (18 Mar 2026)
 - Banner principal IA: "Analiza y entiende la salud de tu animal" con CTA al chat (24 Mar 2026)
+- Accesos rapidos actualizados: Chaleco, Subir analisis, Describir sintoma, Historial, Salud (24 Mar 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)
