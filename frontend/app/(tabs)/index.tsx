@@ -47,6 +47,7 @@ export default function HomeScreen() {
     { id: 'describir-sintoma', icon: 'chatbubble-ellipses', label: t('describeSymptom'), color: colors.accentMint, route: '/(tabs)/chat' },
     { id: 'historial', icon: 'medical', label: t('history'), color: colors.accentOrange, route: '/historial-medico' },
     { id: 'salud', icon: 'heart', label: t('health'), color: colors.error, route: '/(tabs)/salud' },
+    { id: 'ficha-clinica', icon: 'document-text', label: t('clinicalFile'), color: colors.accent, route: '/(tabs)/perfil' },
   ];
 
   const loadGamificationStats = useCallback(async () => {
@@ -168,6 +169,21 @@ export default function HomeScreen() {
             </View>
           </View>
         </TouchableOpacity>
+
+        {/* Quick Access */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>{t('quickAccess')}</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md }}>
+            {quickAccessItems.map((item) => (
+              <TouchableOpacity key={item.id} style={{ width: '30%', alignItems: 'center', padding: Spacing.sm }} onPress={() => handleQuickAccess(item.route)}>
+                <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: item.color + '20', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.sm }}>
+                  <Ionicons name={item.icon as any} size={26} color={item.color} />
+                </View>
+                <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text, textAlign: 'center' }}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {/* Progress */}
         <View style={s.section}>
@@ -294,21 +310,6 @@ export default function HomeScreen() {
             </View>
             <Ionicons name="chevron-forward" size={24} color={colors.gray} />
           </TouchableOpacity>
-        </View>
-
-        {/* Quick Access */}
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>{t('quickAccess')}</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md }}>
-            {quickAccessItems.map((item) => (
-              <TouchableOpacity key={item.id} style={{ width: '30%', alignItems: 'center', padding: Spacing.sm }} onPress={() => handleQuickAccess(item.route)}>
-                <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: item.color + '20', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.sm }}>
-                  <Ionicons name={item.icon as any} size={26} color={item.color} />
-                </View>
-                <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text, textAlign: 'center' }}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
 
         {/* HANI Passport */}
