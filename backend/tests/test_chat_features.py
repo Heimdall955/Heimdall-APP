@@ -13,7 +13,7 @@ import time
 import re
 
 # Use the backend URL from environment
-BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://pet-profile-edit.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://pet-symptom-check-2.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 TEST_EMAIL = "testlesson@test.com"

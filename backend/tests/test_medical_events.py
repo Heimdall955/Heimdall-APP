@@ -8,7 +8,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://pet-profile-edit.preview.emergentagent.com')
+BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://pet-symptom-check-2.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "review@heimdall-ai.tech"

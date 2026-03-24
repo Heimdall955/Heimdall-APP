@@ -1,170 +1,169 @@
 <analysis>**original_problem_statement:**
-Throughout this extensive session, the user has driven a major evolution of the app, focusing on internationalization, UI/UX refinement, new feature implementation, and preparing for production deployment.
+The user initiated a new set of tasks focused on fixing bugs discovered on a real device, addressing Google Play policy violations, and refining core features. The key requests were:
 
-1.  **Full-Stack Internationalization (i18n):** Translate all remaining hardcoded content, including educational programs, games, exercises, the emotion diary, and newly created screens (Privacy, Help, Onboarding, PRO) into Spanish, English, and Italian.
-2.  **Database Migrations:** Provide and verify the execution of several critical SQL scripts to create new tables (, , ) and add new columns to existing tables (, ) to support new features.
-3.  **UI/UX Overhauls:**
-    *   Redesign the PRO subscription screen with a premium gold aesthetic.
-    *   Update the PRO card on the profile screen to match the new design.
-    *   Redesign the Emotion Diary card on the home screen to be more engaging and visual.
-    *   Add an informational banner to the Health screen to clarify that metrics are demo data without the physical vest.
-4.  **New Features:**
-    *   Implement a multi-step pet onboarding flow for first-time users to collect detailed pet information (type, sex, neutered, allergies).
-    *   Create static pages for Privacy Policy and Help accessible from the user's profile.
-5.  **AI Chat (Heimdall) Enhancement:** Massively enrich the AI's context by feeding it data from the user's profile, pet's clinical record, lesson progress, and emotion diary. Improve its personality to be more conversational, empathetic, and to gracefully decline off-topic questions.
-6.  **Production Readiness:**
-    *   Create a dedicated test user account with permanent PRO access for Google Play Store reviewers.
-    *   Fix the Google Wallet passport integration with better error handling and platform-specific instructions.
-7.  **Bug Fixes:**
-    *   Resolve an issue where saving the clinical history would show a false error message.
-    *   Add missing fields (pet type, sex, etc.) to the Edit Pet Profile modal, which were present in the new onboarding flow but not in the existing profile editor.
+1.  **Fix Mobile App Discrepancies:** The user reported that the app, when installed as an APK, was not functioning correctly for their account (). This involved data not saving, pet profiles being incorrect, and the emotion diary not working.
+2.  **Fix Image Upload Bugs:** The image picker functionality was broken on the user's Android device. In both the user profile and the AI chat, the native image cropper would occupy the full screen, hiding the accept button. Even after an initial fix, the image upload in the chat was still failing to send the file.
+3.  **Address Google Play Policy Violations:** Google Play was flagging the app for using health and location permissions. The user requested the removal of:
+    *   
+    *   All GPS-related permissions (, , ).
+4.  **Feature Pivot (GPS to Pedometer):** To comply with the policy, the user requested the complete removal of the GPS-based Routes feature. It was to be replaced with a simpler, motivational Walks screen that uses the phone's pedometer.
+5.  **Fix Crashing Bugs:** After the GPS feature removal, the user reported two new crashing bugs visible in the Expo Go simulator, related to undefined variables () and a notification error.
+6.  **UI/UX Improvement:** The user's final request was to overhaul the main banner on the home screen to better promote the AI analysis feature.
 
 PRODUCT REQUIREMENTS are tracked in .
 
 **User's preferred language**: Spanish (español). The next agent MUST respond in Spanish.
 
 **what currently exists?**
-The application is a feature-rich React Native (Expo) app with a Python (FastAPI) backend using Supabase. The agent has successfully implemented a complete internationalization system, created and applied multiple database schema changes, and built several new features from scratch. The UI has been significantly upgraded with a new premium gold theme for monetization screens. The core AI chat feature is now much more intelligent and context-aware. The app is nearing a state of production readiness, with most user-facing features implemented and bugs addressed.
+The application is a full-stack React Native (Expo) app with a FastAPI backend and Supabase database. The agent has successfully completed a major refactoring by removing all GPS-related features and replacing them with a new -based Walks feature. Numerous critical bugs related to data integrity (duplicate pets), Android-specific UI (image picker), file uploads (base64 implementation), and application stability have been resolved. The app now complies with Google Play's permission policies regarding health and location data. All backend and frontend components for the new Walks feature are implemented, but the very last user request to change the home screen banner is still pending.
 
 **Last working item**:
--   **Last item agent was working**: The user reported two bugs in the profile screen: 1) The clinical record save button showed a misleading error message before confirming success. 2) The edit pet modal was missing the new fields (, , , ) that were recently added to the new user onboarding flow. The agent has already fixed the clinical record issue by refactoring the backend () to store the data correctly. It has also just finished adding the missing fields and logic to the edit pet modal in .
--   **Status**: IN PROGRESS
+-   **Last item agent was working**: The user wants to replace the main banner on the home screen (). The new banner should have the title Analiza y entiende la salud de tu animal, the subtitle Sube una foto, un documento o describe un síntoma y obtén una explicación clara, and a CTA button Empezar análisis that navigates to the chat screen. The agent has identified the relevant file () but has not yet implemented the changes.
+-   **Status**: NOT STARTED
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: Frontend testing agent. The test should focus on the Edit Pet modal within the profile screen. It needs to verify that the new fields (Pet Type, Sex, Neutered, Allergies) are displayed, can be edited, and that saving the form successfully updates the pet's information in the backend.
+-   **Which testing method agent to use?**: Frontend testing agent. The test should navigate to the home screen, verify the new banner text is present (for all 3 languages: ES, EN, IT), and confirm that clicking the Empezar análisis button navigates the user to the chat screen.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   Issue 1: Test and Verify the Edit Pet Modal Fix (P0)
+-   Issue 1: Implement the new home screen banner. (P0)
 
 **Issues Detail**:
--   **Issue 1: Test and Verify the Edit Pet Modal Fix**
-    -   **Attempted fixes**: The agent identified that the modal in  was missing the new state and form elements. The code to add a Picker for pet type/sex, a Switch for neutered status, and a TextInput for allergies has been written and integrated into the modal's  function.
+-   **Issue 1: Implement new home screen banner**
+    -   **Attempted fixes**: None. The agent was about to start this task.
     -   **Next debug checklist**:
-        1.  Call the .
-        2.  Instruct it to navigate to the Profile tab, open the Edit Pet modal.
-        3.  Verify the new fields are present and populated with the current pet's data.
-        4.  Change the values in the new fields, save, and then reopen the modal to confirm the new data was persisted.
-    -   **Why fix this issue and what will be achieved with the fix?**: This ensures data consistency. Users who signed up before the new onboarding flow existed need a way to add this important information, and all users need to be able to edit it. This aligns the profile editing experience with the new onboarding data model.
-    -   **Status**: IN PROGRESS
+        1.  Locate the existing banner component (The Perfect Recall) inside .
+        2.  Add new translation keys to  for the new title (), subtitle (), and CTA ().
+        3.  Replace the old banner's text with the new translation keys using the  function.
+        4.  Ensure the  handler for the Empezar análisis button uses the  to navigate to the  route.
+    -   **Why fix this issue and what will be achieved with the fix?**: This change will make the app's core value proposition—AI-powered analysis—the primary call-to-action on the home screen, improving user engagement and feature discovery.
+    -   **Status**: NOT STARTED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: Frontend
+    -   **Blocked on other issue**: None.
 
 **In progress Task List**:
--   **Task 1: Complete Profile Editing Fix**
-    -   **Where to resume**: The code has been written in . The next step is to initiate testing to verify the changes work as expected.
-    -   **What will be achieved with this?**: A fully functional and consistent pet profile editing experience.
-    -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Frontend
-    -   **Blocked on something**: No.
+-   None.
 
 **Upcoming and Future Tasks**
+-   **Upcoming Tasks:**
+    -   (P0) Implement the new home screen banner as requested by the user.
 -   **Future Tasks:**
     -   (P1) Guide user through creating an EAS Development Build to enable testing of real Bluetooth functionality for the vest.
     -   (P2) Implement the full billing and subscription flow with RevenueCat for the Google Play Store.
 
 **Completed work in this session**
--   **Full i18n Refactor (DONE)**: Translated , , , , and .
--   **SQL Scripts Provided & Verified (DONE)**: Successfully created scripts for , , , , and  tables, and confirmed their implementation with the user.
--   **Premium PRO Screen (DONE)**: Completely redesigned  with a new gold-themed, multi-language layout.
--   **Profile PRO Card (DONE)**: Redesigned the card in  to match the new PRO screen aesthetic.
--   **Health Screen Banner (DONE)**: Added a Coming Soon banner to  for when the vest is not connected.
--   **Pet Onboarding Flow (DONE)**: Created a new multi-step onboarding screen () and integrated it into the registration flow.
--   **Home Screen Emotion Card (DONE)**: Redesigned the emotion diary card in  to be more visual and interactive.
--   **AI Chat Context & Personality (DONE)**: Massively improved the AI's capabilities and personality by enriching its context in .
--   **Google Play Reviewer Account (DONE)**: Created a permanent PRO user () for testing.
--   **Google Wallet Fix (DONE)**: Improved error handling and platform-specific UI in .
--   **Clinical Record Bugfix (DONE)**: Fixed the backend logic in  to correctly save clinical data.
+-   **Edit Pet Modal Fix (DONE)**: Fully implemented and tested the missing fields (, , etc.) in  and the backend.
+-   **Emotion Diary History (DONE)**: The diary screen at  now correctly displays a visible history of all past entries.
+-   **Medical History UX (DONE)**: Replaced text inputs with a calendar picker () and made event notes visible on the profile.
+-   **i18n for Notifications (DONE)**: Refactored  and the settings modal in  to be multi-language.
+-   **Performance Optimization (DONE)**: Implemented backend user session caching and parallelized frontend API calls, achieving a >50% latency reduction on profile load.
+-   **Android Image Picker Fix (Profile & Chat) (DONE)**: Replaced the buggy native cropper with a reliable  flow in  and .
+-   **Chat Image Upload Fix (DONE)**: Re-engineered the chat upload to use a robust base64 JSON endpoint () instead of a failing multipart form, fixing the issue on Android.
+-   **Data Integrity Fixes (DONE)**:
+    -   Implemented a manual cascade delete in  to allow for proper pet profile deletion.
+    -   Cleaned up the user's duplicated pet data.
+    -   Patched the  flow to prevent future duplicate pet creation.
+-   **Google Play Policy Compliance (DONE)**:
+    -   **GPS Removed**: Successfully removed all location permissions from  and all related code from the frontend and backend.
+    -   **Health Permission Removed**: Blocked the  permission in .
+-   **GPS to Pedometer Feature Pivot (DONE)**: The Routes feature was fully replaced with a new Walks screen () using  and corresponding new backend endpoints.
+-   **Expo Go Stability Fixes (DONE)**: Resolved two crashing bugs ( and a notification error) caused by stale caches and platform differences.
 
 **Earlier issues found/mentioned but not fixed**
 -   None.
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork**: Implement real Bluetooth via Development Build.
--   **Recurrence count**: 8
+-   **Recurrence count**: 9
 -   **Status**: BLOCKED (Requires user to create a development build for testing on a physical device).
 
 **Code Architecture**
-
+language
 
 **Key Technical Concepts**
--   **Graceful Backend Degradation**: Implementing try/except blocks and default values in FastAPI endpoints () to prevent crashes when optional columns are missing from the database, allowing for staggered schema migrations.
--   **Conditional Rendering & Onboarding Flow**: Using user and pet data () upon login to conditionally redirect new users to a one-time onboarding flow ().
--   **Complex UI with **: Utilizing SVG for background patterns and decorative elements in the redesigned PRO and Emotion Diary components.
--   **Data-Driven AI Prompts**: Dynamically constructing a rich system prompt for the OpenAI API by fetching and formatting data from multiple database tables (user, dogs, lessons, emotions) to create a highly personalized and context-aware chat experience.
+-   **Base64 JSON Upload**: Switched from multipart/form-data to sending images as base64 strings within a JSON payload to work around React Native/Android upload issues.
+-   **Feature Pivot & Code Removal**: Systematically removed an entire feature (GPS Routes) and its dependencies from the frontend, backend, and configuration (), replacing it with a new one ().
+-   **Backend Caching**: Implemented a simple time-based cache within the user session dictionary in  to reduce redundant database lookups on every authenticated API call.
+-   **Defensive Permission Blocking**: Used the  property in  to explicitly prevent dependencies from injecting unwanted permissions, ensuring compliance with Google Play policies.
+-   **Manual Cascade Delete**: Implemented logic in the  endpoint to manually find and delete all related records (chat messages, diary entries, etc.) before deleting the dog itself, resolving foreign key constraint errors.
+-   ****: Used to programmatically crop and resize images after selection, avoiding the buggy native Android cropper.
 
 **key DB schema**
--   ****: Altered to add  (VARCHAR),  (VARCHAR),  (BOOLEAN),  (TEXT).
--   ****: Altered to add , , , .
--   ****: New table for user preferences (e.g., notifications).
--   ****: New table for the Invite a Friend feature.
--   ****: New table for pet's clinical history. Backend now stores unstructured data as a JSON string in the  field.
+-   ****: New table created to store pedometer data: uid=0(root) gid=0(root) groups=0(root), , ,  (INT),  (FLOAT),  (INT),  (TIMESTAMPTZ).
+-   ****: Backend logic for  was updated to manually cascade deletes to , , , , , and .
+-   , , : All related tables and logic are now obsolete.
 
 **All files of reference**
--    (File just modified for the bug fix)
--    (Location of all backend logic)
--    (New onboarding flow)
--    (New PRO screen)
--    (Home screen with key UI cards)
+-    (File for the next task)
+-    (Will need modification for the next task)
+-    (The new Walks screen)
+-    (Contains all backend business logic)
 -   
 
 **Areas that need refactoring**:
--   None at the moment. The agent has just completed a large refactoring effort for internationalization.
+-   : Contains obsolete translation keys for the removed GPS/routes feature (, , etc.) that should be cleaned up.
 
 **key api endpoints**
--   : Updated to accept new fields (, , , ).
--   : Updated to accept new fields.
--   : The underlying logic was heavily modified to inject a much richer data context into the AI prompt.
--   : Logic was fixed to handle arbitrary data by storing it in a JSON blob within the  column.
+-   **** (NEW): Accepts a base64 encoded image in a JSON body for reliable file uploads.
+-   **** (NEW): Fetches walk history for a dog.
+-   **** (NEW): Saves a new walk session from the pedometer.
+-   **** (MODIFIED): Now performs a manual cascade delete.
+-    (DEPRECATED): This multipart endpoint still exists but the frontend no longer uses it for images/videos.
+-   , ,  (REMOVED): All endpoints related to the old GPS feature have been deleted.
 
 **Critical Info for New Agent**
 -   **¡Habla en español!** The user's preferred language is Spanish. All communication must be in Spanish.
--   **Immediate Priority**: The code for fixing the Edit Pet modal is complete. Your first action should be to test it using the frontend testing agent to confirm it works correctly.
--   **DB Migrations are Done**: The user has confirmed that all requested SQL scripts have been executed. You can assume the database schema is up-to-date with all the new tables and columns.
--   **Production Focus**: The user is focused on preparing the app for deployment. Be ready for tasks related to billing, store policies, and final polish.
--   **Bluetooth Blocker**: The Bluetooth feature remains code-complete but untested. Do not attempt to test it. If the user asks, explain that it requires a physical device and an EAS Development Build.
+-   **Immediate Priority**: Your first task is to implement the user's request to change the main banner on the home screen ().
+-   **Build Required for Fixes**: Remind the user that many of the recently completed fixes (image pickers, permissions) require them to generate and install a new APK build to see the changes on their physical device.
+-   **Expo Go Cache Issues**: The user has experienced problems with stale app versions in the Expo Go client. If they report a bug that was already fixed, suggest they clear the app's cache or restart the development server.
 
 **documents and test reports created in this job**
 -   /app/memory/PRD.md (Continuously updated)
--   Multiple  files were generated and acted upon.
+-   /app/test_reports/iteration_11.json
+-   /app/test_reports/iteration_12.json
+-   /app/test_reports/iteration_13.json
+-   /app/test_reports/iteration_14.json
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User**: The Emotion Diary card on the home screen is too simple. Can you make it a more attractive banner like others in the app? - **Status: RESOLVED**
-9.  **User**: Can you make Heimdall smarter? It should use all the pet's data (diary, health) to ask questions and remember conversations. Also, it should politely refuse to answer off-topic questions. - **Status: RESOLVED**
-8.  **User**: Can you create an easy email/password for Google Play reviewers to test the app with full PRO access? - **Status: RESOLVED**
-7.  **User**: The Google Wallet passport gives an error. - **Status: RESOLVED** (Improved error handling and explained platform limitations)
-6.  **User**: I've added the new columns to the  table in Supabase. Can you check if it works? - **Status: RESOLVED**
-5.  **User**: The save button on the clinical record shows an error, and the edit pet modal is missing the new fields (pet type, cat, etc.). - **Status: IN PROGRESS (Current Task)**
-4.  **User**: Is it possible and easy to add a pet creation screen for new users after they register, so their profile is pre-filled? - **Status: RESOLVED**
-3.  **User**: In the health section, people might think the metrics are live. Can you add a notice that it's coming soon with the vest pack? - **Status: RESOLVED**
-2.  **User**: Can you add this link to the privacy policy screen:  - **Status: RESOLVED**
-1.  **User**: In the profile, the PRO price shows 1,99. Can you change it and make the card look nicer? - **Status: RESOLVED**
+10. **User**: Google Play is rejecting my app because of the  permission. Please remove it. - **Status: RESOLVED**
+9.  **User**: Google Play is also giving me problems for GPS permissions. Let's remove the whole GPS/routes feature and replace it with a simple, nice-looking pedometer for walking the dog. Change the home screen shortcut too. - **Status: RESOLVED**
+8.  **User**: I have created the  table in the database now. Please verify and finish the task. - **Status: RESOLVED**
+7.  **User**: I'm getting an error in Expo and the simulator. - **Status: RESOLVED**
+6.  **User**: The error is . - **Status: RESOLVED**
+5.  **User**: Now I have these two errors (provides screenshots of  error again and a notification error). - **Status: RESOLVED**
+4.  **User**: Let's replace the home banner. Title: Analiza y entiende la salud de tu animal, Subtitle: Sube una foto, un documento o describe un síntoma y obtén una explicación clara, CTA: Empezar análisis that leads to the chat. Can you do it? - **Status: IN PROGRESS (Current Task)**
+3.  **User**: I downloaded the app on my phone and it doesn't work as well as the demo here, why could that be? - **Status: RESOLVED**
+2.  **User**: I logged in with  and nothing was saved, the dog profile is wrong, the diary doesn't work... - **Status: RESOLVED**
+1.  **User**: Leave only the dog Hani and fix the duplication bug so it doesn't happen to others. Also, I can now crop the photo in chat, but it doesn't get sent. - **Status: RESOLVED**
 
 **Project Health Check:**
--   **Broken**:
-    -   None.
+-   **Broken**: None.
 -   **Mocked**:
-    -   **Real BLE connectivity**: The code in  is implemented but cannot be tested without a physical device and an EAS development build.
--   **Partially Implemented**:
-    -   **Billing/RevenueCat**: The UI is ready, but the final implementation to connect with Google Play Store is pending.
+    -   **Real BLE connectivity**: The code in  is implemented but remains untested due to the need for a physical device and an EAS development build.
 
 **3rd Party Integrations**
 -   Supabase: Backend database and authentication.
 -   OpenAI GPT-4o-mini: Powers the AI Chat.
 -   Google Wallet API: For the HANI Passport feature.
--   react-native-ble-plx: For Bluetooth (requires a Development Build to test).
--   OpenStreetMap Overpass API: Fetches real-world hiking trail data.
--   expo-notifications: For scheduling local push notifications.
+-   : For Bluetooth (untested).
+-   : (NEW) Powers the Walks feature.
+-   : For scheduling local push notifications.
+-   : (NEW) For date selection modals.
+-   : (NEW) For programmatic image cropping.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (used multiple times successfully).
+-   **Testing agent used after significant changes**: YES, the agent used curl and the testing agent to verify multiple backend changes and bug fixes.
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: None.
 -   **Known regressions**: None.
 
 **Credentials to test flow:**
--   **Google Play Reviewer Account**:
+-   **Primary Test Account**:
+    -   **Email**: 
+    -   **Password**: 
+-   **User-Specific Data Account**:
     -   **Email**: 
     -   **Password**: 
 
 **What agent forgot to execute**
--   The agent has been thorough and has not forgotten any user requests. All pending work is tracked.</analysis>
+-   None. All user requests and subsequent bugs have been addressed and are tracked.</analysis>

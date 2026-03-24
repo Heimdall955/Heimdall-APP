@@ -33,6 +33,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Optimizacion rendimiento: cache sesion + llamadas paralelas
 - Delete dog con cascade
 - Sin permisos GPS/Location (Google Play compatible) (18 Mar 2026)
+- Banner principal IA: "Analiza y entiende la salud de tu animal" con CTA al chat (24 Mar 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)

@@ -43,7 +43,7 @@ export default function HomeScreen() {
 
   const quickAccessItems = [
     { id: 'chaleco', icon: 'bluetooth', label: t('vest'), color: colors.primary, route: '/chaleco' },
-    { id: 'rutas', icon: 'walk', label: language === 'en' ? 'Walks' : language === 'it' ? 'Passeggiate' : 'Paseos', color: colors.accentPurple, route: '/rutas' },
+    { id: 'rutas', icon: 'walk', label: t('walks') || 'Paseos', color: colors.accentPurple, route: '/rutas' },
     { id: 'historial', icon: 'medical', label: t('history'), color: colors.accentOrange, route: '/historial-medico' },
     { id: 'educacion', icon: 'school', label: t('academy'), color: colors.accentMint, route: '/(tabs)/educacion' },
     { id: 'salud', icon: 'heart', label: t('health'), color: colors.error, route: '/(tabs)/salud' },
@@ -130,33 +130,45 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Today's Session */}
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>{t('todaySession')}</Text>
-          <TouchableOpacity style={s.sessionCard} onPress={() => router.push('/leccion?id=llamada-perfecta')}>
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400' }} style={StyleSheet.absoluteFillObject} />
-            <View style={s.sessionOverlay}>
-              <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm }}>
-                <View style={{ backgroundColor: colors.primary, paddingVertical: 4, paddingHorizontal: Spacing.sm, borderRadius: BorderRadius.sm }}>
-                  <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: '#FFF' }}>{t('intermediate')}</Text>
+        {/* AI Analysis Banner */}
+        <TouchableOpacity
+          style={s.section}
+          onPress={() => router.push('/(tabs)/chat')}
+          activeOpacity={0.85}
+          data-testid="ai-analysis-banner"
+        >
+          <View style={s.analysisBanner}>
+            {/* Decorative elements */}
+            <View style={{ position: 'absolute', top: -30, right: -20, width: 120, height: 120, borderRadius: 60, backgroundColor: colors.primary + '12' }} />
+            <View style={{ position: 'absolute', bottom: -20, left: -15, width: 90, height: 90, borderRadius: 45, backgroundColor: '#00BCD4' + '10' }} />
+
+            {/* Icon row */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              {[
+                { icon: 'camera', color: colors.primary },
+                { icon: 'document-text', color: '#00BCD4' },
+                { icon: 'chatbubble-ellipses', color: colors.accentPurple },
+              ].map((item, i) => (
+                <View key={i} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: item.color + '20', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: item.color + '30' }}>
+                  <Ionicons name={item.icon as any} size={20} color={item.color} />
                 </View>
-                <Text style={{ fontSize: FontSizes.xs, fontWeight: '700', color: colors.accentOrange }}>{t('highPriority')}</Text>
-              </View>
-              <Text style={{ fontSize: FontSizes.xxl, fontWeight: '800', color: '#FFF', marginBottom: Spacing.sm }}>{t('thePerfectCall')}</Text>
-              <View style={{ flexDirection: 'row', gap: Spacing.lg }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <Ionicons name="time-outline" size={16} color="#FFF" />
-                  <Text style={{ fontSize: FontSizes.sm, color: '#FFF', fontWeight: '500' }}>10 min</Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <Ionicons name="flame" size={16} color="#FFF" />
-                  <Text style={{ fontSize: FontSizes.sm, color: '#FFF', fontWeight: '500' }}>+50 XP</Text>
-                </View>
-              </View>
+              ))}
             </View>
-            <View style={s.playButton}><Ionicons name="play" size={24} color={colors.secondary} /></View>
-          </TouchableOpacity>
-        </View>
+
+            {/* Title */}
+            <Text style={s.analysisBannerTitle}>{t('homeBannerTitle')}</Text>
+
+            {/* Subtitle */}
+            <Text style={s.analysisBannerSubtitle}>{t('homeBannerSubtitle')}</Text>
+
+            {/* CTA Button */}
+            <View style={[s.analysisBannerCta, { backgroundColor: colors.primary }]}>
+              <Ionicons name="sparkles" size={18} color="#FFF" />
+              <Text style={s.analysisBannerCtaText}>{t('homeBannerCta')}</Text>
+              <Ionicons name="arrow-forward" size={16} color="#FFF" />
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {/* Progress */}
         <View style={s.section}>
@@ -375,9 +387,11 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   sectionTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text, marginBottom: Spacing.md },
   viewAllLink: { fontSize: FontSizes.md, fontWeight: '600', color: C.primary },
-  sessionCard: { height: 200, borderRadius: BorderRadius.xl, overflow: 'hidden', position: 'relative' },
-  sessionOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', padding: Spacing.lg, justifyContent: 'flex-end' },
-  playButton: { position: 'absolute', bottom: Spacing.lg, right: Spacing.lg, width: 52, height: 52, borderRadius: 26, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
+  analysisBanner: { backgroundColor: '#0A1628', borderRadius: BorderRadius.xl, padding: Spacing.lg, overflow: 'hidden', position: 'relative' },
+  analysisBannerTitle: { fontSize: FontSizes.xxl, fontWeight: '800', color: '#F5F5F5', marginBottom: 8, lineHeight: 28 },
+  analysisBannerSubtitle: { fontSize: FontSizes.sm, color: '#A0AEC0', marginBottom: 18, lineHeight: 20 },
+  analysisBannerCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: BorderRadius.lg },
+  analysisBannerCtaText: { fontSize: FontSizes.md, fontWeight: '700', color: '#FFF' },
   statsRow: { flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderTopColor: C.grayLight, paddingTop: Spacing.lg },
   statNumber: { fontSize: 28, fontWeight: '800', color: C.text },
   statLabel: { fontSize: FontSizes.sm, color: C.textSecondary, marginTop: 4 },

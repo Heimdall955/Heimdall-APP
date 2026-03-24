@@ -2804,7 +2804,7 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict 
     claims = {
         "iss": credentials_info["client_email"],
         "aud": "google",
-        "origins": ["https://pet-profile-edit.preview.emergentagent.com"],
+        "origins": ["https://pet-symptom-check-2.preview.emergentagent.com"],
         "typ": "savetowallet",
         "payload": {
             "genericClasses": [generic_class],
@@ -2882,7 +2882,7 @@ async def health_check():
 
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else []
 # Always allow the preview/production URL
-PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://pet-profile-edit.preview.emergentagent.com")
+PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://pet-symptom-check-2.preview.emergentagent.com")
 if PREVIEW_URL and PREVIEW_URL not in ALLOWED_ORIGINS:
     ALLOWED_ORIGINS.append(PREVIEW_URL)
 

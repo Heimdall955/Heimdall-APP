@@ -61,6 +61,9 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     goodEvening: 'Buenas noches',
     positiveEducation: 'Educación en Positivo',
     todaySession: 'Sesión de Hoy',
+    homeBannerTitle: 'Analiza y entiende la salud de tu animal',
+    homeBannerSubtitle: 'Sube una foto, un documento o describe un síntoma y obtén una explicación clara',
+    homeBannerCta: 'Empezar análisis',
     yourProgress: 'Tu Progreso',
     quickAccess: 'Accesos rápidos',
     exerciseLibrary: 'Biblioteca de Ejercicios',
@@ -92,7 +95,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     
     // Quick Access
     vest: 'Chaleco',
-    gpsRoutes: 'Rutas GPS',
+    walks: 'Paseos',
     history: 'Historial',
     academy: 'Academia',
     pro: 'PRO',
@@ -528,6 +531,9 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     goodEvening: 'Good evening',
     positiveEducation: 'Positive Education',
     todaySession: "Today's Session",
+    homeBannerTitle: 'Analyze and understand your pet\'s health',
+    homeBannerSubtitle: 'Upload a photo, a document or describe a symptom and get a clear explanation',
+    homeBannerCta: 'Start analysis',
     yourProgress: 'Your Progress',
     quickAccess: 'Quick Access',
     exerciseLibrary: 'Exercise Library',
@@ -559,7 +565,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     
     // Quick Access
     vest: 'Vest',
-    gpsRoutes: 'GPS Routes',
+    walks: 'Walks',
     history: 'History',
     academy: 'Academy',
     pro: 'PRO',
@@ -990,6 +996,9 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     goodEvening: 'Buonasera',
     positiveEducation: 'Educazione Positiva',
     todaySession: 'Sessione di Oggi',
+    homeBannerTitle: 'Analizza e comprendi la salute del tuo animale',
+    homeBannerSubtitle: 'Carica una foto, un documento o descrivi un sintomo e ottieni una spiegazione chiara',
+    homeBannerCta: 'Inizia analisi',
     yourProgress: 'I Tuoi Progressi',
     quickAccess: 'Accesso Rapido',
     exerciseLibrary: 'Libreria Esercizi',
@@ -1021,7 +1030,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     
     // Quick Access
     vest: 'Gilet',
-    gpsRoutes: 'Percorsi GPS',
+    walks: 'Passeggiate',
     history: 'Cronologia',
     academy: 'Accademia',
     pro: 'PRO',

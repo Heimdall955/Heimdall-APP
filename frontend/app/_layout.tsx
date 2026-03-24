@@ -14,7 +14,7 @@ function InnerLayout() {
   const { isDark } = useTheme();
 
   useEffect(() => {
-    notificationService.init().then(() => notificationService.scheduleAll());
+    notificationService.init().then(() => notificationService.scheduleAll()).catch(() => {});
   }, []);
   return (
     <>

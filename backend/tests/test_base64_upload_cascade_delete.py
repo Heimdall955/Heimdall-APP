@@ -14,7 +14,7 @@ import os
 import base64
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://pet-profile-edit.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://pet-symptom-check-2.preview.emergentagent.com').rstrip('/')
 
 # Test credentials from review request
 REVIEW_EMAIL = "review@heimdall-ai.tech"
