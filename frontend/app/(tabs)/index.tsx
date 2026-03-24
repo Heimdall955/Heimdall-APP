@@ -36,6 +36,8 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [weeklySummary, setWeeklySummary] = useState<any>(null);
   const [todayEmotion, setTodayEmotion] = useState<string | null>(null);
+  const [lastConsultation, setLastConsultation] = useState<string | null>(null);
+  const [lastMedicalEvent, setLastMedicalEvent] = useState<any>(null);
   const [dogStatus, setDogStatus] = useState<DogStatus>({
     status: 'calm', bones: 0, level: 1, level_progress: 0,
     level_target: 500, streak_days: 0, exercises_completed: 0, practice_minutes: 0,
@@ -55,10 +57,13 @@ export default function HomeScreen() {
       const token = await SecureStore.getItemAsync('session_token');
       if (!token) return;
       const headers = { Authorization: `Bearer ${token}` };
-      const [statsRes, weeklyRes, diaryRes] = await Promise.all([
+      const dogId = currentDog?.id;
+      const [statsRes, weeklyRes, diaryRes, chatRes, medicalRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/api/gamification/stats`, { headers }),
         axios.get(`${BACKEND_URL}/api/gamification/weekly-summary`, { headers }).catch(() => null),
         axios.get(`${BACKEND_URL}/api/diary/today`, { headers }).catch(() => null),
+        dogId ? axios.get(`${BACKEND_URL}/api/chat/history?dog_id=${dogId}&limit=1`, { headers }).catch(() => null) : null,
+        dogId ? axios.get(`${BACKEND_URL}/api/medical-events/${dogId}`, { headers }).catch(() => null) : null,
       ]);
       setDogStatus(prev => ({
         ...prev, bones: statsRes.data.bones, level: statsRes.data.level || 1,
@@ -69,8 +74,12 @@ export default function HomeScreen() {
       if (weeklyRes?.data) setWeeklySummary(weeklyRes.data);
       if (diaryRes?.data?.logged_today) setTodayEmotion(diaryRes.data.emotion);
       else setTodayEmotion(null);
-    } catch (error) { console.log('Error loading gamification stats'); }
-  }, []);
+      if (chatRes?.data?.length > 0) setLastConsultation(chatRes.data[0].created_at);
+      else setLastConsultation(null);
+      if (medicalRes?.data?.length > 0) setLastMedicalEvent(medicalRes.data[0]);
+      else setLastMedicalEvent(null);
+    } catch (error) { console.log('Error loading home data'); }
+  }, [currentDog?.id]);
 
   useEffect(() => { loadGamificationStats(); }, [loadGamificationStats]);
   useFocusEffect(useCallback(() => { loadGamificationStats(); }, [loadGamificationStats]));
@@ -88,6 +97,24 @@ export default function HomeScreen() {
   const onRefresh = async () => { setRefreshing(true); await loadGamificationStats(); setRefreshing(false); };
   const getGreeting = () => { const h = new Date().getHours(); return h < 12 ? t('goodMorning') : h < 19 ? t('goodAfternoon') : t('goodEvening'); };
   const handleQuickAccess = (route: string | null) => { if (route) router.push(route as any); };
+  const formatRelativeDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return t('today');
+    if (diffDays === 1) return t('yesterday');
+    if (diffDays < 7) return `${t('daysAgo').replace('{n}', String(diffDays))}`;
+    return date.toLocaleDateString(language === 'es' ? 'es-ES' : language === 'it' ? 'it-IT' : 'en-US', { day: 'numeric', month: 'short' });
+  };
+  const getEmotionLabel = (emotion: string) => {
+    const map: Record<string, string> = { happy: t('emotionHappy'), calm: t('emotionCalm'), worried: t('emotionWorried'), sad: t('emotionSad'), stressed: t('emotionStressed') };
+    return map[emotion] || emotion;
+  };
+  const getMedicalTypeLabel = (type: string) => {
+    const map: Record<string, string> = { vaccine: t('vaccines'), deworming: t('deworming'), vet_visit: t('vetVisits'), medication: t('medications'), surgery: t('surgeries'), other: t('other') };
+    return map[type] || type;
+  };
 
   const s = useMemo(() => createStyles(colors, shadows), [colors, shadows]);
 
@@ -185,33 +212,52 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Progress */}
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>{t('yourProgress')}</Text>
-          <Card style={{ padding: Spacing.lg }}>
-            <View style={{ marginBottom: Spacing.lg }}>
-              <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, marginBottom: Spacing.sm }}>{t('level')} {dogStatus.level}: {t('explorerLevel')}</Text>
-              <View style={{ height: 8, backgroundColor: colors.grayLight, borderRadius: 4, marginBottom: 4 }}>
-                <View style={{ height: '100%', backgroundColor: colors.primary, borderRadius: 4, width: `${(dogStatus.level_progress / dogStatus.level_target) * 100}%` }} />
+        {/* Health Activity */}
+        <View style={s.section} data-testid="health-activity-section">
+          <Text style={s.sectionTitle}>{t('healthActivity')}</Text>
+          <View style={{ gap: Spacing.sm }}>
+            {/* Last AI Consultation */}
+            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/(tabs)/chat')} data-testid="last-consultation-card">
+              <View style={[s.healthCardIcon, { backgroundColor: colors.primary + '15' }]}>
+                <Ionicons name="chatbubbles" size={22} color={colors.primary} />
               </View>
-              <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, textAlign: 'right' }}>{dogStatus.level_progress}/{dogStatus.level_target} XP</Text>
-              <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary }}>{t('almostLevel')} {dogStatus.level + 1}!</Text>
-              <View style={{ flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.md }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.accentLight, paddingVertical: 6, paddingHorizontal: Spacing.sm, borderRadius: BorderRadius.sm }}>
-                  <Ionicons name="flash" size={14} color={colors.accent} />
-                  <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text }}>{dogStatus.streak_days} {t('days')}</Text>
-                </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.healthCardTitle, { color: colors.text }]}>{t('lastConsultation')}</Text>
+                <Text style={[s.healthCardValue, { color: lastConsultation ? colors.text : colors.textSecondary }]}>
+                  {lastConsultation ? formatRelativeDate(lastConsultation) : t('noConsultationsYet')}
+                </Text>
               </View>
-            </View>
-            <View style={s.statsRow}>
-              <View style={{ alignItems: 'center' }}><Text style={s.statNumber}>{dogStatus.exercises_completed}</Text><Text style={s.statLabel}>{t('exercises')}</Text></View>
-              <View style={{ alignItems: 'center' }}><Text style={s.statNumber}>{dogStatus.practice_minutes}m</Text><Text style={s.statLabel}>{t('practice')}</Text></View>
-              <View style={{ alignItems: 'center' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Text style={s.statNumber}>{dogStatus.bones}</Text><Text style={{ fontSize: 24 }}>{'🦴'}</Text></View>
-                <Text style={s.statLabel}>{t('bones')}</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.gray} />
+            </TouchableOpacity>
+
+            {/* Last Medical Event */}
+            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/historial-medico')} data-testid="last-medical-card">
+              <View style={[s.healthCardIcon, { backgroundColor: colors.accentOrange + '15' }]}>
+                <Ionicons name="medical" size={22} color={colors.accentOrange} />
               </View>
-            </View>
-          </Card>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.healthCardTitle, { color: colors.text }]}>{t('lastMedicalEvent')}</Text>
+                <Text style={[s.healthCardValue, { color: lastMedicalEvent ? colors.text : colors.textSecondary }]}>
+                  {lastMedicalEvent ? `${getMedicalTypeLabel(lastMedicalEvent.type)} - ${formatRelativeDate(lastMedicalEvent.date)}` : t('noEventsYet')}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gray} />
+            </TouchableOpacity>
+
+            {/* Emotional State */}
+            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/diario')} data-testid="emotion-state-card">
+              <View style={[s.healthCardIcon, { backgroundColor: todayEmotion ? '#4CAF50' + '15' : colors.accentPurple + '15' }]}>
+                <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={22} color={todayEmotion ? '#4CAF50' : colors.accentPurple} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.healthCardTitle, { color: colors.text }]}>{t('emotionalState')}</Text>
+                <Text style={[s.healthCardValue, { color: todayEmotion ? colors.text : colors.textSecondary }]}>
+                  {todayEmotion ? getEmotionLabel(todayEmotion) : t('notRegisteredToday')}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gray} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Emotion Diary Banner */}
@@ -398,4 +444,8 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   leaderboardCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.lg, ...S.sm },
   exerciseCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm, ...S.sm },
   exerciseIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  healthCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.lg, ...S.sm },
+  healthCardIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  healthCardTitle: { fontSize: FontSizes.sm, fontWeight: '500', marginBottom: 2 },
+  healthCardValue: { fontSize: FontSizes.md, fontWeight: '700' },
 });

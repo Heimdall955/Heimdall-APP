@@ -35,6 +35,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Sin permisos GPS/Location (Google Play compatible) (18 Mar 2026)
 - Banner principal IA: "Analiza y entiende la salud de tu animal" con CTA al chat (24 Mar 2026)
 - Accesos rapidos actualizados: Chaleco, Subir analisis, Describir sintoma, Historial, Salud, Ficha Clinica - reubicados debajo del banner (24 Mar 2026)
+- Seccion "Actividad de salud" reemplaza "Tu Progreso": ultima consulta IA, ultimo evento medico, estado emocional con datos reales (24 Mar 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)
