@@ -342,20 +342,23 @@ export default function HomeScreen() {
           </Card>
         </View>
 
-        {/* Leaderboard Preview */}
-        <View style={s.section} data-testid="leaderboard-preview-section">
-          <View style={s.sectionHeader}>
-            <Text style={s.sectionTitle}>{t('leaderboard')}</Text>
-            <TouchableOpacity onPress={() => router.push('/leaderboard')}><Text style={s.viewAllLink}>{t('viewLeaderboard')}</Text></TouchableOpacity>
+        {/* What does Heimdall do? */}
+        <View style={s.section} data-testid="what-heimdall-does-section">
+          <Text style={s.sectionTitle}>{t('whatDoesHeimdall')}</Text>
+          <View style={{ gap: Spacing.sm }}>
+            {[
+              { icon: 'search', color: colors.primary, text: t('heimdallFeature1') },
+              { icon: 'shield-checkmark', color: colors.accentOrange, text: t('heimdallFeature2') },
+              { icon: 'bulb', color: colors.accentMint, text: t('heimdallFeature3') },
+            ].map((item, i) => (
+              <View key={i} style={s.healthCard}>
+                <View style={[s.healthCardIcon, { backgroundColor: item.color + '15' }]}>
+                  <Ionicons name={item.icon as any} size={22} color={item.color} />
+                </View>
+                <Text style={{ flex: 1, fontSize: FontSizes.md, fontWeight: '600', color: colors.text }}>{item.text}</Text>
+              </View>
+            ))}
           </View>
-          <TouchableOpacity style={s.leaderboardCard} onPress={() => router.push('/leaderboard')} data-testid="leaderboard-card">
-            <Ionicons name="trophy" size={28} color="#FFD700" />
-            <View style={{ flex: 1, marginLeft: Spacing.md }}>
-              <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: colors.text }}>{t('leaderboardTitle')}</Text>
-              <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, marginTop: 2 }}>{t('topTrainers')}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors.gray} />
-          </TouchableOpacity>
         </View>
 
         {/* HANI Passport */}

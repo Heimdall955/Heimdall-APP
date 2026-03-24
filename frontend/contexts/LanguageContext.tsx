@@ -491,6 +491,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     emotionWorried: 'Preocupado',
     emotionSad: 'Triste',
     emotionStressed: 'Estresado',
+    // What does Heimdall do
+    whatDoesHeimdall: 'Que hace Heimdall?',
+    heimdallFeature1: 'Entiende la salud de tu animal',
+    heimdallFeature2: 'Detecta riesgos a tiempo',
+    heimdallFeature3: 'Toma decisiones con claridad',
   },
   en: {
     // General
@@ -973,6 +978,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     emotionWorried: 'Worried',
     emotionSad: 'Sad',
     emotionStressed: 'Stressed',
+    // What does Heimdall do
+    whatDoesHeimdall: 'What does Heimdall do?',
+    heimdallFeature1: 'Understands your pet\'s health',
+    heimdallFeature2: 'Detects risks early',
+    heimdallFeature3: 'Make decisions with clarity',
   },
   it: {
     // General
@@ -1455,6 +1465,11 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     emotionWorried: 'Preoccupato',
     emotionSad: 'Triste',
     emotionStressed: 'Stressato',
+    // What does Heimdall do
+    whatDoesHeimdall: 'Cosa fa Heimdall?',
+    heimdallFeature1: 'Comprende la salute del tuo animale',
+    heimdallFeature2: 'Rileva i rischi in tempo',
+    heimdallFeature3: 'Prendi decisioni con chiarezza',
   },
 };
 
