@@ -40,6 +40,8 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Eliminado todo el sistema PRO/Premium: sin badges, sin gates, sin pagos, todo abierto y gratuito (29 May 2026)
 - API key OpenAI actualizada y respuesta multiidioma mejorada: secciones de salud traducidas correctamente en EN/IT (29 May 2026)
 - Limpieza codigo residual PRO: eliminados pro.tsx, useSubscription.ts, ProBadge, ProModal, FREE_LIMITS, UsageCounter, tarjeta PRO en perfil (29 May 2026)
+- Recuperacion de contraseña: enlace "Olvidaste tu contraseña?" en login con flujo de codigo de 6 digitos (29 May 2026)
+- Google Login verificado: flujo completo con Emergent Auth (29 May 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)

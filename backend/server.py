@@ -127,6 +127,14 @@ class User(BaseModel):
 class SessionExchange(BaseModel):
     session_id: str
 
+class PasswordResetRequest(BaseModel):
+    email: str
+
+class PasswordResetConfirm(BaseModel):
+    email: str
+    code: str
+    new_password: str
+
 class DogCreate(BaseModel):
     name: str
     age: int  # in months
@@ -446,6 +454,60 @@ async def login(data: UserLogin, request: Request):
     except Exception as e:
         logger.error(f"Login error: {e}")
         raise HTTPException(status_code=500, detail="Error de autenticación")
+
+# Password reset codes stored in memory (in production, use Redis or DB)
+password_reset_codes: dict = {}
+
+@api_router.post("/auth/request-reset")
+async def request_password_reset(data: PasswordResetRequest):
+    """Request a password reset code"""
+    clean_email = data.email.strip().lower()
+    
+    result = supabase.table("users").select("id, email").eq("email", clean_email).execute()
+    
+    # Always return success to prevent email enumeration
+    if not result.data or len(result.data) == 0:
+        return {"message": "Si el email existe, se ha generado un código de recuperación"}
+    
+    import random
+    code = str(random.randint(100000, 999999))
+    password_reset_codes[clean_email] = {
+        "code": code,
+        "expires": datetime.now(timezone.utc).timestamp() + 600,  # 10 min
+        "user_id": result.data[0]["id"]
+    }
+    
+    logger.info(f"Password reset code for {clean_email}: {code}")
+    
+    return {"message": "Si el email existe, se ha generado un código de recuperación", "code": code}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: PasswordResetConfirm):
+    """Reset password with code"""
+    clean_email = data.email.strip().lower()
+    
+    reset_data = password_reset_codes.get(clean_email)
+    if not reset_data:
+        raise HTTPException(status_code=400, detail="No hay solicitud de recuperación para este email")
+    
+    if datetime.now(timezone.utc).timestamp() > reset_data["expires"]:
+        del password_reset_codes[clean_email]
+        raise HTTPException(status_code=400, detail="El código ha expirado. Solicita uno nuevo.")
+    
+    if reset_data["code"] != data.code:
+        raise HTTPException(status_code=400, detail="Código incorrecto")
+    
+    if not validate_password(data.new_password):
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    
+    supabase.table("users").update({
+        "password_hash": hash_password(data.new_password),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }).eq("id", reset_data["user_id"]).execute()
+    
+    del password_reset_codes[clean_email]
+    
+    return {"message": "Contraseña actualizada correctamente"}
 
 @api_router.post("/auth/session")
 async def exchange_session(data: SessionExchange):
