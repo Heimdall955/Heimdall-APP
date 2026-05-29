@@ -837,13 +837,15 @@ Frase base implícita (sin sonar repetitivo):
 
 # 10) ESTRUCTURA OBLIGATORIA EN RESPUESTAS DE SALUD
 
-Cuando el tema sea salud animal, responde con este patrón:
-1. Lo que observo (síntomas/datos/valores)
-2. Lo que podría significar (posibles explicaciones)
-3. Señales de alerta (qué sería preocupante)
-4. Nivel de urgencia (leve/moderado/urgente)
-5. Qué haría ahora (pasos seguros, preparar visita, qué monitorizar)
-6. Pregunta final (para seguir y afinar)
+Cuando el tema sea salud animal, responde con este patrón (traduce los encabezados al idioma del usuario):
+1. Lo que observo / What I observe / Cosa osservo (síntomas/datos/valores)
+2. Lo que podría significar / What it could mean / Cosa potrebbe significare (posibles explicaciones)
+3. Señales de alerta / Warning signs / Segnali di allerta (qué sería preocupante)
+4. Nivel de urgencia / Urgency level / Livello di urgenza (leve/moderado/urgente)
+5. Qué haría ahora / What I would do now / Cosa farei ora (pasos seguros, preparar visita, qué monitorizar)
+6. Pregunta final / Final question / Domanda finale (para seguir y afinar)
+
+IMPORTANT: Always use the headers in the SAME language the user wrote in. If user writes in English, ALL headers and text must be in English. If in Italian, ALL in Italian.
 
 # 11) PDFs Y ANÁLISIS DE SANGRE
 
@@ -1226,25 +1228,36 @@ Usa esta informacion para personalizar tus respuestas. Menciona a {dog_name} por
         elif lang_lower in ['es', 'spanish', 'español']:
             detected_language = "español"
     
-    # Remove unused variable
-    # Build the complete system prompt
+    # Build the complete system prompt with language instruction
+    language_instruction = ""
+    if detected_language != "español":
+        language_instruction = f"\n\nCRITICAL LANGUAGE RULE: The user is communicating in {detected_language}. You MUST respond ENTIRELY in {detected_language}. This includes ALL section headers like 'Lo que observo' -> translate them to {detected_language}. Translate 'Señales de alerta', 'Nivel de urgencia', 'Qué haría ahora', and ALL other text. Not a single word in Spanish. EVERY word must be in {detected_language}."
+    
     complete_system_prompt = f"""{HEIMDALL_SYSTEM_PROMPT}
 
 {dog_context}
 {feedback_context}
+{language_instruction}
 """
     
-    # Build messages with aggressive language override for non-Spanish
+    # Build messages
     messages_to_send = [
         {"role": "system", "content": complete_system_prompt},
-        *history[-6:],
-        {"role": "user", "content": data.content}
     ]
     
     if detected_language != "español":
         messages_to_send.append({
             "role": "system", 
-            "content": f"CRITICAL OVERRIDE: The user just wrote in {detected_language}. You MUST respond ENTIRELY in {detected_language}. Do NOT use Spanish. Every single word of your response must be in {detected_language}."
+            "content": f"LANGUAGE CONTEXT: This conversation is in {detected_language}. Respond ONLY in {detected_language}."
+        })
+    
+    messages_to_send.extend(history[-6:])
+    messages_to_send.append({"role": "user", "content": data.content})
+    
+    if detected_language != "español":
+        messages_to_send.append({
+            "role": "system", 
+            "content": f"CRITICAL OVERRIDE: The user just wrote in {detected_language}. You MUST respond ENTIRELY in {detected_language}. Translate ALL section headers (Lo que observo -> What I observe, Señales de alerta -> Warning signs, etc). Not a single word in Spanish."
         })
     
     # Call OpenAI API directly - Using gpt-4o-mini for cost efficiency

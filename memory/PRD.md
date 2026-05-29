@@ -38,6 +38,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Seccion "Actividad de salud" reemplaza "Tu Progreso": ultima consulta IA, ultimo evento medico, estado emocional con datos reales (24 Mar 2026)
 - Seccion "Que hace Heimdall?" reemplaza Ranking/Leaderboard: 3 tarjetas de propuesta de valor (24 Mar 2026)
 - Eliminado todo el sistema PRO/Premium: sin badges, sin gates, sin pagos, todo abierto y gratuito (29 May 2026)
+- API key OpenAI actualizada y respuesta multiidioma mejorada: secciones de salud traducidas correctamente en EN/IT (29 May 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)
