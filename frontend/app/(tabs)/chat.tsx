@@ -23,10 +23,6 @@ interface ChatMessage {
   content: string; created_at: string; rating?: 'up' | 'down'; file_url?: string; file_type?: string;
 }
 
-interface DailyUsage {
-  messages: number; photos: number; videos: number; pdfs: number;
-}
-
 const SUGGESTED_QUESTIONS = {
   es: ['¿Por qué mi perro ladra tanto?', 'Juegos para días de lluvia', '¿Cuánto debe comer mi perro?'],
   en: ['Why does my dog bark so much?', 'Games for rainy days', 'How much should my dog eat?'],
@@ -38,12 +34,10 @@ const WELCOME_MESSAGES = {
   it: { title: 'Ciao! Sono Heimdall', text: 'Sono il tuo guardiano conversazionale. Sono qui per accompagnarti, guidarti e proteggere il tuo migliore amico. Come posso aiutarti?', suggestions: 'Prova a chiedere:' },
 };
 const ATTACHMENT_LABELS = {
-  es: { photo: 'Foto', video: 'Video', bloodTest: 'Analisis', attachTitle: 'Adjuntar archivo', photoDesc: 'Foto de tu mascota', videoDesc: 'Video corto (max 4s)', bloodDesc: 'Analisis de sangre (PDF)', proOnly: 'Solo PRO', limitReached: 'Limite alcanzado', upgradeToPro: 'Hazte PRO', messagesLeft: 'mensajes restantes hoy', photosLeft: 'foto restante hoy', unlimited: 'Ilimitado', limitTitle: 'Limite alcanzado', limitMsg: 'Has alcanzado el limite diario de mensajes gratuitos. Hazte PRO para chatear sin limites.', photoLimitMsg: 'Has alcanzado el limite diario de fotos gratuitas. Hazte PRO para enviar fotos ilimitadas.', videoProMsg: 'El analisis de video es una funcion PRO exclusiva.', pdfProMsg: 'El analisis de documentos es una funcion PRO exclusiva.' },
-  en: { photo: 'Photo', video: 'Video', bloodTest: 'Analysis', attachTitle: 'Attach file', photoDesc: 'Photo of your pet', videoDesc: 'Short video (max 4s)', bloodDesc: 'Blood test (PDF)', proOnly: 'PRO Only', limitReached: 'Limit reached', upgradeToPro: 'Go PRO', messagesLeft: 'messages left today', photosLeft: 'photo left today', unlimited: 'Unlimited', limitTitle: 'Limit reached', limitMsg: 'You have reached your daily free message limit. Go PRO for unlimited chat.', photoLimitMsg: 'You have reached your daily free photo limit. Go PRO for unlimited photos.', videoProMsg: 'Video analysis is a PRO exclusive feature.', pdfProMsg: 'Document analysis is a PRO exclusive feature.' },
-  it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)', proOnly: 'Solo PRO', limitReached: 'Limite raggiunto', upgradeToPro: 'Passa a PRO', messagesLeft: 'messaggi rimasti oggi', photosLeft: 'foto rimasta oggi', unlimited: 'Illimitato', limitTitle: 'Limite raggiunto', limitMsg: 'Hai raggiunto il limite giornaliero di messaggi gratuiti. Passa a PRO per chattare senza limiti.', photoLimitMsg: 'Hai raggiunto il limite giornaliero di foto gratuite. Passa a PRO per foto illimitate.', videoProMsg: "L'analisi video è una funzione PRO esclusiva.", pdfProMsg: "L'analisi dei documenti è una funzione PRO esclusiva." },
+  es: { photo: 'Foto', video: 'Video', bloodTest: 'Analisis', attachTitle: 'Adjuntar archivo', photoDesc: 'Foto de tu mascota', videoDesc: 'Video corto (max 4s)', bloodDesc: 'Analisis de sangre (PDF)' },
+  en: { photo: 'Photo', video: 'Video', bloodTest: 'Analysis', attachTitle: 'Attach file', photoDesc: 'Photo of your pet', videoDesc: 'Short video (max 4s)', bloodDesc: 'Blood test (PDF)' },
+  it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)' },
 };
-
-const FREE_LIMITS = { photos: 999, videos: 999, pdfs: 999 };
 
 export default function ChatScreen() {
   const { currentDog, user } = useAuth();
@@ -56,27 +50,13 @@ export default function ChatScreen() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
-  const [showProModal, setShowProModal] = useState(false);
-  const [proModalMessage, setProModalMessage] = useState('');
-  const isPro = true;
-  const [usage, setUsage] = useState<DailyUsage>({ messages: 0, photos: 0, videos: 0, pdfs: 0 });
   const scrollViewRef = useRef<ScrollView>(null);
 
   const suggestedQuestions = SUGGESTED_QUESTIONS[language];
   const welcomeMessage = WELCOME_MESSAGES[language];
   const labels = ATTACHMENT_LABELS[language];
 
-  const photosRemaining = isPro ? -1 : Math.max(0, FREE_LIMITS.photos - usage.photos);
-
-  const fetchUsage = useCallback(async () => {
-    try {
-      const token = await SecureStore.getItemAsync('session_token');
-      const res = await axios.get(`${BACKEND_URL}/api/chat/daily-usage`, { headers: { Authorization: `Bearer ${token}` } });
-      setUsage(res.data.usage);
-    } catch (e) { console.log('Error fetching usage:', e); }
-  }, []);
-
-  useEffect(() => { loadChatHistory(); fetchUsage(); }, []);
+  useEffect(() => { loadChatHistory(); }, []);
 
   const loadChatHistory = async () => {
     try {
@@ -86,8 +66,6 @@ export default function ChatScreen() {
     } catch (error) { console.log('Error loading chat history:', error); }
     finally { setIsLoadingHistory(false); }
   };
-
-  const showProGate = (msg: string) => { setProModalMessage(msg); setShowProModal(true); };
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -107,7 +85,6 @@ export default function ChatScreen() {
 
   const pickImage = async () => {
     setShowAttachMenu(false);
-    if (!isPro && usage.photos >= FREE_LIMITS.photos) { return; }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.7 });
     if (!result.canceled && result.assets[0]) {
       const userMsg: ChatMessage = { id: `temp_${Date.now()}`, user_id: user?.user_id || '', dog_id: currentDog?.id, role: 'user', content: `[FOTO] ${result.assets[0].fileName || 'foto.jpg'}${inputText ? '\n' + inputText : ''}`, created_at: new Date().toISOString(), file_type: 'image' };
@@ -132,8 +109,7 @@ export default function ChatScreen() {
         setMessages(prev => [...prev, response.data]);
         setUsage(prev => ({ ...prev, photos: prev.photos + 1 }));
       } catch (error: any) {
-        if (error?.response?.status === 403) { showProGate(labels.photoLimitMsg); }
-        else { Alert.alert(t('error'), error?.response?.data?.detail || 'Error al enviar foto'); }
+        Alert.alert(t('error'), error?.response?.data?.detail || 'Error al enviar foto');
         setMessages(prev => prev.filter(m => m.id !== userMsg.id));
       } finally { setIsLoading(false); setUploadProgress(null); setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100); }
     }
@@ -161,8 +137,7 @@ export default function ChatScreen() {
       const response = await axios.post(`${BACKEND_URL}/api/chat/upload`, formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }, timeout: 60000 });
       setMessages(prev => [...prev, response.data]);
     } catch (error: any) {
-      if (error?.response?.status === 403) { const detail = error?.response?.data?.detail || ''; if (detail.includes('PHOTO')) showProGate(labels.photoLimitMsg); else if (detail.includes('VIDEO')) showProGate(labels.videoProMsg); else if (detail.includes('PDF')) showProGate(labels.pdfProMsg); else showProGate(labels.limitMsg); }
-      else { Alert.alert(t('error'), error?.response?.data?.detail || 'Error uploading file'); }
+      Alert.alert(t('error'), error?.response?.data?.detail || 'Error uploading file');
       setMessages(prev => prev.filter(m => m.id !== userMsg.id));
     }
     finally { setIsLoading(false); setUploadProgress(null); setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100); }
@@ -248,14 +223,6 @@ export default function ChatScreen() {
     );
   };
 
-  const UsageCounter = () => null;
-
-  const ProBadge = ({ small }: { small?: boolean }) => (
-    <View style={[s.proBadgeInline, small && { paddingHorizontal: 4, paddingVertical: 1 }]}>
-      <Ionicons name="diamond" size={small ? 8 : 10} color="#FFF" />
-      <Text style={[s.proBadgeText, small && { fontSize: 8 }]}>PRO</Text>
-    </View>
-  );
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
@@ -266,7 +233,6 @@ export default function ChatScreen() {
             <View style={s.haniAvatar}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 48, height: 48 }} resizeMode="cover" /></View>
             <View><Text style={s.headerTitle}>Heimdall</Text><Text style={s.headerSub}>{t('guardianChat') || 'Tu guardian'}</Text></View>
           </View>
-          <UsageCounter />
         </View>
 
         <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ padding: Spacing.md, paddingBottom: Spacing.lg }}
@@ -384,11 +350,6 @@ const cs = (C: any, S: any) => StyleSheet.create({
   haniAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   headerTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text },
   headerSub: { fontSize: FontSizes.sm, color: C.textSecondary },
-  usageBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: C.primary + '40', backgroundColor: C.primary + '08' },
-  usageBadgePro: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, backgroundColor: C.accent + '15', borderWidth: 1, borderColor: C.accent + '40' },
-  usageBadgeText: { fontSize: FontSizes.sm, fontWeight: '700', color: C.primary },
-  usageBarBg: { width: 40, height: 4, borderRadius: 2, backgroundColor: C.grayLight, overflow: 'hidden' },
-  usageBarFill: { height: '100%', borderRadius: 2 },
   welcomeAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg, overflow: 'hidden' },
   quickActionCard: { flex: 1, backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: 4, ...S.sm, borderWidth: 1, borderColor: C.grayLight, position: 'relative' },
   suggestionChip: { backgroundColor: C.cardBg, paddingVertical: Spacing.md, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: C.primary + '40', ...S.sm },
@@ -410,13 +371,4 @@ const cs = (C: any, S: any) => StyleSheet.create({
   quickBarBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderRadius: BorderRadius.lg, backgroundColor: C.background, borderWidth: 1, borderColor: C.grayLight },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   attachMenu: { backgroundColor: C.cardBg, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: Spacing.lg, paddingBottom: 40 },
-  proModal: { backgroundColor: C.cardBg, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, paddingBottom: 40, alignItems: 'center' },
-  proModalIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.accent + '15', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg },
-  proModalTitle: { fontSize: FontSizes.xl, fontWeight: '800', color: C.text, marginBottom: Spacing.sm },
-  proModalText: { fontSize: FontSizes.md, color: C.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: Spacing.lg },
-  proModalButton: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, backgroundColor: C.accent, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl, borderRadius: BorderRadius.lg },
-  proModalButtonText: { fontSize: FontSizes.md, fontWeight: '700', color: '#FFF' },
-  proBadgeInline: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: C.accent, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, position: 'absolute', top: -4, right: -4 },
-  proBadgeText: { fontSize: 9, fontWeight: '800', color: '#FFF' },
-  limitWarning: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, paddingHorizontal: Spacing.sm, paddingVertical: 4, marginBottom: Spacing.xs },
 });
