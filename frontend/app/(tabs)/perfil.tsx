@@ -489,33 +489,7 @@ export default function PerfilScreen() {
           )}
         </View>
 
-        {/* PRO Card */}
-        <TouchableOpacity onPress={() => router.push('/pro')} activeOpacity={0.85} data-testid="pro-card-btn">
-          <View style={{ backgroundColor: '#0D0D0D', borderRadius: BorderRadius.xl, padding: Spacing.lg, marginBottom: Spacing.lg, borderWidth: 1, borderColor: '#C8A96030' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.md }}>
-              <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: '#C8A96020', borderWidth: 1.5, borderColor: '#C8A960', alignItems: 'center', justifyContent: 'center' }}>
-                <Ionicons name="shield" size={24} color="#C8A960" />
-              </View>
-              <View style={{ marginLeft: Spacing.md, flex: 1 }}>
-                <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: '#E8D5A3', letterSpacing: 0.5 }}>Heimdall Guardian</Text>
-                <Text style={{ fontSize: FontSizes.sm, color: '#8A8070', marginTop: 2 }}>{t('proSubtitle')}</Text>
-              </View>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: Spacing.sm }}>
-              <Text style={{ fontSize: 28, fontWeight: '800', color: '#E8E0D0' }}>4,90 EUR</Text>
-              <Text style={{ fontSize: FontSizes.sm, color: '#8A8070', marginLeft: 6 }}>/{t('monthly').toLowerCase()}</Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: Spacing.md }}>
-              <View style={{ backgroundColor: '#C8A960', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: '#0D0D0D' }}>{t('free7days') || '7 DIAS GRATIS'}</Text>
-              </View>
-              <Text style={{ fontSize: FontSizes.xs, color: '#C8A960', fontStyle: 'italic' }}>Heimdall ilumina lo que no siempre sabemos ver</Text>
-            </View>
-            <View style={{ backgroundColor: '#C8A960', borderRadius: 12, paddingVertical: 13, alignItems: 'center' }}>
-              <Text style={{ fontSize: FontSizes.md, fontWeight: '800', color: '#0D0D0D', letterSpacing: 1 }}>{t('tryFree') || 'PROBAR GRATIS'}</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+        {/* PRO Card - Removed */}
 
         {/* Menu */}
         <View style={styles.section}>

@@ -37,6 +37,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Accesos rapidos actualizados: Chaleco, Subir analisis, Describir sintoma, Historial, Salud, Ficha Clinica - reubicados debajo del banner (24 Mar 2026)
 - Seccion "Actividad de salud" reemplaza "Tu Progreso": ultima consulta IA, ultimo evento medico, estado emocional con datos reales (24 Mar 2026)
 - Seccion "Que hace Heimdall?" reemplaza Ranking/Leaderboard: 3 tarjetas de propuesta de valor (24 Mar 2026)
+- Eliminado todo el sistema PRO/Premium: sin badges, sin gates, sin pagos, todo abierto y gratuito (29 May 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)

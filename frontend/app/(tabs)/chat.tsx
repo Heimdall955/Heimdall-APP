@@ -43,7 +43,7 @@ const ATTACHMENT_LABELS = {
   it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)', proOnly: 'Solo PRO', limitReached: 'Limite raggiunto', upgradeToPro: 'Passa a PRO', messagesLeft: 'messaggi rimasti oggi', photosLeft: 'foto rimasta oggi', unlimited: 'Illimitato', limitTitle: 'Limite raggiunto', limitMsg: 'Hai raggiunto il limite giornaliero di messaggi gratuiti. Passa a PRO per chattare senza limiti.', photoLimitMsg: 'Hai raggiunto il limite giornaliero di foto gratuite. Passa a PRO per foto illimitate.', videoProMsg: "L'analisi video è una funzione PRO esclusiva.", pdfProMsg: "L'analisi dei documenti è una funzione PRO esclusiva." },
 };
 
-const FREE_LIMITS = { photos: 1, videos: 0, pdfs: 0 };
+const FREE_LIMITS = { photos: 999, videos: 999, pdfs: 999 };
 
 export default function ChatScreen() {
   const { currentDog, user } = useAuth();
@@ -58,7 +58,7 @@ export default function ChatScreen() {
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [showProModal, setShowProModal] = useState(false);
   const [proModalMessage, setProModalMessage] = useState('');
-  const [isPro, setIsPro] = useState(false);
+  const isPro = true;
   const [usage, setUsage] = useState<DailyUsage>({ messages: 0, photos: 0, videos: 0, pdfs: 0 });
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -72,7 +72,6 @@ export default function ChatScreen() {
     try {
       const token = await SecureStore.getItemAsync('session_token');
       const res = await axios.get(`${BACKEND_URL}/api/chat/daily-usage`, { headers: { Authorization: `Bearer ${token}` } });
-      setIsPro(res.data.is_pro);
       setUsage(res.data.usage);
     } catch (e) { console.log('Error fetching usage:', e); }
   }, []);
@@ -108,7 +107,7 @@ export default function ChatScreen() {
 
   const pickImage = async () => {
     setShowAttachMenu(false);
-    if (!isPro && usage.photos >= FREE_LIMITS.photos) { showProGate(labels.photoLimitMsg); return; }
+    if (!isPro && usage.photos >= FREE_LIMITS.photos) { return; }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.7 });
     if (!result.canceled && result.assets[0]) {
       const userMsg: ChatMessage = { id: `temp_${Date.now()}`, user_id: user?.user_id || '', dog_id: currentDog?.id, role: 'user', content: `[FOTO] ${result.assets[0].fileName || 'foto.jpg'}${inputText ? '\n' + inputText : ''}`, created_at: new Date().toISOString(), file_type: 'image' };
@@ -141,13 +140,11 @@ export default function ChatScreen() {
   };
   const pickVideo = async () => {
     setShowAttachMenu(false);
-    if (!isPro) { showProGate(labels.videoProMsg); return; }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], allowsEditing: false, videoMaxDuration: 4, quality: 0.5 });
     if (!result.canceled && result.assets[0]) await uploadFile(result.assets[0].uri, 'video', result.assets[0].fileName || 'video.mp4');
   };
   const pickPDF = async () => {
     setShowAttachMenu(false);
-    if (!isPro) { showProGate(labels.pdfProMsg); return; }
     try { const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf', copyToCacheDirectory: true }); if (!result.canceled && result.assets && result.assets[0]) await uploadFile(result.assets[0].uri, 'pdf', result.assets[0].name || 'document.pdf'); } catch (error) { console.log('Error picking PDF:', error); }
   };
 
@@ -251,15 +248,7 @@ export default function ChatScreen() {
     );
   };
 
-  const UsageCounter = () => {
-    if (isPro) return (
-      <View style={s.usageBadgePro} data-testid="usage-counter-pro">
-        <Ionicons name="diamond" size={14} color={colors.accent} />
-        <Text style={[s.usageBadgeText, { color: colors.accent }]}>PRO</Text>
-      </View>
-    );
-    return null;
-  };
+  const UsageCounter = () => null;
 
   const ProBadge = ({ small }: { small?: boolean }) => (
     <View style={[s.proBadgeInline, small && { paddingHorizontal: 4, paddingVertical: 1 }]}>
@@ -290,27 +279,22 @@ export default function ChatScreen() {
               <Text style={{ fontSize: FontSizes.xl, fontWeight: '700', color: colors.text, marginBottom: Spacing.sm }}>{welcomeMessage.title}</Text>
               <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: Spacing.lg }}>{welcomeMessage.text}</Text>
 
-              {/* Quick Actions with PRO badges */}
+              {/* Quick Actions */}
               <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl, width: '100%' }} data-testid="quick-actions">
                 <TouchableOpacity style={s.quickActionCard} onPress={pickImage}>
                   <Ionicons name="camera" size={28} color={colors.primary} />
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.photo}</Text>
                   <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{labels.photoDesc}</Text>
-                  {!isPro && photosRemaining <= 0 && <ProBadge small />}
                 </TouchableOpacity>
                 <TouchableOpacity style={s.quickActionCard} onPress={pickVideo}>
-                  <View style={{ position: 'relative' }}>
-                    <Ionicons name="videocam" size={28} color={colors.accentOrange} />
-                  </View>
+                  <Ionicons name="videocam" size={28} color={colors.accentOrange} />
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.video}</Text>
                   <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{labels.videoDesc}</Text>
-                  {!isPro && <ProBadge small />}
                 </TouchableOpacity>
                 <TouchableOpacity style={s.quickActionCard} onPress={pickPDF}>
                   <Ionicons name="document-text" size={28} color={colors.accentPurple} />
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.bloodTest}</Text>
                   <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{labels.bloodDesc}</Text>
-                  {!isPro && <ProBadge small />}
                 </TouchableOpacity>
               </View>
 
@@ -336,43 +320,21 @@ export default function ChatScreen() {
           )}
         </ScrollView>
 
-        {/* PRO Upgrade Modal */}
-        <Modal visible={showProModal} transparent animationType="fade" onRequestClose={() => setShowProModal(false)}>
-          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowProModal(false)}>
-            <View style={s.proModal} data-testid="pro-modal">
-              <View style={s.proModalIcon}>
-                <Ionicons name="diamond" size={40} color={colors.accent} />
-              </View>
-              <Text style={s.proModalTitle}>{labels.limitTitle}</Text>
-              <Text style={s.proModalText}>{proModalMessage}</Text>
-              <TouchableOpacity style={s.proModalButton} onPress={() => { setShowProModal(false); router.push('/pro'); }} data-testid="go-pro-button">
-                <Ionicons name="diamond" size={18} color="#FFF" />
-                <Text style={s.proModalButtonText}>{labels.upgradeToPro} - 4,90 EUR/mes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={{ paddingVertical: Spacing.md }} onPress={() => setShowProModal(false)}>
-                <Text style={{ color: colors.textSecondary, fontSize: FontSizes.md }}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
 
-        {/* Quick Bar with PRO indicators */}
+        {/* Quick Bar */}
         {!isLoading && (
           <View style={s.quickBar} data-testid="quick-bar">
             <TouchableOpacity style={s.quickBarBtn} onPress={pickImage}>
-              <Ionicons name="camera" size={20} color={!isPro && photosRemaining <= 0 ? colors.gray : colors.primary} />
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !isPro && photosRemaining <= 0 ? colors.gray : colors.text }}>{labels.photo}</Text>
-              {!isPro && photosRemaining <= 0 && <ProBadge small />}
+              <Ionicons name="camera" size={20} color={colors.primary} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: colors.text }}>{labels.photo}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.quickBarBtn} onPress={pickVideo}>
-              <Ionicons name="videocam" size={20} color={!isPro ? colors.gray : colors.accentOrange} />
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !isPro ? colors.gray : colors.text }}>{labels.video}</Text>
-              {!isPro && <ProBadge small />}
+              <Ionicons name="videocam" size={20} color={colors.accentOrange} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: colors.text }}>{labels.video}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.quickBarBtn} onPress={pickPDF}>
-              <Ionicons name="document-text" size={20} color={!isPro ? colors.gray : colors.accentPurple} />
-              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: !isPro ? colors.gray : colors.text }}>{labels.bloodTest}</Text>
-              {!isPro && <ProBadge small />}
+              <Ionicons name="document-text" size={20} color={colors.accentPurple} />
+              <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: colors.text }}>{labels.bloodTest}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -396,16 +358,15 @@ export default function ChatScreen() {
             <View style={s.attachMenu} data-testid="attach-menu">
               <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: Spacing.lg }}>{labels.attachTitle}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                {[{ icon: 'camera', color: colors.primary, bg: colors.primaryLight, label: labels.photo, desc: !isPro && photosRemaining <= 0 ? labels.limitReached : labels.photoDesc, fn: pickImage, locked: !isPro && photosRemaining <= 0 },
-                  { icon: 'videocam', color: colors.accentOrange, bg: '#FFF0E0', label: labels.video, desc: !isPro ? labels.proOnly : labels.videoDesc, fn: pickVideo, locked: !isPro },
-                  { icon: 'document-text', color: colors.accentPurple, bg: '#F0E8FF', label: labels.bloodTest, desc: !isPro ? labels.proOnly : labels.bloodDesc, fn: pickPDF, locked: !isPro }].map((a, i) => (
-                  <TouchableOpacity key={i} style={{ alignItems: 'center', gap: Spacing.sm, width: 90, opacity: a.locked ? 0.5 : 1 }} onPress={a.fn}>
-                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                {[{ icon: 'camera', color: colors.primary, bg: colors.primaryLight, label: labels.photo, desc: labels.photoDesc, fn: pickImage },
+                  { icon: 'videocam', color: colors.accentOrange, bg: '#FFF0E0', label: labels.video, desc: labels.videoDesc, fn: pickVideo },
+                  { icon: 'document-text', color: colors.accentPurple, bg: '#F0E8FF', label: labels.bloodTest, desc: labels.bloodDesc, fn: pickPDF }].map((a, i) => (
+                  <TouchableOpacity key={i} style={{ alignItems: 'center', gap: Spacing.sm, width: 90 }} onPress={a.fn}>
+                    <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: a.bg, alignItems: 'center', justifyContent: 'center' }}>
                       <Ionicons name={a.icon as any} size={24} color={a.color} />
-                      {a.locked && <View style={{ position: 'absolute', top: -4, right: -4 }}><ProBadge small /></View>}
                     </View>
                     <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{a.label}</Text>
-                    <Text style={{ fontSize: 10, color: a.locked ? colors.error : colors.textSecondary, textAlign: 'center' }}>{a.desc}</Text>
+                    <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>{a.desc}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
