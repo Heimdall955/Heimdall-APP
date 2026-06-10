@@ -42,6 +42,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Limpieza codigo residual PRO: eliminados pro.tsx, useSubscription.ts, ProBadge, ProModal, FREE_LIMITS, UsageCounter, tarjeta PRO en perfil (29 May 2026)
 - Recuperacion de contraseña: enlace "Olvidaste tu contraseña?" en login con flujo de codigo de 6 digitos (29 May 2026)
 - Google Login verificado: flujo completo con Emergent Auth (29 May 2026)
+- Google Play compliance: orientation=default, eliminado edgeToEdgeEnabled obsoleto, eliminado expo-location plugin, eliminados permisos GPS contradictorios (29 May 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)
