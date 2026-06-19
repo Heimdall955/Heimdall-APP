@@ -20,9 +20,13 @@ import bcrypt
 import httpx
 import base64
 import jwt
-from google.oauth2 import service_account
-from google.auth.transport.requests import Request as GoogleRequest
-from google.auth import jwt as google_jwt
+try:
+    from google.oauth2 import service_account
+    from google.auth.transport.requests import Request as GoogleRequest
+    from google.auth import jwt as google_jwt
+    GOOGLE_WALLET_AVAILABLE = True
+except ImportError:
+    GOOGLE_WALLET_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -2899,6 +2903,8 @@ def create_wallet_pass_jwt(dog_data: dict, user_data: dict, clinical_data: dict 
 @api_router.get("/wallet/pass/{dog_id}")
 async def get_wallet_pass(dog_id: str, user: User = Depends(require_auth)):
     """Generate Google Wallet pass URL for a dog"""
+    if not GOOGLE_WALLET_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Google Wallet no disponible en este servidor")
     try:
         # Get dog data
         result = supabase.table("dogs").select("*").eq("id", dog_id).eq("user_id", user.user_id).execute()
