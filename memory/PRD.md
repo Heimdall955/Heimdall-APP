@@ -43,6 +43,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Recuperacion de contraseña: enlace "Olvidaste tu contraseña?" en login con flujo de codigo de 6 digitos (29 May 2026)
 - Google Login verificado: flujo completo con Emergent Auth (29 May 2026)
 - Google Play compliance: orientation=default, eliminado edgeToEdgeEnabled obsoleto, eliminado expo-location plugin, eliminados permisos GPS contradictorios (29 May 2026)
+- Logo actualizado: nuevo logo con fondo transparente en todas las variantes, splash screen oscuro (#0A0A0A) sin verde Emergent (19 Jun 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)
