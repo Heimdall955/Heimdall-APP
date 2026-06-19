@@ -44,6 +44,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Google Login verificado: flujo completo con Emergent Auth (29 May 2026)
 - Google Play compliance: orientation=default, eliminado edgeToEdgeEnabled obsoleto, eliminado expo-location plugin, eliminados permisos GPS contradictorios (29 May 2026)
 - Logo actualizado: nuevo logo con fondo transparente en todas las variantes, splash screen oscuro (#0A0A0A) sin verde Emergent (19 Jun 2026)
+- EAS Build Fixes: Limpieza .gitignore (entradas malformadas/duplicadas), eliminacion dependencias obsoletas (react-native-purchases, expo-location, react-native-dotenv), resolucion duplicado @react-navigation/core a v7.14.0, eliminacion ruta "pro" residual en _layout.tsx, eliminacion services/purchases.ts (19 Jun 2026)
 
 ## Archivos Clave
 - frontend/app/rutas.tsx (paseos con podometro - reescrito)
@@ -58,6 +59,7 @@ App premium para monitoreo de salud animal, educacion y conexion con chaleco int
 - Bloqueados: ACTIVITY_RECOGNITION, ACCESS_*_LOCATION
 
 ## Tareas Pendientes
-- P1: EAS Development Build (Bluetooth real)
-- P2: RevenueCat produccion
+- P1: EAS Development Build (Bluetooth real) - Dependencias y config limpiadas, listo para build
+- P2: Integrar envio real de emails para recuperacion de contrasena (actualmente MOCKED)
+- P2: Decidir tecnologia del chaleco (Bluetooth vs WiFi) e implementar conectividad real
 - P2: Google Play Store publicacion

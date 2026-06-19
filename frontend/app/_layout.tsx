@@ -26,7 +26,6 @@ function InnerLayout() {
         <Stack.Screen name="chaleco" options={{ presentation: 'modal' }} />
         <Stack.Screen name="historial-medico" options={{ presentation: 'card' }} />
         <Stack.Screen name="rutas" options={{ presentation: 'card' }} />
-        <Stack.Screen name="pro" options={{ presentation: 'modal' }} />
         <Stack.Screen name="leccion" options={{ presentation: 'card' }} />
         <Stack.Screen name="ejercicio" options={{ presentation: 'card' }} />
         <Stack.Screen name="leaderboard" options={{ presentation: 'card' }} />
