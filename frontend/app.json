@@ -25,6 +25,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A0A0A"
       },
+      "versionCode": 114,
       "package": "com.heimdall.app",
       "permissions": [
         "CAMERA",
