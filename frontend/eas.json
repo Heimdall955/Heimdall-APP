@@ -22,17 +22,11 @@
     },
     "production": {
       "android": {
-        "buildType": "app-bundle",
-        "enableProguardInReleaseBuilds": true
+        "buildType": "app-bundle"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./google-services.json",
-        "track": "internal"
-      }
-    }
+    "production": {}
   }
 }
