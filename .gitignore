@@ -31,8 +31,8 @@ dist/
 dist
 
 # Environment files (comprehensive coverage)
-.env
-.env.*
+!.env
+!.env.*
 !.env.example
 *token.json*
 *credentials.json*
@@ -80,7 +80,5 @@ agenthub/agents/youtube/db
 
 # Mobile development
 android-sdk/
-*.env
 credentials.json
-*.key
 .credentials
