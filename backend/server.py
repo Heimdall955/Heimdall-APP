@@ -2956,14 +2956,10 @@ async def health_check():
 # ==================== CORS & APP SETUP ====================
 
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else []
-# Always allow the preview/production URL
-PREVIEW_URL = os.environ.get("PREVIEW_URL", "https://pet-symptom-check-2.preview.emergentagent.com")
-if PREVIEW_URL and PREVIEW_URL not in ALLOWED_ORIGINS:
-    ALLOWED_ORIGINS.append(PREVIEW_URL)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
@@ -2998,4 +2994,5 @@ async def root_health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    port = int(os.environ.get("PORT", 8001))
+    uvicorn.run(app, host="0.0.0.0", port=port)
