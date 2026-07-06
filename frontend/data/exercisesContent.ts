@@ -68,6 +68,28 @@ const DB: Record<Language, Record<string, ExerciseData>> = {
         { nombre: 'Girar', instrucciones: '1. Con un premio, guia su nariz en circulo\n2. Sigue hasta que complete la vuelta\n3. Premia al finalizar\n4. Anade "Gira"', repeticiones: '5 giros por lado', tip: 'Hazlo lentamente al principio' },
       ],
     },
+    'clicker': {
+      id: 'clicker', titulo: 'Entrenamiento con Clicker', subtitulo: 'Precision y timing',
+      descripcion: 'El clicker es una herramienta que marca el momento exacto del comportamiento correcto. Aprende a usarlo.',
+      huesos: 10, color: '#9C27B0', icon: 'radio-button-on',
+      ejercicios: [
+        { nombre: 'Cargar el Clicker', instrucciones: '1. Click + premio inmediato\n2. Repite 20 veces seguidas\n3. Tu perro asociara el sonido con recompensa\n4. Haz esto antes de cualquier otro ejercicio', repeticiones: '20 repeticiones', tip: 'El premio debe llegar en menos de 1 segundo tras el click' },
+        { nombre: 'Captura de Sentado', instrucciones: '1. Espera sin hacer nada\n2. Cuando tu perro se siente solo, haz click\n3. Premia inmediatamente\n4. Espera que se levante y vuelva a sentarse', repeticiones: '10 repeticiones', tip: 'No digas nada, solo observa y marca el momento exacto' },
+        { nombre: 'Modelado Libre', instrucciones: '1. Pon un objeto nuevo en el suelo\n2. Haz click por cualquier interaccion: mirar, acercarse, tocar\n3. Ve subiendo criterio gradualmente\n4. Tu perro aprendera a ofrecer comportamientos', repeticiones: '5 minutos', tip: 'Acepta cualquier intento al principio, luego pide mas' },
+        { nombre: 'Timing Perfecto', instrucciones: '1. Lanza una pelota al aire\n2. Practica hacer click justo cuando llegue al punto mas alto\n3. Despues practica con tu perro\n4. Marca el instante exacto del comportamiento', repeticiones: '15 lanzamientos', tip: 'Practica primero sin el perro para mejorar tu reflejos' },
+      ],
+    },
+    'olfato': {
+      id: 'olfato', titulo: 'Juegos de Olfato', subtitulo: 'Estimulacion mental natural',
+      descripcion: 'El olfato es el sentido mas poderoso de tu perro. Estos juegos lo cansan mentalmente y le dan confianza.',
+      huesos: 15, color: '#00BCD4', icon: 'search',
+      ejercicios: [
+        { nombre: 'Busqueda en Casa', instrucciones: '1. Esconde 5 premios por una habitacion\n2. Deja que tu perro te vea esconder los primeros\n3. Di "Busca" y deja que los encuentre\n4. Celebra cada hallazgo', repeticiones: '3 rondas', tip: 'Empieza con escondites faciles y visibles' },
+        { nombre: 'Juego de Vasos', instrucciones: '1. Pon 3 vasos boca abajo\n2. Esconde un premio bajo uno\n3. Deja que tu perro olfatee\n4. Cuando senale el correcto, levanta el vaso', repeticiones: '10 repeticiones', tip: 'Al principio deja que vea donde lo pones' },
+        { nombre: 'Alfombra de Olfateo', instrucciones: '1. Esparce premios en hierba o alfombra\n2. Deja que tu perro olfatee y busque\n3. Aumenta la dificultad con premios mas pequenos\n4. Esto simula la busqueda natural de comida', repeticiones: '5-10 minutos', tip: 'Es un ejercicio excelente para dias de lluvia' },
+        { nombre: 'Rastro de Premios', instrucciones: '1. Arrastra un premio oloroso por el suelo\n2. Deja un rastro de 3-5 metros\n3. Pon el premio grande al final\n4. Di "Busca" y guia a tu perro al inicio del rastro', repeticiones: '3 rastros', tip: 'Usa premios muy olorosos como queso o salchicha' },
+      ],
+    },
   },
   en: {
     'senales-basicas': {
@@ -118,6 +140,28 @@ const DB: Record<Language, Record<string, ExerciseData>> = {
         { nombre: 'Spin', instrucciones: '1. With a treat, guide their nose in a circle\n2. Follow until they complete the turn\n3. Reward at the end\n4. Add "Spin"', repeticiones: '5 spins each way', tip: 'Go slowly at first' },
       ],
     },
+    'clicker': {
+      id: 'clicker', titulo: 'Clicker Training', subtitulo: 'Precision and timing',
+      descripcion: 'The clicker marks the exact moment of the correct behavior. Learn to use it effectively.',
+      huesos: 10, color: '#9C27B0', icon: 'radio-button-on',
+      ejercicios: [
+        { nombre: 'Load the Clicker', instrucciones: '1. Click + immediate treat\n2. Repeat 20 times in a row\n3. Your dog will associate the sound with reward\n4. Do this before any other exercise', repeticiones: '20 reps', tip: 'The treat must come within 1 second of the click' },
+        { nombre: 'Capture a Sit', instrucciones: '1. Wait without doing anything\n2. When your dog sits on their own, click\n3. Reward immediately\n4. Wait for them to stand and sit again', repeticiones: '10 reps', tip: 'Say nothing, just watch and mark the exact moment' },
+        { nombre: 'Free Shaping', instrucciones: '1. Place a new object on the floor\n2. Click for any interaction: looking, approaching, touching\n3. Gradually raise criteria\n4. Your dog will learn to offer behaviors', repeticiones: '5 minutes', tip: 'Accept any attempt at first, then ask for more' },
+        { nombre: 'Perfect Timing', instrucciones: '1. Toss a ball in the air\n2. Practice clicking right when it reaches the highest point\n3. Then practice with your dog\n4. Mark the exact instant of the behavior', repeticiones: '15 tosses', tip: 'Practice without the dog first to improve your reflexes' },
+      ],
+    },
+    'olfato': {
+      id: 'olfato', titulo: 'Scent Games', subtitulo: 'Natural mental stimulation',
+      descripcion: 'Scent is your dog\'s most powerful sense. These games tire them mentally and build confidence.',
+      huesos: 15, color: '#00BCD4', icon: 'search',
+      ejercicios: [
+        { nombre: 'Indoor Search', instrucciones: '1. Hide 5 treats around a room\n2. Let your dog see you hide the first ones\n3. Say "Find it" and let them search\n4. Celebrate each find', repeticiones: '3 rounds', tip: 'Start with easy, visible hiding spots' },
+        { nombre: 'Cup Game', instrucciones: '1. Place 3 cups upside down\n2. Hide a treat under one\n3. Let your dog sniff\n4. When they indicate the right one, lift the cup', repeticiones: '10 reps', tip: 'At first, let them see where you put it' },
+        { nombre: 'Snuffle Mat', instrucciones: '1. Scatter treats in grass or on a mat\n2. Let your dog sniff and search\n3. Increase difficulty with smaller treats\n4. This simulates natural foraging', repeticiones: '5-10 minutes', tip: 'Great exercise for rainy days' },
+        { nombre: 'Treat Trail', instrucciones: '1. Drag a smelly treat along the ground\n2. Leave a trail of 3-5 meters\n3. Place a big treat at the end\n4. Say "Find it" and guide your dog to the start', repeticiones: '3 trails', tip: 'Use very smelly treats like cheese or sausage' },
+      ],
+    },
   },
   it: {
     'senales-basicas': {
@@ -166,6 +210,28 @@ const DB: Record<Language, Record<string, ExerciseData>> = {
       ejercicios: [
         { nombre: 'Zampa', instrucciones: '1. Con il cane seduto, tocca la sua zampa\n2. Quando la alza, premia\n3. Aggiungi il segnale "Zampa"\n4. Pratica con entrambe le zampe', repeticiones: '10 ripetizioni', tip: 'Tocca delicatamente' },
         { nombre: 'Gira', instrucciones: '1. Con un premio, guida il naso in cerchio\n2. Continua finche non completa il giro\n3. Premia alla fine\n4. Aggiungi "Gira"', repeticiones: '5 giri per lato', tip: 'Fallo lentamente all\'inizio' },
+      ],
+    },
+    'clicker': {
+      id: 'clicker', titulo: 'Addestramento con Clicker', subtitulo: 'Precisione e timing',
+      descripcion: 'Il clicker marca il momento esatto del comportamento corretto. Impara ad usarlo efficacemente.',
+      huesos: 10, color: '#9C27B0', icon: 'radio-button-on',
+      ejercicios: [
+        { nombre: 'Caricare il Clicker', instrucciones: '1. Click + premio immediato\n2. Ripeti 20 volte di fila\n3. Il tuo cane associera il suono alla ricompensa\n4. Fallo prima di qualsiasi altro esercizio', repeticiones: '20 ripetizioni', tip: 'Il premio deve arrivare entro 1 secondo dal click' },
+        { nombre: 'Cattura del Seduto', instrucciones: '1. Aspetta senza fare nulla\n2. Quando il tuo cane si siede da solo, fai click\n3. Premia immediatamente\n4. Aspetta che si alzi e si risieda', repeticiones: '10 ripetizioni', tip: 'Non dire niente, osserva e marca il momento esatto' },
+        { nombre: 'Modellamento Libero', instrucciones: '1. Metti un oggetto nuovo per terra\n2. Fai click per qualsiasi interazione: guardare, avvicinarsi, toccare\n3. Alza gradualmente i criteri\n4. Il tuo cane imparera a offrire comportamenti', repeticiones: '5 minuti', tip: 'Accetta qualsiasi tentativo all\'inizio' },
+        { nombre: 'Timing Perfetto', instrucciones: '1. Lancia una palla in aria\n2. Pratica il click quando raggiunge il punto piu alto\n3. Poi pratica con il tuo cane\n4. Marca l\'istante esatto del comportamento', repeticiones: '15 lanci', tip: 'Pratica prima senza il cane per migliorare i riflessi' },
+      ],
+    },
+    'olfato': {
+      id: 'olfato', titulo: 'Giochi di Fiuto', subtitulo: 'Stimolazione mentale naturale',
+      descripcion: 'L\'olfatto e il senso piu potente del tuo cane. Questi giochi lo stancano mentalmente e gli danno fiducia.',
+      huesos: 15, color: '#00BCD4', icon: 'search',
+      ejercicios: [
+        { nombre: 'Ricerca in Casa', instrucciones: '1. Nascondi 5 premi in una stanza\n2. Lascia che il cane ti veda nascondere i primi\n3. Di "Cerca" e lascialo cercare\n4. Festeggia ogni ritrovamento', repeticiones: '3 round', tip: 'Inizia con nascondigli facili e visibili' },
+        { nombre: 'Gioco dei Bicchieri', instrucciones: '1. Metti 3 bicchieri capovolti\n2. Nascondi un premio sotto uno\n3. Lascia che il cane annusi\n4. Quando indica quello giusto, alza il bicchiere', repeticiones: '10 ripetizioni', tip: 'All\'inizio lascia che veda dove lo metti' },
+        { nombre: 'Tappetino Olfattivo', instrucciones: '1. Spargi premi nell\'erba o su un tappetino\n2. Lascia che il cane annusi e cerchi\n3. Aumenta la difficolta con premi piu piccoli\n4. Questo simula la ricerca naturale di cibo', repeticiones: '5-10 minuti', tip: 'Ottimo esercizio per i giorni di pioggia' },
+        { nombre: 'Pista di Premi', instrucciones: '1. Trascina un premio odoroso per terra\n2. Lascia una pista di 3-5 metri\n3. Metti un grosso premio alla fine\n4. Di "Cerca" e guida il cane all\'inizio della pista', repeticiones: '3 piste', tip: 'Usa premi molto odorosi come formaggio o wurstel' },
       ],
     },
   },
