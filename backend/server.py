@@ -464,14 +464,14 @@ password_reset_codes: dict = {}
 
 @api_router.post("/auth/request-reset")
 async def request_password_reset(data: PasswordResetRequest):
-    """Request a password reset code"""
+    """Request a password reset code — code is sent via email only"""
     clean_email = data.email.strip().lower()
     
     result = supabase.table("users").select("id, email").eq("email", clean_email).execute()
     
     # Always return success to prevent email enumeration
     if not result.data or len(result.data) == 0:
-        return {"message": "Si el email existe, se ha generado un código de recuperación"}
+        return {"message": "Si el email existe, recibirás un código de recuperación"}
     
     import random
     code = str(random.randint(100000, 999999))
@@ -481,9 +481,32 @@ async def request_password_reset(data: PasswordResetRequest):
         "user_id": result.data[0]["id"]
     }
     
-    logger.info(f"Password reset code for {clean_email}: {code}")
+    # Send code via Resend email — never expose in API response
+    try:
+        import resend
+        resend.api_key = os.environ.get("RESEND_API_KEY", "")
+        resend.Emails.send({
+            "from": f"Heimdall <{os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')}>",
+            "to": [clean_email],
+            "subject": "Código de recuperación - Heimdall",
+            "html": f"""
+                <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+                    <h2 style="color:#1a1a2e;">Recuperación de contraseña</h2>
+                    <p>Has solicitado recuperar tu contraseña en Heimdall.</p>
+                    <p>Tu código de verificación es:</p>
+                    <div style="background:#f0f0f5;border-radius:8px;padding:16px;text-align:center;margin:16px 0;">
+                        <span style="font-size:32px;font-weight:bold;letter-spacing:6px;color:#1a1a2e;">{code}</span>
+                    </div>
+                    <p style="color:#666;font-size:13px;">Este código expira en 10 minutos. Si no solicitaste esto, ignora este mensaje.</p>
+                </div>
+            """
+        })
+        logger.info(f"Password reset email sent to {clean_email}")
+    except Exception as e:
+        logger.error(f"Failed to send reset email to {clean_email}: {e}")
+        # Don't fail the request — code is stored, user can retry
     
-    return {"message": "Si el email existe, se ha generado un código de recuperación", "code": code}
+    return {"message": "Si el email existe, recibirás un código de recuperación"}
 
 @api_router.post("/auth/reset-password")
 async def reset_password(data: PasswordResetConfirm):
