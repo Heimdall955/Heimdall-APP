@@ -11,7 +11,7 @@ import axios from 'axios';
 
 export default function RegistroScreen() {
   const router = useRouter();
-  const { login, register, loginWithGoogle, isLoading, refreshDogs } = useAuth();
+  const { login, register, isLoading, refreshDogs } = useAuth();
   const { t } = useLanguage();
   
   const [isLogin, setIsLogin] = useState(true);
@@ -93,14 +93,6 @@ export default function RegistroScreen() {
         t('error') || 'Error',
         error.response?.data?.detail || t('genericError') || 'Ha ocurrido un error. Inténtalo de nuevo.'
       );
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      await loginWithGoogle();
-    } catch (error) {
-      Alert.alert(t('error') || 'Error', t('googleLoginError') || 'No se pudo iniciar sesión con Google');
     }
   };
 
@@ -230,17 +222,6 @@ export default function RegistroScreen() {
               style={styles.submitButton}
             />
 
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>{t('orContinueWith') || 'o continúa con'}</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-              <Ionicons name="logo-google" size={24} color={Colors.text} />
-              <Text style={styles.googleButtonText}>{t('continueWithGoogle') || 'Continuar con Google'}</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity 
               style={styles.switchMode} 
               onPress={() => setIsLogin(!isLogin)}
@@ -360,37 +341,6 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: Spacing.md,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: Spacing.lg,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.grayLight,
-  },
-  dividerText: {
-    color: Colors.textSecondary,
-    paddingHorizontal: Spacing.md,
-    fontSize: FontSizes.sm,
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.white,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.grayLight,
-    gap: Spacing.sm,
-  },
-  googleButtonText: {
-    fontSize: FontSizes.md,
-    fontWeight: '600',
-    color: Colors.text,
   },
   switchMode: {
     marginTop: Spacing.lg,
