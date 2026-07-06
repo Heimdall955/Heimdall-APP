@@ -40,6 +40,10 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Integración Resend para envío real de emails de recuperación (remitente: heimdall@escudolegado.com)
 - FIX: Chat Heimdall ahora lee tabla medical_events (vacunas, desparasitaciones, cirugías) al construir contexto
 - FIX: Query clinical_files corregida (columnas inexistentes eliminadas, datos clínicos parseados desde JSON en campo notes)
+- FEATURE: Campo edad en formularios ahora tiene toggle Meses/Años (onboarding-mascota, onboarding/perro, perfil editar)
+  - Cuando edad >= 12 meses, se muestra automáticamente en años
+  - Al guardar siempre se convierte a meses para la DB
+  - Al editar, se convierte automáticamente entre unidades
 - server.py desplegado en VPS con todas las correcciones
 - Resend instalado en VPS y .env actualizado con RESEND_API_KEY y SENDER_EMAIL
 - server.py desplegado en VPS con la corrección de seguridad
