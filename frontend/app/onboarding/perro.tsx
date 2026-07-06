@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button, Input, Card } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../config/backend';
 
 export default function PerroScreen() {
   const router = useRouter();

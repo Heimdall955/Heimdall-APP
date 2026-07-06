@@ -9,7 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 interface LeaderboardEntry {
   rank: number;

@@ -24,7 +24,7 @@ interface DogStatus {
   practice_minutes: number;
 }
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../config/backend';
 
 export default function HomeScreen() {
   const router = useRouter();

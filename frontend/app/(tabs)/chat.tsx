@@ -16,7 +16,7 @@ import { useLanguage, getLanguageName } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../config/backend';
 
 interface ChatMessage {
   id: string; user_id: string; dog_id?: string; role: 'user' | 'assistant';

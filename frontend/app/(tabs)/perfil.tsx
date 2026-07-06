@@ -18,7 +18,7 @@ import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 import { BiometricAuth } from '../../utils/biometricAuth';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../config/backend';
 
 interface GamificationData {
   bones: number; xp: number; level: number; level_progress: number; level_target: number;

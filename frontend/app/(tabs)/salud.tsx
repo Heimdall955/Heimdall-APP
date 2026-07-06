@@ -12,7 +12,7 @@ import { Card, ProgressCircle } from '../../components/ui';
 import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../../config/backend';
 
 interface MedicalEvent {
   id: string;

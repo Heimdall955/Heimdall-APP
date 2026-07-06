@@ -8,6 +8,7 @@ import { Button, Input } from '../../components/ui';
 import { Colors, Spacing, BorderRadius, FontSizes, Shadows } from '../../constants/theme';
 import { BiometricAuth } from '../../utils/biometricAuth';
 import axios from 'axios';
+import { BACKEND_URL } from '../../config/backend';
 
 export default function RegistroScreen() {
   const router = useRouter();
@@ -96,7 +97,6 @@ export default function RegistroScreen() {
     }
   };
 
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
   const handleRequestReset = async () => {
     const emailToReset = resetEmail.trim().toLowerCase();

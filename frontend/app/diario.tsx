@@ -11,7 +11,7 @@ import { Card } from '../components/ui';
 import { SecureStore } from '../utils/secureStore';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 const EMOTION_KEYS = [
   { id: 'happy', icon: 'happy', labelKey: 'emotionHappy', color: '#4CAF50', bg: '#E8F5E9' },

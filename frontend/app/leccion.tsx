@@ -10,7 +10,7 @@ import { Card } from '../components/ui';
 import { useLanguage, Language } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 // Base de datos de lecciones de educación canina en positivo
 const LECCIONES_DB: Record<string, Leccion> = {

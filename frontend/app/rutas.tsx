@@ -11,7 +11,7 @@ import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 const STEP_LENGTH_KM = 0.0007;
 const DAILY_GOAL = 5000;
 

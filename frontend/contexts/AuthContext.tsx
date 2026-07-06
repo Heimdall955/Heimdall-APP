@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 import axios from 'axios';
 import { User, Dog, Language } from '../types';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 interface AuthContextType {
   user: User | null;

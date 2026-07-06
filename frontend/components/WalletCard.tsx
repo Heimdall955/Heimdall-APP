@@ -7,7 +7,7 @@ import { Spacing, BorderRadius, FontSizes } from '../constants/theme';
 import axios from 'axios';
 import { SecureStore } from '../utils/secureStore';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 interface WalletCardProps {
   dogId: string; dogName: string; dogBreed?: string; dogAge?: number;

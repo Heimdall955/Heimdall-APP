@@ -11,7 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
 import { getGameData } from '../data/gamesContent';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 export default function JuegoScreen() {
   const router = useRouter();

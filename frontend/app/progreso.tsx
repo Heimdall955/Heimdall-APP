@@ -11,7 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { SecureStore } from '../utils/secureStore';
 import { getAllPrograms } from '../data/programsContent';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 const ALL_PROGRAM_ICONS: Record<string, string> = {
   'educacion-basica': 'school',

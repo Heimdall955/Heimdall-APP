@@ -10,7 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { SecureStore } from '../utils/secureStore';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+import { BACKEND_URL } from '../config/backend';
 
 const PET_TYPES = [
   { id: 'dog', icon: 'paw', color: '#4CAF50', bg: '#E8F5E9' },

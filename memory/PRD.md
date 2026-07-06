@@ -64,7 +64,16 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Deploy backend en Hostinger VPS con Caddy reverse proxy
 - Frontend actualizado: EXPO_PUBLIC_BACKEND_URL=https://heimdall.escudolegado.com
 
+## Cambios 6 Jul 2026 (fork actual)
+- ROOT CAUSE del fallo en producción v118: el fork del entorno reescribió frontend/.env con la URL de preview de Emergent, y el AAB compilado incrustó esa URL efímera → chat, recuperar contraseña y guardar perro fallaban en la app de Google Play.
+- FIX PERMANENTE: creado frontend/config/backend.ts — en builds de producción (release) BACKEND_URL es SIEMPRE https://heimdall.escudolegado.com (hardcodeado con __DEV__); en desarrollo usa EXPO_PUBLIC_BACKEND_URL. Los 19 archivos que leían process.env ahora importan de config/backend.
+- eas.json: perfil production ahora define env EXPO_PUBLIC_BACKEND_URL=https://heimdall.escudolegado.com (cinturón y tirantes).
+- app.json: versionCode 118 → 119 (necesario para re-subir a Google Play).
+- Verificado contra el VPS: login ✅, /api/auth/request-reset ✅ (email Resend), /api/chat ✅ (respuesta LLM OK). El backend del VPS estaba correcto todo el tiempo.
+- IMPORTANTE PARA FUTUROS AGENTES: nunca depender de frontend/.env para la URL de producción; los forks lo reescriben. config/backend.ts es la fuente de verdad.
+
 ## Tareas Pendientes
+- P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
 - P2: Decidir tecnología del chaleco (Bluetooth vs WiFi) e implementar conectividad real
 - P2: Google Play Store - subir nueva versión con backend permanente
