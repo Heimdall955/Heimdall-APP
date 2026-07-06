@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.heimdall.app",
+      "bundleIdentifier": "app.emergent.hanigpsfixf4b1b81d",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Track your dog's walks and routes",
         "NSLocationAlwaysUsageDescription": "Track your dog's location in background",
@@ -25,8 +25,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A0A0A"
       },
-      "versionCode": 117,
-      "package": "com.heimdall.app",
+      "versionCode": 118,
+      "package": "app.emergent.hanigpsfixf4b1b81d",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",

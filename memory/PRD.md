@@ -45,6 +45,8 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
   - Al guardar siempre se convierte a meses para la DB
   - Al editar, se convierte automáticamente entre unidades
 - BUGFIX: Ejercicios 'Clicker' y 'Olfato' en Biblioteca de Ejercicios - añadido contenido completo (4 ejercicios cada uno, 3 idiomas)
+- BUILD: Package name cambiado a app.emergent.hanigpsfixf4b1b81d, versionCode 118
+- BUILD: Plugin withAndroidFeatures actualizado para resolver conflictos de content provider authorities (com.heimdall.app -> app.emergent.hanigpsfixf4b1b81d)
 - server.py desplegado en VPS con todas las correcciones
 - Resend instalado en VPS y .env actualizado con RESEND_API_KEY y SENDER_EMAIL
 - server.py desplegado en VPS con la corrección de seguridad
@@ -62,6 +64,6 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Frontend actualizado: EXPO_PUBLIC_BACKEND_URL=https://heimdall.escudolegado.com
 
 ## Tareas Pendientes
-- P1: Generar nuevo APK/AAB con EAS build (versionCode 117 y URL backend actualizada)
+- P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
 - P2: Decidir tecnología del chaleco (Bluetooth vs WiFi) e implementar conectividad real
 - P2: Google Play Store - subir nueva versión con backend permanente
