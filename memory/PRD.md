@@ -37,7 +37,10 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 
 ## Cambios recientes (6 Jul 2026)
 - SECURITY FIX: Endpoint /api/auth/request-reset ya NO devuelve el PIN de recuperación en la respuesta JSON
-- Integración Resend para envío real de emails de recuperación de contraseña
+- Integración Resend para envío real de emails de recuperación (remitente: heimdall@escudolegado.com)
+- FIX: Chat Heimdall ahora lee tabla medical_events (vacunas, desparasitaciones, cirugías) al construir contexto
+- FIX: Query clinical_files corregida (columnas inexistentes eliminadas, datos clínicos parseados desde JSON en campo notes)
+- server.py desplegado en VPS con todas las correcciones
 - Resend instalado en VPS y .env actualizado con RESEND_API_KEY y SENDER_EMAIL
 - server.py desplegado en VPS con la corrección de seguridad
 
@@ -55,6 +58,5 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 
 ## Tareas Pendientes
 - P1: Generar nuevo APK/AAB con EAS build (versionCode 117 y URL backend actualizada)
-- P2: Verificar dominio remitente en Resend para enviar desde @escudolegado.com (actualmente usa onboarding@resend.dev)
 - P2: Decidir tecnología del chaleco (Bluetooth vs WiFi) e implementar conectividad real
 - P2: Google Play Store - subir nueva versión con backend permanente
