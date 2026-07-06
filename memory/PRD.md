@@ -44,6 +44,7 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
   - Cuando edad >= 12 meses, se muestra automáticamente en años
   - Al guardar siempre se convierte a meses para la DB
   - Al editar, se convierte automáticamente entre unidades
+- BUGFIX: Ejercicios 'Clicker' y 'Olfato' en Biblioteca de Ejercicios - añadido contenido completo (4 ejercicios cada uno, 3 idiomas)
 - server.py desplegado en VPS con todas las correcciones
 - Resend instalado en VPS y .env actualizado con RESEND_API_KEY y SENDER_EMAIL
 - server.py desplegado en VPS con la corrección de seguridad
