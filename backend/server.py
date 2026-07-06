@@ -1239,15 +1239,48 @@ Usa esta informacion para personalizar tus respuestas. Menciona a {dog_name} por
             except Exception as e:
                 logger.error(f"Error getting lessons: {e}")
             
-            # Fetch clinical history
+            # Fetch medical events (vaccines, deworming, surgeries, etc.)
+            try:
+                med_result = supabase.table("medical_events").select("event_type,title,description,event_date").eq("dog_id", data.dog_id).order("event_date", desc=True).execute()
+                if med_result.data:
+                    med_entries = []
+                    for m in med_result.data:
+                        entry = f"  - {m.get('event_date', '')[:10]}: [{m.get('event_type', '')}] {m.get('title', '')}"
+                        if m.get('description'):
+                            entry += f" — {m['description']}"
+                        med_entries.append(entry)
+                    dog_context += f"\n# HISTORIAL MEDICO COMPLETO (vacunas, desparasitaciones, cirugias, revisiones)\n"
+                    dog_context += "\n".join(med_entries) + "\n"
+                    dog_context += "IMPORTANTE: Usa este historial para recordar vacunas, desparasitaciones y eventos medicos. Si el usuario pregunta, menciona fechas y detalles concretos.\n"
+            except Exception as e:
+                logger.error(f"Error getting medical events: {e}")
+            
+            # Fetch clinical file (profile: vet, allergies, conditions, medication)
             try:
                 clinical_result = supabase.table("clinical_files").select("type,title,date,vet_name,notes").eq("dog_id", data.dog_id).order("date", desc=True).limit(5).execute()
                 if clinical_result.data:
                     clinical_entries = []
                     for c in clinical_result.data:
-                        clinical_entries.append(f"  - {c.get('date', '')[:10]}: {c.get('title', '')} ({c.get('type', '')})" + (f" - Notas: {c.get('notes', '')}" if c.get('notes') else ""))
-                    dog_context += f"\n# HISTORIAL CLINICO RECIENTE\n" + "\n".join(clinical_entries) + "\n"
-                    dog_context += "Usa este historial para contextualizar cualquier consulta de salud.\n"
+                        entry = f"  - {c.get('date', '')[:10]}: {c.get('title', '')} ({c.get('type', '')})"
+                        if c.get('vet_name'):
+                            entry += f" - Veterinario: {c['vet_name']}"
+                        # Parse profile JSON from notes
+                        notes_raw = c.get('notes', '')
+                        if notes_raw:
+                            try:
+                                import json as json_mod
+                                profile = json_mod.loads(notes_raw)
+                                if profile.get('allergies'):
+                                    entry += f" - Alergias: {profile['allergies']}"
+                                if profile.get('chronic_conditions'):
+                                    entry += f" - Condiciones: {profile['chronic_conditions']}"
+                                if profile.get('current_medication'):
+                                    entry += f" - Medicacion: {profile['current_medication']}"
+                            except Exception:
+                                entry += f" - Notas: {notes_raw}"
+                        clinical_entries.append(entry)
+                    dog_context += f"\n# FICHA CLINICA\n" + "\n".join(clinical_entries) + "\n"
+                    dog_context += "Usa esta ficha clinica para contextualizar cualquier consulta de salud.\n"
             except Exception as e:
                 logger.error(f"Error getting clinical: {e}")
         except Exception as e:
