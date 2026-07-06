@@ -16,6 +16,7 @@ export default function PerroScreen() {
   
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
+  const [ageUnit, setAgeUnit] = useState<'months' | 'years'>('months');
   const [weight, setWeight] = useState('');
   const [sex, setSex] = useState<'male' | 'female' | null>(null);
   const [breed, setBreed] = useState('');
@@ -54,7 +55,7 @@ export default function PerroScreen() {
         `${BACKEND_URL}/api/dogs`,
         {
           name: name.trim(),
-          age: Number(age),
+          age: ageUnit === 'years' ? Number(age) * 12 : Number(age),
           weight: Number(weight),
           sex,
           breed: breed.trim() || undefined,
@@ -107,15 +108,33 @@ export default function PerroScreen() {
             
             <View style={styles.row}>
               <View style={styles.halfInput}>
-                <Input
-                  label="Edad (meses) *"
-                  placeholder="Ej: 24"
-                  value={age}
-                  onChangeText={setAge}
-                  icon="calendar-outline"
-                  keyboardType="numeric"
-                  error={errors.age}
-                />
+                <Text style={{ color: '#8a8a8a', fontSize: 14, marginBottom: 6, fontWeight: '500' }}>Edad *</Text>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                  <View style={{ flex: 1 }}>
+                    <Input
+                      placeholder={ageUnit === 'years' ? 'Ej: 2' : 'Ej: 24'}
+                      value={age}
+                      onChangeText={setAge}
+                      icon="calendar-outline"
+                      keyboardType="numeric"
+                      error={errors.age}
+                    />
+                  </View>
+                  <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: '#2a2a3e', marginBottom: errors.age ? 20 : 0 }}>
+                    <TouchableOpacity
+                      style={{ paddingHorizontal: 10, paddingVertical: 10, backgroundColor: ageUnit === 'months' ? Colors.primary : 'transparent' }}
+                      onPress={() => setAgeUnit('months')}
+                    >
+                      <Text style={{ color: ageUnit === 'months' ? '#fff' : '#aaa', fontWeight: '600', fontSize: 12 }}>Meses</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ paddingHorizontal: 10, paddingVertical: 10, backgroundColor: ageUnit === 'years' ? Colors.primary : 'transparent' }}
+                      onPress={() => setAgeUnit('years')}
+                    >
+                      <Text style={{ color: ageUnit === 'years' ? '#fff' : '#aaa', fontWeight: '600', fontSize: 12 }}>Años</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
               <View style={styles.halfInput}>
                 <Input

@@ -55,6 +55,7 @@ export default function PerfilScreen() {
   
   const [editName, setEditName] = useState('');
   const [editAge, setEditAge] = useState('');
+  const [editAgeUnit, setEditAgeUnit] = useState<'months' | 'years'>('months');
   const [editWeight, setEditWeight] = useState('');
   const [editBreed, setEditBreed] = useState('');
   const [editChip, setEditChip] = useState('');
@@ -85,7 +86,15 @@ export default function PerfilScreen() {
   useEffect(() => { loadDogImage(); loadAll(); loadBiometricStatus(); loadNotifPrefs(); }, []);
   useEffect(() => {
     if (currentDog) {
-      setEditName(currentDog.name || ''); setEditAge(currentDog.age?.toString() || '');
+      setEditName(currentDog.name || '');
+      const ageMonths = currentDog.age || 0;
+      if (ageMonths >= 12) {
+        setEditAge(Math.floor(ageMonths / 12).toString());
+        setEditAgeUnit('years');
+      } else {
+        setEditAge(ageMonths.toString());
+        setEditAgeUnit('months');
+      }
       setEditWeight(currentDog.weight?.toString() || ''); setEditBreed(currentDog.breed || '');
       setEditChip(currentDog.chip_id || '');
       setEditPetType((currentDog as any).pet_type || 'dog');
@@ -228,12 +237,13 @@ export default function PerfilScreen() {
     setSaving(true);
     try {
       const headers = await getHeaders();
+      const ageInMonths = editAgeUnit === 'years' ? (parseInt(editAge) || 0) * 12 : parseInt(editAge) || 0;
       await axios.put(`${BACKEND_URL}/api/dogs/${currentDog.id}`, {
-        name: editName, age: parseInt(editAge) || 0, weight: parseFloat(editWeight) || 0,
+        name: editName, age: ageInMonths, weight: parseFloat(editWeight) || 0,
         breed: editBreed, chip_id: editChip, pet_type: editPetType, sex: editSex,
         neutered: editNeutered, allergies: editAllergies,
       }, { headers });
-      setCurrentDog({ ...currentDog, name: editName, age: parseInt(editAge) || 0, weight: parseFloat(editWeight) || 0, breed: editBreed, chip_id: editChip, pet_type: editPetType as any, sex: editSex as any, neutered: editNeutered as any, allergies: editAllergies as any });
+      setCurrentDog({ ...currentDog, name: editName, age: ageInMonths, weight: parseFloat(editWeight) || 0, breed: editBreed, chip_id: editChip, pet_type: editPetType as any, sex: editSex as any, neutered: editNeutered as any, allergies: editAllergies as any });
       await refreshDogs();
       setShowEditModal(false);
     } catch (error) { Alert.alert('Error', 'No se pudo guardar'); }
@@ -534,7 +544,40 @@ export default function PerfilScreen() {
             </TouchableOpacity>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('dogName')}</Text><TextInput style={styles.input} value={editName} onChangeText={setEditName} /></View>
             <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-              <View style={[styles.inputGroup, { flex: 1 }]}><Text style={styles.inputLabel}>{t('dogAge')}</Text><TextInput style={styles.input} value={editAge} onChangeText={setEditAge} keyboardType="numeric" /></View>
+              <View style={[styles.inputGroup, { flex: 1 }]}>
+                <Text style={styles.inputLabel}>{t('dogAge')}</Text>
+                <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                  <TextInput style={[styles.input, { flex: 1 }]} value={editAge} onChangeText={setEditAge} keyboardType="numeric" />
+                  <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                    <TouchableOpacity
+                      style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: editAgeUnit === 'months' ? colors.primary : 'transparent' }}
+                      onPress={() => {
+                        if (editAgeUnit === 'years') {
+                          const years = parseInt(editAge) || 0;
+                          setEditAge((years * 12).toString());
+                          setEditAgeUnit('months');
+                        }
+                      }}
+                      data-testid="edit-age-unit-months"
+                    >
+                      <Text style={{ color: editAgeUnit === 'months' ? '#fff' : colors.text, fontWeight: '600', fontSize: 12 }}>{language === 'en' ? 'Months' : language === 'it' ? 'Mesi' : 'Meses'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: editAgeUnit === 'years' ? colors.primary : 'transparent' }}
+                      onPress={() => {
+                        if (editAgeUnit === 'months') {
+                          const months = parseInt(editAge) || 0;
+                          setEditAge(Math.floor(months / 12).toString());
+                          setEditAgeUnit('years');
+                        }
+                      }}
+                      data-testid="edit-age-unit-years"
+                    >
+                      <Text style={{ color: editAgeUnit === 'years' ? '#fff' : colors.text, fontWeight: '600', fontSize: 12 }}>{language === 'en' ? 'Years' : language === 'it' ? 'Anni' : 'Años'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
               <View style={[styles.inputGroup, { flex: 1 }]}><Text style={styles.inputLabel}>{t('dogWeight')}</Text><TextInput style={styles.input} value={editWeight} onChangeText={setEditWeight} keyboardType="decimal-pad" /></View>
             </View>
             <View style={styles.inputGroup}><Text style={styles.inputLabel}>{t('dogBreed')}</Text><TextInput style={styles.input} value={editBreed} onChangeText={setEditBreed} /></View>

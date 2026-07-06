@@ -37,8 +37,10 @@ const TXT: Record<string, Record<string, string>> = {
   sex: { es: 'Sexo', en: 'Sex', it: 'Sesso' },
   male: { es: 'Macho', en: 'Male', it: 'Maschio' },
   female: { es: 'Hembra', en: 'Female', it: 'Femmina' },
-  ageMonths: { es: 'Edad (meses)', en: 'Age (months)', it: 'Eta (mesi)' },
-  agePlaceholder: { es: 'Ej: 24', en: 'E.g.: 24', it: 'Es.: 24' },
+  ageMonths: { es: 'Edad', en: 'Age', it: 'Eta' },
+  agePlaceholder: { es: 'Ej: 2', en: 'E.g.: 2', it: 'Es.: 2' },
+  ageUnitMonths: { es: 'Meses', en: 'Months', it: 'Mesi' },
+  ageUnitYears: { es: 'Años', en: 'Years', it: 'Anni' },
   weightKg: { es: 'Peso (kg)', en: 'Weight (kg)', it: 'Peso (kg)' },
   weightPlaceholder: { es: 'Ej: 12.5', en: 'E.g.: 12.5', it: 'Es.: 12,5' },
   neutered: { es: 'Esterilizado/a', en: 'Neutered/Spayed', it: 'Sterilizzato/a' },
@@ -71,6 +73,7 @@ export default function OnboardingMascotaScreen() {
     breed: '',
     sex: '',
     age: '',
+    ageUnit: 'months' as 'months' | 'years',
     weight: '',
     neutered: false,
     chip_id: '',
@@ -94,7 +97,7 @@ export default function OnboardingMascotaScreen() {
         pet_type: form.pet_type || 'dog',
         breed: form.breed.trim() || null,
         sex: form.sex || null,
-        age: parseInt(form.age) || 12,
+        age: form.ageUnit === 'years' ? (parseInt(form.age) || 1) * 12 : parseInt(form.age) || 12,
         weight: parseFloat(form.weight) || 5,
         neutered: form.neutered,
         chip_id: form.chip_id.trim() || null,
@@ -215,7 +218,25 @@ export default function OnboardingMascotaScreen() {
           <View style={s.rowFields}>
             <View style={[s.fieldGroup, { flex: 1 }]}>
               <Text style={s.fieldLabel}>{T('ageMonths')}</Text>
-              <TextInput style={s.input} value={form.age} onChangeText={v => update('age', v)} placeholder={T('agePlaceholder')} placeholderTextColor={colors.gray} keyboardType="numeric" data-testid="pet-age-input" />
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TextInput style={[s.input, { flex: 1 }]} value={form.age} onChangeText={v => update('age', v)} placeholder={T('agePlaceholder')} placeholderTextColor={colors.gray} keyboardType="numeric" data-testid="pet-age-input" />
+                <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                  <TouchableOpacity
+                    style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: form.ageUnit === 'months' ? colors.primary : 'transparent' }}
+                    onPress={() => update('ageUnit', 'months')}
+                    data-testid="age-unit-months"
+                  >
+                    <Text style={{ color: form.ageUnit === 'months' ? '#fff' : colors.text, fontWeight: '600', fontSize: 13 }}>{T('ageUnitMonths')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: form.ageUnit === 'years' ? colors.primary : 'transparent' }}
+                    onPress={() => update('ageUnit', 'years')}
+                    data-testid="age-unit-years"
+                  >
+                    <Text style={{ color: form.ageUnit === 'years' ? '#fff' : colors.text, fontWeight: '600', fontSize: 13 }}>{T('ageUnitYears')}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
             <View style={[s.fieldGroup, { flex: 1 }]}>
               <Text style={s.fieldLabel}>{T('weightKg')}</Text>
