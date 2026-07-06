@@ -47,6 +47,7 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - BUGFIX: Ejercicios 'Clicker' y 'Olfato' en Biblioteca de Ejercicios - añadido contenido completo (4 ejercicios cada uno, 3 idiomas)
 - BUILD: Package name cambiado a app.emergent.hanigpsfixf4b1b81d, versionCode 118
 - BUILD: Plugin withAndroidFeatures actualizado para resolver conflictos de content provider authorities (com.heimdall.app -> app.emergent.hanigpsfixf4b1b81d)
+- BUGFIX: Eliminado botón "Iniciar sesión con Google" que no funcionaba (usaba auth de Emergent, no compatible con producción)
 - server.py desplegado en VPS con todas las correcciones
 - Resend instalado en VPS y .env actualizado con RESEND_API_KEY y SENDER_EMAIL
 - server.py desplegado en VPS con la corrección de seguridad
