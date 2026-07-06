@@ -1,0 +1,49 @@
+{
+  "packageId": "com.heimdall.app",
+  "host": "heimdall.escudolegado.com",
+  "name": "Heimdall",
+  "launcherName": "Heimdall",
+  "display": "standalone",
+  "themeColor": "#0A0A0A",
+  "themeColorDark": "#0A0A0A",
+  "navigationColor": "#0A0A0A",
+  "navigationColorDark": "#0A0A0A",
+  "navigationDividerColor": "#0A0A0A",
+  "navigationDividerColorDark": "#0A0A0A",
+  "backgroundColor": "#0A0A0A",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://heimdall.escudolegado.com/icon-512.png",
+  "maskableIconUrl": "https://heimdall.escudolegado.com/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/app/heimdall-release.jks",
+    "alias": "heimdall-key"
+  },
+  "appVersionCode": 117,
+  "appVersionName": "1.0.7",
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://heimdall.escudolegado.com/manifest.json",
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://heimdall.escudolegado.com/",
+  "minSdkVersion": 19,
+  "fingerprints": [
+    {
+      "name": "assetlinks",
+      "value": "2C:CB:D4:50:38:31:DD:6A:AE:5A:9B:C8:05:D2:9F:FC:D1:AA:7A:1E:30:A8:78:7B:D2:C8:35:AF:8A:AE:B3:7A"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "playBilling": {
+    "enabled": false
+  },
+  "locationDelegation": {
+    "enabled": false
+  },
+  "orientation": "default"
+}
