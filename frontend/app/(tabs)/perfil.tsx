@@ -14,7 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { SecureStore } from '../../utils/secureStore';
 import { Card, Button } from '../../components/ui';
-import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 import { BiometricAuth } from '../../utils/biometricAuth';
 
@@ -752,7 +752,7 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   scrollView: { flex: 1 },
   scrollContent: { padding: Spacing.md },
   header: { marginBottom: Spacing.lg },
-  title: { fontSize: FontSizes.xxl, fontWeight: '700', color: C.text },
+  title: { fontSize: 24, fontFamily: Fonts.serif, fontWeight: '700', color: C.text },
   profileCard: { marginBottom: Spacing.lg },
   profileHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
   avatarContainer: { position: 'relative' },

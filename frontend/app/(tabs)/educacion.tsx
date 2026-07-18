@@ -8,7 +8,7 @@ import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, Language } from '../../contexts/LanguageContext';
 import { Card, Button, ProgressCircle } from '../../components/ui';
-import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getTrainingPrograms, getExercises, getGames } from '../../data/educationContent';
 
@@ -346,6 +346,7 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   },
   headerTitle: {
     fontSize: FontSizes.lg,
+    fontFamily: Fonts.serif,
     fontWeight: '700',
     color: C.text,
   },
@@ -412,6 +413,7 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FontSizes.xl,
+    fontFamily: Fonts.serif,
     fontWeight: '700',
     color: C.text,
   },

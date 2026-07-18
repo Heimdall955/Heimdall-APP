@@ -11,9 +11,9 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { colors, shadows } = useTheme();
-  
+
   const bottomInset = Math.max(insets.bottom, 0);
-  const tabBarHeight = 70 + bottomInset;
+  const tabBarHeight = 72 + bottomInset;
 
   return (
     <Tabs
@@ -24,6 +24,8 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.cardBg,
           borderTopWidth: 0,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
           height: tabBarHeight,
           paddingBottom: bottomInset + 10,
           paddingTop: 10,
@@ -66,12 +68,12 @@ export default function TabsLayout() {
         name="educacion"
         options={{
           title: t('education'),
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.centerTab, { backgroundColor: colors.grayLight, borderColor: colors.cardBg, ...shadows.md as any }, focused && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
-              <Image 
-                source={require('../../assets/images/heimdall-logo.png')}
+          tabBarIcon: ({ focused }) => (
+            <View style={[styles.centerTab, { backgroundColor: colors.cardBg, borderColor: focused ? colors.primary : colors.grayLight, ...shadows.md as any }]}>
+              <Image
+                source={require('../../assets/images/heimdall-avatar.png')}
                 style={styles.logoImage}
-                resizeMode="contain"
+                resizeMode="cover"
               />
             </View>
           ),
@@ -83,7 +85,7 @@ export default function TabsLayout() {
           title: t('chat'),
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? [styles.activeIconBg, { backgroundColor: colors.primaryLight }] : undefined}>
-              <Ionicons name={focused ? 'chatbubbles' : 'chatbubbles-outline'} size={24} color={color} />
+              <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={24} color={color} />
             </View>
           ),
         }}
@@ -109,17 +111,18 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   centerTab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -20,
-    borderWidth: 3,
+    marginTop: -24,
+    borderWidth: 2,
+    overflow: 'hidden',
   },
   logoImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
   },
 });

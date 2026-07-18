@@ -14,7 +14,7 @@ import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, getLanguageName } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
 
 import { BACKEND_URL } from '../../config/backend';
 
@@ -192,7 +192,7 @@ export default function ChatScreen() {
     const hasAttachment = message.file_type || (message.content && message.content.startsWith('['));
     return (
       <View key={message.id} style={[s.messageContainer, isUser ? s.userMessage : s.assistantMessage]} data-testid={`message-${message.id}`}>
-        {!isUser && <View style={s.avatarContainer}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 32, height: 32 }} resizeMode="cover" /></View>}
+        {!isUser && <View style={s.avatarContainer}><Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 32, height: 32 }} resizeMode="cover" /></View>}
         <View style={[s.messageBubble, isUser ? s.userBubble : s.assistantBubble]}>
           {isUser && hasAttachment && <View style={{ marginBottom: 4 }}><Ionicons name={message.file_type === 'pdf' || message.content?.includes('[PDF]') ? 'document-text' : message.file_type === 'video' || message.content?.includes('[VIDEO]') ? 'videocam' : 'camera'} size={16} color="#FFF" /></View>}
           {isUser ? (
@@ -230,7 +230,7 @@ export default function ChatScreen() {
         {/* Header */}
         <View style={s.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md }}>
-            <View style={s.haniAvatar}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 48, height: 48 }} resizeMode="cover" /></View>
+            <View style={s.haniAvatar}><Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 48, height: 48 }} resizeMode="cover" /></View>
             <View><Text style={s.headerTitle}>Heimdall</Text><Text style={s.headerSub}>{t('guardianChat') || 'Tu guardian'}</Text></View>
           </View>
         </View>
@@ -241,7 +241,7 @@ export default function ChatScreen() {
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 }}><ActivityIndicator size="large" color={colors.primary} /></View>
           ) : messages.length === 0 ? (
             <View style={{ alignItems: 'center', paddingTop: Spacing.xl, paddingHorizontal: Spacing.md }}>
-              <View style={s.welcomeAvatar}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 80, height: 80 }} resizeMode="cover" /></View>
+              <View style={s.welcomeAvatar}><Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 80, height: 80 }} resizeMode="cover" /></View>
               <Text style={{ fontSize: FontSizes.xl, fontWeight: '700', color: colors.text, marginBottom: Spacing.sm }}>{welcomeMessage.title}</Text>
               <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: Spacing.lg }}>{welcomeMessage.text}</Text>
 
@@ -277,7 +277,7 @@ export default function ChatScreen() {
 
           {isLoading && (
             <View style={[s.messageContainer, s.assistantMessage]}>
-              <View style={s.avatarContainer}><Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 32, height: 32 }} resizeMode="cover" /></View>
+              <View style={s.avatarContainer}><Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 32, height: 32 }} resizeMode="cover" /></View>
               <View style={[s.messageBubble, s.assistantBubble, { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }]}>
                 <ActivityIndicator size="small" color={colors.primary} />
                 <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, fontStyle: 'italic' }}>{uploadProgress ? `${uploadProgress} ${t('analyzing')}...` : t('thinking')}</Text>
@@ -348,7 +348,7 @@ const cs = (C: any, S: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: C.background },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Spacing.md, backgroundColor: C.cardBg, borderBottomWidth: 1, borderBottomColor: C.grayLight },
   haniAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  headerTitle: { fontSize: FontSizes.lg, fontWeight: '700', color: C.text },
+  headerTitle: { fontSize: FontSizes.lg, fontFamily: Fonts.serif, fontWeight: '700', color: C.text },
   headerSub: { fontSize: FontSizes.sm, color: C.textSecondary },
   welcomeAvatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.lg, overflow: 'hidden' },
   quickActionCard: { flex: 1, backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: 4, ...S.sm, borderWidth: 1, borderColor: C.grayLight, position: 'relative' },

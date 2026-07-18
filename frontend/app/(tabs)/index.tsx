@@ -9,9 +9,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Card, StatusBadge, ProgressCircle } from '../../components/ui';
+import { Card } from '../../components/ui';
 import { WalletCard } from '../../components/WalletCard';
-import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
+import { BACKEND_URL } from '../../config/backend';
 
 interface DogStatus {
   status: 'calm' | 'active' | 'anxious' | 'sleeping' | 'playing';
@@ -23,8 +24,6 @@ interface DogStatus {
   exercises_completed: number;
   practice_minutes: number;
 }
-
-import { BACKEND_URL } from '../../config/backend';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -44,12 +43,12 @@ export default function HomeScreen() {
   });
 
   const quickAccessItems = [
-    { id: 'chaleco', icon: 'bluetooth', label: t('vest'), color: colors.primary, route: '/chaleco' },
-    { id: 'subir-analisis', icon: 'cloud-upload', label: t('uploadAnalysis'), color: colors.accentPurple, route: '/(tabs)/chat' },
-    { id: 'describir-sintoma', icon: 'chatbubble-ellipses', label: t('describeSymptom'), color: colors.accentMint, route: '/(tabs)/chat' },
-    { id: 'historial', icon: 'medical', label: t('history'), color: colors.accentOrange, route: '/historial-medico' },
-    { id: 'salud', icon: 'heart', label: t('health'), color: colors.error, route: '/(tabs)/salud' },
-    { id: 'ficha-clinica', icon: 'document-text', label: t('clinicalFile'), color: colors.accent, route: '/(tabs)/perfil' },
+    { id: 'chaleco', icon: 'bluetooth', label: t('vest'), color: '#2E7FD8', bg: '#E4EFFA', route: '/chaleco' },
+    { id: 'subir-analisis', icon: 'cloud-upload-outline', label: t('uploadAnalysis'), color: colors.accentPurple, bg: '#EFEAFA', route: '/(tabs)/chat' },
+    { id: 'describir-sintoma', icon: 'chatbox-ellipses-outline', label: t('describeSymptom'), color: colors.primary, bg: colors.primaryLight, route: '/(tabs)/chat' },
+    { id: 'historial', icon: 'time-outline', label: t('history'), color: colors.accentOrange, bg: '#FBEEDF', route: '/historial-medico' },
+    { id: 'salud', icon: 'pulse', label: t('health'), color: colors.error, bg: '#FAE8E7', route: '/(tabs)/salud' },
+    { id: 'ficha-clinica', icon: 'document-text-outline', label: t('clinicalFile'), color: colors.accent, bg: colors.accentLight, route: '/(tabs)/perfil' },
   ];
 
   const loadGamificationStats = useCallback(async () => {
@@ -95,7 +94,6 @@ export default function HomeScreen() {
   }, [isConnected, biometricData]);
 
   const onRefresh = async () => { setRefreshing(true); await loadGamificationStats(); setRefreshing(false); };
-  const getGreeting = () => { const h = new Date().getHours(); return h < 12 ? t('goodMorning') : h < 19 ? t('goodAfternoon') : t('goodEvening'); };
   const handleQuickAccess = (route: string | null) => { if (route) router.push(route as any); };
   const formatRelativeDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -127,7 +125,9 @@ export default function HomeScreen() {
         <View style={s.header}>
           <View style={s.headerLeft}>
             <View style={{ position: 'relative' }}>
-              <Image source={require('../../assets/images/heimdall-logo.png')} style={s.headerLogo} resizeMode="contain" />
+              <View style={s.avatarRing}>
+                <Image source={require('../../assets/images/heimdall-avatar.png')} style={s.headerLogo} resizeMode="cover" />
+              </View>
               <View style={s.onlineIndicator} />
             </View>
             <View>
@@ -136,61 +136,63 @@ export default function HomeScreen() {
             </View>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity style={[s.iconBtn, { marginRight: 10 }]} onPress={toggleTheme} accessibilityLabel="Toggle theme">
-              <Ionicons name={isDark ? 'sunny' : 'moon-outline'} size={22} color={isDark ? colors.accent : colors.text} />
+            <TouchableOpacity style={[s.iconBtn, { marginRight: 10 }]} onPress={toggleTheme} accessibilityLabel="Toggle theme" data-testid="theme-toggle-btn">
+              <Ionicons name={isDark ? 'sunny' : 'moon-outline'} size={21} color={isDark ? colors.accent : colors.text} />
             </TouchableOpacity>
-            <TouchableOpacity style={s.iconBtn}>
-              <Ionicons name="notifications-outline" size={24} color={colors.text} />
+            <TouchableOpacity style={s.iconBtn} data-testid="notifications-btn">
+              <Ionicons name="notifications-outline" size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Reward Banner */}
+        {/* Reward Card */}
         {dogStatus.bones > 0 && (
-          <View style={s.rewardBanner}>
-            <Text style={{ fontSize: 20, marginRight: 4 }}>{'🦴'}</Text>
-            <Text style={s.rewardText}>{t('greatJob')} </Text>
-            <Text style={s.rewardHighlight}>{dogStatus.bones} {t('bones').toLowerCase()}</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/perfil')}>
-              <Text style={s.viewRewardsLink}>{t('viewRewards')}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={s.rewardCard} onPress={() => router.push('/(tabs)/perfil')} activeOpacity={0.85} data-testid="reward-banner">
+            <Image source={require('../../assets/images/trophy-badge.png')} style={s.trophyImg} resizeMode="contain" />
+            <View style={{ flex: 1 }}>
+              <Text style={s.rewardText}>{t('greatJob')}</Text>
+              <Text style={s.rewardHighlight}>{dogStatus.bones} {t('bones').toUpperCase()}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <Text style={s.viewRewardsLink}>{t('viewRewards')}</Text>
+                <Ionicons name="chevron-forward" size={13} color={colors.primary} />
+              </View>
+            </View>
+            <Image source={require('../../assets/images/golden-bone.png')} style={s.boneImg} resizeMode="contain" />
+          </TouchableOpacity>
         )}
 
-        {/* AI Analysis Banner */}
+        {/* AI Analysis Hero */}
         <TouchableOpacity
           style={s.section}
           onPress={() => router.push('/(tabs)/chat')}
-          activeOpacity={0.85}
+          activeOpacity={0.9}
           data-testid="ai-analysis-banner"
         >
           <View style={s.analysisBanner}>
-            {/* Decorative elements */}
-            <View style={{ position: 'absolute', top: -30, right: -20, width: 120, height: 120, borderRadius: 60, backgroundColor: colors.primary + '12' }} />
-            <View style={{ position: 'absolute', bottom: -20, left: -15, width: 90, height: 90, borderRadius: 45, backgroundColor: '#00BCD4' + '10' }} />
+            <View style={{ position: 'absolute', top: -40, right: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: '#FFFFFF08' }} />
+            <View style={{ position: 'absolute', bottom: -30, left: -20, width: 110, height: 110, borderRadius: 55, backgroundColor: '#FFFFFF06' }} />
 
-            {/* Icon row */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              {[
-                { icon: 'camera', color: colors.primary },
-                { icon: 'document-text', color: '#00BCD4' },
-                { icon: 'chatbubble-ellipses', color: colors.accentPurple },
-              ].map((item, i) => (
-                <View key={i} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: item.color + '20', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: item.color + '30' }}>
-                  <Ionicons name={item.icon as any} size={20} color={item.color} />
-                </View>
-              ))}
+            <Image source={require('../../assets/images/heimdall-vet-hero.png')} style={s.heroMascot} resizeMode="contain" />
+
+            <View style={{ width: '58%' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                {[
+                  { icon: 'camera', color: '#8FD6BE', bg: '#FFFFFF14' },
+                  { icon: 'document-text', color: '#8FD6BE', bg: '#FFFFFF14' },
+                  { icon: 'chatbubble-ellipses', color: '#C8B4F5', bg: '#8E6FD830' },
+                ].map((item, i) => (
+                  <View key={i} style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: item.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#FFFFFF1A' }}>
+                    <Ionicons name={item.icon as any} size={20} color={item.color} />
+                  </View>
+                ))}
+              </View>
+
+              <Text style={s.analysisBannerTitle}>{t('homeBannerTitle')}</Text>
+              <Text style={s.analysisBannerSubtitle}>{t('homeBannerSubtitle')}</Text>
             </View>
 
-            {/* Title */}
-            <Text style={s.analysisBannerTitle}>{t('homeBannerTitle')}</Text>
-
-            {/* Subtitle */}
-            <Text style={s.analysisBannerSubtitle}>{t('homeBannerSubtitle')}</Text>
-
-            {/* CTA Button */}
-            <View style={[s.analysisBannerCta, { backgroundColor: colors.primary }]}>
-              <Ionicons name="sparkles" size={18} color="#FFF" />
+            <View style={s.analysisBannerCta}>
+              <Ionicons name="sparkles" size={17} color="#FFF" />
               <Text style={s.analysisBannerCtaText}>{t('homeBannerCta')}</Text>
               <Ionicons name="arrow-forward" size={16} color="#FFF" />
             </View>
@@ -199,14 +201,20 @@ export default function HomeScreen() {
 
         {/* Quick Access */}
         <View style={s.section}>
-          <Text style={s.sectionTitle}>{t('quickAccess')}</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md }}>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>{t('quickAccess')}</Text>
+            <Image source={require('../../assets/images/tree-of-life.png')} style={{ width: 30, height: 30, opacity: 0.8 }} resizeMode="contain" />
+          </View>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
             {quickAccessItems.map((item) => (
-              <TouchableOpacity key={item.id} style={{ width: '30%', alignItems: 'center', padding: Spacing.sm }} onPress={() => handleQuickAccess(item.route)}>
-                <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: item.color + '20', alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.sm }}>
-                  <Ionicons name={item.icon as any} size={26} color={item.color} />
+              <TouchableOpacity key={item.id} style={s.quickCard} onPress={() => handleQuickAccess(item.route)} activeOpacity={0.8} data-testid={`quick-access-${item.id}`}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <View style={[s.quickIcon, { backgroundColor: item.bg }]}>
+                    <Ionicons name={item.icon as any} size={22} color={item.color} />
+                  </View>
+                  <Ionicons name="chevron-forward" size={15} color={colors.textLight} />
                 </View>
-                <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text, textAlign: 'center' }}>{item.label}</Text>
+                <Text style={s.quickLabel} numberOfLines={2}>{item.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -214,96 +222,93 @@ export default function HomeScreen() {
 
         {/* Health Activity */}
         <View style={s.section} data-testid="health-activity-section">
-          <Text style={s.sectionTitle}>{t('healthActivity')}</Text>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>{t('healthActivity')}</Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/salud')}><Text style={s.viewAllLink}>{t('viewAll')}</Text></TouchableOpacity>
+          </View>
           <View style={{ gap: Spacing.sm }}>
-            {/* Last AI Consultation */}
             <TouchableOpacity style={s.healthCard} onPress={() => router.push('/(tabs)/chat')} data-testid="last-consultation-card">
-              <View style={[s.healthCardIcon, { backgroundColor: colors.primary + '15' }]}>
-                <Ionicons name="chatbubbles" size={22} color={colors.primary} />
+              <View style={[s.healthCardIcon, { backgroundColor: colors.primaryLight }]}>
+                <Ionicons name="chatbubbles" size={21} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.healthCardTitle, { color: colors.text }]}>{t('lastConsultation')}</Text>
-                <Text style={[s.healthCardValue, { color: lastConsultation ? colors.text : colors.textSecondary }]}>
+                <Text style={[s.healthCardTitle, { color: colors.textSecondary }]}>{t('lastConsultation')}</Text>
+                <Text style={[s.healthCardValue, { color: lastConsultation ? colors.primary : colors.textSecondary }]}>
                   {lastConsultation ? formatRelativeDate(lastConsultation) : t('noConsultationsYet')}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gray} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
 
-            {/* Last Medical Event */}
             <TouchableOpacity style={s.healthCard} onPress={() => router.push('/historial-medico')} data-testid="last-medical-card">
-              <View style={[s.healthCardIcon, { backgroundColor: colors.accentOrange + '15' }]}>
-                <Ionicons name="medical" size={22} color={colors.accentOrange} />
+              <View style={[s.healthCardIcon, { backgroundColor: '#FBEEDF' }]}>
+                <Ionicons name="medical" size={21} color={colors.accentOrange} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.healthCardTitle, { color: colors.text }]}>{t('lastMedicalEvent')}</Text>
+                <Text style={[s.healthCardTitle, { color: colors.textSecondary }]}>{t('lastMedicalEvent')}</Text>
                 <Text style={[s.healthCardValue, { color: lastMedicalEvent ? colors.text : colors.textSecondary }]}>
                   {lastMedicalEvent ? `${getMedicalTypeLabel(lastMedicalEvent.type)} - ${formatRelativeDate(lastMedicalEvent.date)}` : t('noEventsYet')}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gray} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
 
-            {/* Emotional State */}
             <TouchableOpacity style={s.healthCard} onPress={() => router.push('/diario')} data-testid="emotion-state-card">
-              <View style={[s.healthCardIcon, { backgroundColor: todayEmotion ? '#4CAF50' + '15' : colors.accentPurple + '15' }]}>
-                <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={22} color={todayEmotion ? '#4CAF50' : colors.accentPurple} />
+              <View style={[s.healthCardIcon, { backgroundColor: todayEmotion ? colors.primaryLight : '#EFEAFA' }]}>
+                <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={21} color={todayEmotion ? colors.primary : colors.accentPurple} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[s.healthCardTitle, { color: colors.text }]}>{t('emotionalState')}</Text>
+                <Text style={[s.healthCardTitle, { color: colors.textSecondary }]}>{t('emotionalState')}</Text>
                 <Text style={[s.healthCardValue, { color: todayEmotion ? colors.text : colors.textSecondary }]}>
                   {todayEmotion ? getEmotionLabel(todayEmotion) : t('notRegisteredToday')}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gray} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Emotion Diary Banner */}
         <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} activeOpacity={0.85} data-testid="emotion-diary-card">
-          <View style={{ backgroundColor: todayEmotion ? '#0D2818' : '#1A0A2E', borderRadius: BorderRadius.xl, padding: Spacing.lg, overflow: 'hidden' }}>
-            {/* Decorative circles */}
-            <View style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: todayEmotion ? '#4CAF5015' : '#9C27B015' }} />
-            <View style={{ position: 'absolute', bottom: -30, left: -10, width: 80, height: 80, borderRadius: 40, backgroundColor: todayEmotion ? '#4CAF5010' : '#9C27B010' }} />
+          <View style={{ backgroundColor: colors.primaryDark, borderRadius: BorderRadius.xxl, padding: Spacing.lg, overflow: 'hidden' }}>
+            <View style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFFFFF0A' }} />
+            <View style={{ position: 'absolute', bottom: -30, left: -10, width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFFFFF07' }} />
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: todayEmotion ? '#4CAF5025' : '#9C27B025', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: todayEmotion ? '#4CAF5040' : '#9C27B040' }}>
-                <Ionicons name={todayEmotion ? 'checkmark-circle' : 'journal'} size={24} color={todayEmotion ? '#66BB6A' : '#CE93D8'} />
+              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: '#FFFFFF14', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#FFFFFF20' }}>
+                <Ionicons name={todayEmotion ? 'checkmark-circle' : 'journal'} size={24} color={'#E9D9A8'} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: '#F5F5F5' }}>
+                <Text style={{ fontSize: FontSizes.lg, fontFamily: Fonts.serif, fontWeight: '700', color: '#FDFBF5' }}>
                   {todayEmotion ? t('todayYouFeel') : t('howDoYouFeel')}
                 </Text>
-                <Text style={{ fontSize: FontSizes.xs, color: todayEmotion ? '#81C784' : '#B39DDB', marginTop: 2 }}>
+                <Text style={{ fontSize: FontSizes.xs, color: '#A9C6BC', marginTop: 2 }}>
                   {todayEmotion ? t('emotionDiary') : t('diaryEmpty').substring(0, 50) + '...'}
                 </Text>
               </View>
             </View>
 
-            {/* Emotion icons row */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14, paddingHorizontal: 8 }}>
               {[
-                { icon: 'happy', color: '#4CAF50', id: 'happy' },
-                { icon: 'leaf', color: '#2196F3', id: 'calm' },
-                { icon: 'alert-circle', color: '#FF9800', id: 'worried' },
-                { icon: 'sad', color: '#9C27B0', id: 'sad' },
-                { icon: 'thunderstorm', color: '#F44336', id: 'stressed' },
+                { icon: 'happy', color: '#7FD8A8', id: 'happy' },
+                { icon: 'leaf', color: '#7FC4D8', id: 'calm' },
+                { icon: 'alert-circle', color: '#E8C170', id: 'worried' },
+                { icon: 'sad', color: '#C8A8E8', id: 'sad' },
+                { icon: 'thunderstorm', color: '#E89A8A', id: 'stressed' },
               ].map(e => (
                 <View key={e.id} style={{
                   width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: todayEmotion === e.id ? e.color + '30' : '#FFFFFF08',
+                  backgroundColor: todayEmotion === e.id ? e.color + '30' : '#FFFFFF0C',
                   borderWidth: todayEmotion === e.id ? 1.5 : 0, borderColor: e.color,
                 }}>
-                  <Ionicons name={e.icon as any} size={22} color={todayEmotion === e.id ? e.color : '#666'} />
+                  <Ionicons name={e.icon as any} size={22} color={todayEmotion === e.id ? e.color : '#6E8E83'} />
                 </View>
               ))}
             </View>
 
-            {/* CTA */}
-            <View style={{ backgroundColor: todayEmotion ? '#4CAF5020' : '#9C27B020', borderRadius: 12, paddingVertical: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: todayEmotion ? '#4CAF5030' : '#9C27B030' }}>
-              <Ionicons name={todayEmotion ? 'eye' : 'add-circle'} size={18} color={todayEmotion ? '#66BB6A' : '#CE93D8'} />
-              <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: todayEmotion ? '#66BB6A' : '#CE93D8' }}>
+            <View style={{ backgroundColor: '#FFFFFF12', borderRadius: BorderRadius.full, paddingVertical: 11, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: '#FFFFFF1E' }}>
+              <Ionicons name={todayEmotion ? 'eye' : 'add-circle'} size={18} color={'#E9D9A8'} />
+              <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: '#E9D9A8' }}>
                 {todayEmotion ? t('weeklyInsight') : t('emotionDiary')}
               </Text>
             </View>
@@ -316,26 +321,26 @@ export default function HomeScreen() {
             <Text style={s.sectionTitle}>{t('weeklyProgress')}</Text>
             <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, fontWeight: '500' }}>{t('thisWeek')}</Text>
           </View>
-          <Card style={{ padding: Spacing.md }}>
+          <Card style={{ padding: Spacing.md, borderRadius: BorderRadius.xl }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.md }}>
               {[
-                { emoji: '🦴', value: weeklySummary?.bones_total || dogStatus.bones || 0, label: t('bonesThisWeek'), bg: '#FFD70020' },
-                { icon: 'school', value: weeklySummary?.exercises_total || dogStatus.exercises_completed || 0, label: t('exercisesThisWeek'), bg: colors.accentMint + '20', iconColor: colors.accentMint },
-                { icon: 'flash', value: weeklySummary?.streak_days || dogStatus.streak_days || 0, label: t('streakActive'), bg: colors.accentPurple + '20', iconColor: colors.accentPurple },
+                { image: require('../../assets/images/golden-bone.png'), value: weeklySummary?.bones_total || dogStatus.bones || 0, label: t('bonesThisWeek'), bg: colors.accentLight },
+                { icon: 'school', value: weeklySummary?.exercises_total || dogStatus.exercises_completed || 0, label: t('exercisesThisWeek'), bg: colors.primaryLight, iconColor: colors.primary },
+                { icon: 'flash', value: weeklySummary?.streak_days || dogStatus.streak_days || 0, label: t('streakActive'), bg: '#EFEAFA', iconColor: colors.accentPurple },
               ].map((item, i) => (
                 <View key={i} style={{ alignItems: 'center', flex: 1 }}>
                   <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: item.bg, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.xs }}>
-                    {item.emoji ? <Text style={{ fontSize: 20 }}>{item.emoji}</Text> : <Ionicons name={item.icon as any} size={20} color={item.iconColor} />}
+                    {item.image ? <Image source={item.image} style={{ width: 28, height: 28 }} resizeMode="contain" /> : <Ionicons name={item.icon as any} size={20} color={item.iconColor} />}
                   </View>
                   <Text style={{ fontSize: FontSizes.xl, fontWeight: '800', color: colors.text }}>{item.value}</Text>
-                  <Text style={{ fontSize: FontSizes.xs, color: colors.textSecondary, marginTop: 2 }}>{item.label}</Text>
+                  <Text style={{ fontSize: FontSizes.xs, color: colors.textSecondary, marginTop: 2, textAlign: 'center' }}>{item.label}</Text>
                 </View>
               ))}
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.grayLight, borderRadius: BorderRadius.md, padding: Spacing.sm }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background, borderRadius: BorderRadius.md, padding: Spacing.sm }}>
               <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: colors.text, marginRight: Spacing.sm }}>{t('level')} {weeklySummary?.level || dogStatus.level}</Text>
-              <View style={{ flex: 1, height: 8, backgroundColor: colors.grayLight, borderRadius: 4, overflow: 'hidden', borderWidth: 1, borderColor: colors.gray + '30' }}>
-                <View style={{ height: '100%', backgroundColor: colors.primary, borderRadius: 4, width: `${((weeklySummary?.level_progress || 0) / (weeklySummary?.level_target || 500)) * 100}%` }} />
+              <View style={{ flex: 1, height: 8, backgroundColor: colors.grayLight, borderRadius: 4, overflow: 'hidden' }}>
+                <View style={{ height: '100%', backgroundColor: colors.accent, borderRadius: 4, width: `${((weeklySummary?.level_progress || 0) / (weeklySummary?.level_target || 500)) * 100}%` }} />
               </View>
               <Text style={{ fontSize: FontSizes.xs, color: colors.textSecondary, marginLeft: Spacing.sm, fontWeight: '600' }}>{weeklySummary?.level_progress || 0}/{weeklySummary?.level_target || 500} XP</Text>
             </View>
@@ -345,14 +350,14 @@ export default function HomeScreen() {
         {/* What does Heimdall do? */}
         <View style={s.section} data-testid="what-heimdall-does-section">
           <Text style={s.sectionTitle}>{t('whatDoesHeimdall')}</Text>
-          <View style={{ gap: Spacing.sm }}>
+          <View style={{ gap: Spacing.sm, marginTop: Spacing.md }}>
             {[
-              { icon: 'search', color: colors.primary, text: t('heimdallFeature1') },
-              { icon: 'shield-checkmark', color: colors.accentOrange, text: t('heimdallFeature2') },
-              { icon: 'bulb', color: colors.accentMint, text: t('heimdallFeature3') },
+              { icon: 'search', color: colors.primary, bg: colors.primaryLight, text: t('heimdallFeature1') },
+              { icon: 'shield-checkmark', color: colors.accent, bg: colors.accentLight, text: t('heimdallFeature2') },
+              { icon: 'bulb', color: colors.accentOrange, bg: '#FBEEDF', text: t('heimdallFeature3') },
             ].map((item, i) => (
               <View key={i} style={s.healthCard}>
-                <View style={[s.healthCardIcon, { backgroundColor: item.color + '15' }]}>
+                <View style={[s.healthCardIcon, { backgroundColor: item.bg }]}>
                   <Ionicons name={item.icon as any} size={22} color={item.color} />
                 </View>
                 <Text style={{ flex: 1, fontSize: FontSizes.md, fontWeight: '600', color: colors.text }}>{item.text}</Text>
@@ -364,7 +369,7 @@ export default function HomeScreen() {
         {/* HANI Passport */}
         {currentDog && (
           <View style={s.section}>
-            <Text style={s.sectionTitle}>HANI Passport</Text>
+            <Text style={[s.sectionTitle, { marginBottom: Spacing.md }]}>HANI Passport</Text>
             <WalletCard dogId={currentDog.id} dogName={currentDog.name} dogBreed={currentDog.breed} dogAge={currentDog.age} dogWeight={currentDog.weight} chipId={currentDog.chip_id} dogPhoto={currentDog.avatar} />
           </View>
         )}
@@ -376,34 +381,34 @@ export default function HomeScreen() {
             <TouchableOpacity onPress={() => router.push('/(tabs)/educacion')}><Text style={s.viewAllLink}>{t('viewAll')}</Text></TouchableOpacity>
           </View>
           {[
-            { id: 'senales-basicas', title: t('basicSignals'), subtitle: t('sitDownStay'), icon: 'paw', color: colors.primary, xp: 5 },
-            { id: 'control-impulsos', title: t('impulseControl'), subtitle: t('waitLeaveRelease'), icon: 'hand-left', color: colors.accentPurple, xp: 10 },
-            { id: 'socializacion', title: t('socialization'), subtitle: t('dogsPeopleEnvironments'), icon: 'search', color: colors.accentMint, xp: 15 },
+            { id: 'senales-basicas', title: t('basicSignals'), subtitle: t('sitDownStay'), icon: 'paw', color: colors.primary, bg: colors.primaryLight, xp: 5 },
+            { id: 'control-impulsos', title: t('impulseControl'), subtitle: t('waitLeaveRelease'), icon: 'hand-left', color: colors.accentPurple, bg: '#EFEAFA', xp: 10 },
+            { id: 'socializacion', title: t('socialization'), subtitle: t('dogsPeopleEnvironments'), icon: 'search', color: colors.accentOrange, bg: '#FBEEDF', xp: 15 },
           ].map((ex, i) => (
             <TouchableOpacity key={i} style={s.exerciseCard} onPress={() => router.push(`/ejercicio?id=${ex.id}`)}>
-              <View style={[s.exerciseIcon, { backgroundColor: ex.color + '20' }]}><Ionicons name={ex.icon as any} size={24} color={ex.color} /></View>
+              <View style={[s.exerciseIcon, { backgroundColor: ex.bg }]}><Ionicons name={ex.icon as any} size={24} color={ex.color} /></View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: colors.text }}>{ex.title}</Text>
                 <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary }}>{ex.subtitle}</Text>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.accentLight, paddingVertical: 4, paddingHorizontal: Spacing.sm, borderRadius: BorderRadius.sm, marginRight: Spacing.sm }}>
-                <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{ex.xp}</Text>
-                <Text style={{ fontSize: 14, marginLeft: 2 }}>{'🦴'}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.accentLight, paddingVertical: 4, paddingHorizontal: Spacing.sm, borderRadius: BorderRadius.full, marginRight: Spacing.sm }}>
+                <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.accent }}>{ex.xp}</Text>
+                <Image source={require('../../assets/images/golden-bone.png')} style={{ width: 16, height: 16, marginLeft: 3 }} resizeMode="contain" />
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.gray} />
+              <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Chat Promo */}
         <TouchableOpacity onPress={() => router.push('/(tabs)/chat')}>
-          <Card>
+          <Card style={{ borderRadius: BorderRadius.xl }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', padding: Spacing.sm }}>
-              <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md }}>
-                <Image source={require('../../assets/images/heimdall-logo.png')} style={{ width: 40, height: 40, borderRadius: 20 }} resizeMode="contain" />
+              <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md, overflow: 'hidden' }}>
+                <Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 48, height: 48, borderRadius: 24 }} resizeMode="cover" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: colors.text }}>{t('haveQuestions')}</Text>
+                <Text style={{ fontSize: FontSizes.lg, fontFamily: Fonts.serif, fontWeight: '700', color: colors.text }}>{t('haveQuestions')}</Text>
                 <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary }}>{t('askHani')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={24} color={colors.primary} />
@@ -411,7 +416,7 @@ export default function HomeScreen() {
           </Card>
         </TouchableOpacity>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 110 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -423,32 +428,35 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   scrollContent: { padding: Spacing.md },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  headerLogo: { width: 52, height: 52, borderRadius: 26, borderWidth: 3, borderColor: C.primary },
-  onlineIndicator: { position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: 7, backgroundColor: C.primary, borderWidth: 2, borderColor: C.background },
-  appName: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text },
-  subtitle: { fontSize: FontSizes.sm, color: C.textSecondary },
-  iconBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.grayLight, alignItems: 'center', justifyContent: 'center' },
-  rewardBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.bannerBg, padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.lg, flexWrap: 'wrap', gap: 4 },
-  rewardText: { fontSize: FontSizes.md, color: C.text },
-  rewardHighlight: { fontSize: FontSizes.md, fontWeight: '700', color: C.accent },
-  viewRewardsLink: { fontSize: FontSizes.md, fontWeight: '600', color: C.accentOrange, marginLeft: 4 },
+  avatarRing: { width: 58, height: 58, borderRadius: 29, borderWidth: 2, borderColor: C.accent + '60', alignItems: 'center', justifyContent: 'center', backgroundColor: C.accentLight, overflow: 'hidden' },
+  headerLogo: { width: 54, height: 54, borderRadius: 27 },
+  onlineIndicator: { position: 'absolute', bottom: 1, right: 1, width: 14, height: 14, borderRadius: 7, backgroundColor: C.primary, borderWidth: 2, borderColor: C.background },
+  appName: { fontSize: 26, fontFamily: Fonts.serif, fontWeight: '700', color: C.text, letterSpacing: 0.3 },
+  subtitle: { fontSize: FontSizes.sm, color: C.textSecondary, marginTop: 1 },
+  iconBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.cardBg, alignItems: 'center', justifyContent: 'center', ...S.sm },
+  rewardCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.xl, marginBottom: Spacing.lg, gap: Spacing.md, ...S.md },
+  trophyImg: { width: 58, height: 58 },
+  boneImg: { width: 92, height: 64 },
+  rewardText: { fontSize: FontSizes.sm, color: C.text },
+  rewardHighlight: { fontSize: 22, fontWeight: '800', color: C.accent, marginVertical: 2, letterSpacing: 0.5 },
+  viewRewardsLink: { fontSize: FontSizes.sm, fontWeight: '600', color: C.primary },
   section: { marginBottom: Spacing.lg },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
-  sectionTitle: { fontSize: FontSizes.xl, fontWeight: '700', color: C.text, marginBottom: Spacing.md },
+  sectionTitle: { fontSize: 22, fontFamily: Fonts.serif, fontWeight: '700', color: C.text },
   viewAllLink: { fontSize: FontSizes.md, fontWeight: '600', color: C.primary },
-  analysisBanner: { backgroundColor: '#0A1628', borderRadius: BorderRadius.xl, padding: Spacing.lg, overflow: 'hidden', position: 'relative' },
-  analysisBannerTitle: { fontSize: FontSizes.xxl, fontWeight: '800', color: '#F5F5F5', marginBottom: 8, lineHeight: 28 },
-  analysisBannerSubtitle: { fontSize: FontSizes.sm, color: '#A0AEC0', marginBottom: 18, lineHeight: 20 },
-  analysisBannerCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: BorderRadius.lg },
+  analysisBanner: { backgroundColor: C.primaryDark, borderRadius: 28, padding: Spacing.lg, overflow: 'hidden', position: 'relative', minHeight: 290 },
+  heroMascot: { position: 'absolute', right: -14, bottom: 52, width: 185, height: 265 },
+  analysisBannerTitle: { fontSize: 25, fontFamily: Fonts.serif, fontWeight: '700', color: '#FDFBF5', marginBottom: 10, lineHeight: 32 },
+  analysisBannerSubtitle: { fontSize: FontSizes.sm, color: '#B9D2C9', marginBottom: 18, lineHeight: 20 },
+  analysisBannerCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.full, backgroundColor: C.primary, alignSelf: 'flex-start', ...S.md },
   analysisBannerCtaText: { fontSize: FontSizes.md, fontWeight: '700', color: '#FFF' },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderTopColor: C.grayLight, paddingTop: Spacing.lg },
-  statNumber: { fontSize: 28, fontWeight: '800', color: C.text },
-  statLabel: { fontSize: FontSizes.sm, color: C.textSecondary, marginTop: 4 },
-  leaderboardCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.lg, ...S.sm },
-  exerciseCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: Spacing.sm, ...S.sm },
+  quickCard: { width: '31.5%', backgroundColor: C.cardBg, borderRadius: BorderRadius.lg, padding: Spacing.sm + 2, ...S.sm },
+  quickIcon: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+  quickLabel: { fontSize: FontSizes.sm, fontWeight: '600', color: C.text, marginTop: Spacing.sm },
+  exerciseCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.xl, marginBottom: Spacing.sm, ...S.sm },
   exerciseIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
-  healthCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.lg, ...S.sm },
-  healthCardIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  healthCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.xl, ...S.sm },
+  healthCardIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
   healthCardTitle: { fontSize: FontSizes.sm, fontWeight: '500', marginBottom: 2 },
   healthCardValue: { fontSize: FontSizes.md, fontWeight: '700' },
 });

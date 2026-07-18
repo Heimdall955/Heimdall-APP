@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Card, ProgressCircle } from '../../components/ui';
-import { Spacing, BorderRadius, FontSizes } from '../../constants/theme';
+import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 
 import { BACKEND_URL } from '../../config/backend';
@@ -328,7 +328,8 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: FontSizes.xxl,
+    fontSize: 24,
+    fontFamily: Fonts.serif,
     fontWeight: '700',
     color: C.text,
   },
@@ -403,7 +404,7 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
     color: C.white,
   },
   vestBanner: {
-    backgroundColor: '#0D0D0D',
+    backgroundColor: C.primaryDark,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,

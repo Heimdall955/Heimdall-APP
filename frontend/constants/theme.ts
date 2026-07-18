@@ -1,53 +1,42 @@
-// Heimdall Theme Constants - Exact Visual Style from Design
+// Heimdall Theme Constants - Emerald & Gold branding
+import { Platform } from 'react-native';
+
+export const Fonts = {
+  serif: Platform.select({ ios: 'Georgia', android: 'serif', default: "Georgia, 'Times New Roman', serif" }),
+};
+
 export const Colors = {
-  // Main backgrounds
-  background: '#F8F9FA',
-  backgroundDark: '#1A1F2E',
+  background: '#F6F4EE',
+  backgroundDark: '#0C4A3E',
   cardBg: '#FFFFFF',
-  
-  // Primary colors - Teal/Mint
-  primary: '#20C997',
-  primaryDark: '#1BA87C',
-  primaryLight: '#E8F8F4',
-  
-  // Secondary - Dark
-  secondary: '#343A40',
-  
-  // Accent colors
-  accent: '#D4A60B',       // Golden yellow for bones/rewards
-  accentLight: '#FFF3CD',  // Light yellow/cream for badges
-  accentOrange: '#E67E22', // Orange for highlights
-  accentPurple: '#A060DD', // Purple for icons
-  accentMint: '#85E1CA',   // Light mint for icons
-  accentEducation: '#6366F1', // Indigo for education/learning
-  
-  // Reward badge colors
-  rewardBadge: '#FDBA74',  // Light orange for +XP badges
-  cardHighlight: '#F0FDF4', // Light green for highlighted cards
-  
-  // UI Colors
+  primary: '#128C67',
+  primaryDark: '#0C4A3E',
+  primaryLight: '#E3F0EA',
+  secondary: '#22332D',
+  accent: '#B98A1D',
+  accentLight: '#F8F1DD',
+  accentOrange: '#E08A3C',
+  accentPurple: '#8E6FD8',
+  accentMint: '#2BAE94',
+  accentEducation: '#4C6FBF',
+  rewardBadge: '#EFD9A7',
+  cardHighlight: '#EDF5F0',
   white: '#FFFFFF',
   black: '#000000',
-  gray: '#6C757D',
-  grayLight: '#E9ECEF',
-  grayDark: '#495057',
-  
-  // Status colors
-  success: '#28A745',
-  warning: '#FFC107',
-  error: '#DC3545',
-  info: '#17A2B8',
-  
-  // Text colors
-  text: '#343A40',
-  textSecondary: '#6C757D',
-  textLight: '#ADB5BD',
+  gray: '#7A857F',
+  grayLight: '#ECEAE3',
+  grayDark: '#4A554F',
+  success: '#2E9E5B',
+  warning: '#D9A62E',
+  error: '#D9534F',
+  info: '#3B8EA5',
+  text: '#1F2B26',
+  textSecondary: '#6C7A73',
+  textLight: '#A5AFA8',
   textInverse: '#FFFFFF',
-  
-  // Specific UI elements
-  notificationBg: '#E9ECEF',
-  bannerBg: '#FFF3CD',
-  levelBadgeBg: '#E9ECEF',
+  notificationBg: '#EFEDE6',
+  bannerBg: '#F8F1DD',
+  levelBadgeBg: '#ECEAE3',
 };
 
 export const Spacing = {
