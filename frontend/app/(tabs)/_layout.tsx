@@ -65,10 +65,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="educacion"
+        name="chat"
         options={{
-          title: t('education'),
-          tabBarIcon: ({ focused }) => (
+          title: t('chat'),
+          tabBarIcon: () => (
             <View style={styles.centerTab}>
               <Image
                 source={require('../../assets/images/heimdall-logo-round.png')}
@@ -80,12 +80,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="chat"
+        name="educacion"
         options={{
-          title: t('chat'),
+          title: t('education'),
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? [styles.activeIconBg, { backgroundColor: colors.primaryLight }] : undefined}>
-              <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={24} color={color} />
+              <Ionicons name={focused ? 'school' : 'school-outline'} size={24} color={color} />
             </View>
           ),
         }}
