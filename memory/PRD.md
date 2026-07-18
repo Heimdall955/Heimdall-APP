@@ -102,6 +102,9 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - app/epilepsia.tsx: stats (totales/este mes/última), modal registrar crisis (fecha, duración, intensidad leve/moderada/fuerte, desencadenante, notas), lista con borrar. Backend: POST/GET/DELETE /api/epilepsy sobre medical_events con event_type='seizure' → las crisis entran automáticamente en el contexto del Chat IA. i18n es/en/it.
 - Desplegado en VPS y verificado. Testing agent iteración 22: frontend 100% PASS, limpieza de datos de prueba hecha.
 
+## Pantalla de idiomas rediseñada (18 Jul 2026)
+- app/onboarding/idioma.tsx reescrita según mockup: escena acuarela (bosque + castillo + retrato circular con aro dorado del perro, asset language-hero.png), título HEIMDALL serif verde #1E4D3B con divisor ornamental dorado + árbol de la vida, banderas reales (flag-es/en/it.png), tarjeta seleccionada con borde verde y check, footer con escudo-huella dorado (shield-paw.png) y tagline.
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
