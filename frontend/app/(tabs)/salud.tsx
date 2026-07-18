@@ -163,7 +163,7 @@ export default function SaludScreen() {
 
         {/* Vest Coming Soon Banner - shown when vest not connected */}
         {!isConnected && (
-          <TouchableOpacity onPress={() => router.push('/chaleco')} activeOpacity={0.85} data-testid="vest-coming-soon-banner">
+          <TouchableOpacity onPress={() => router.push('/chaleco')} activeOpacity={0.85} testID="vest-coming-soon-banner">
             <View style={styles.vestBanner}>
               <View style={styles.vestBannerIcon}>
                 <Ionicons name="shirt" size={28} color="#C8A960" />

@@ -35,7 +35,7 @@ export default function PrivacidadScreen() {
   return (
     <SafeAreaView style={s.container} edges={['top']}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} data-testid="privacy-back-btn">
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} testID="privacy-back-btn">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={s.title}>{t('privacyTitle')}</Text>
@@ -56,19 +56,19 @@ export default function PrivacidadScreen() {
         ))}
 
         <View style={s.linksSection}>
-          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-ai.tech/politica-de-privacidad/')} data-testid="terms-link">
+          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-ai.tech/politica-de-privacidad/')} testID="terms-link">
             <Ionicons name="document-text-outline" size={20} color={colors.primary} />
             <Text style={s.linkText}>{t('termsOfService')}</Text>
             <Ionicons name="open-outline" size={16} color={colors.gray} />
           </TouchableOpacity>
-          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-ai.tech/politica-de-privacidad/')} data-testid="privacy-policy-link">
+          <TouchableOpacity style={s.linkRow} onPress={() => Linking.openURL('https://heimdall-ai.tech/politica-de-privacidad/')} testID="privacy-policy-link">
             <Ionicons name="shield-outline" size={20} color={colors.primary} />
             <Text style={s.linkText}>{t('privacyPolicy')}</Text>
             <Ionicons name="open-outline" size={16} color={colors.gray} />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={s.deleteBtn} onPress={handleDeleteAccount} data-testid="delete-account-btn">
+        <TouchableOpacity style={s.deleteBtn} onPress={handleDeleteAccount} testID="delete-account-btn">
           <Ionicons name="trash-outline" size={20} color="#F44336" />
           <Text style={s.deleteBtnText}>{t('deleteAccount')}</Text>
         </TouchableOpacity>

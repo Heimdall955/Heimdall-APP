@@ -136,7 +136,7 @@ export default function OnboardingMascotaScreen() {
                 key={pet.id}
                 style={[s.petCard, form.pet_type === pet.id && { borderColor: pet.color, borderWidth: 2.5, backgroundColor: pet.bg }]}
                 onPress={() => update('pet_type', pet.id)}
-                data-testid={`pet-type-${pet.id}`}
+                testID={`pet-type-${pet.id}`}
               >
                 <View style={[s.petIcon, { backgroundColor: pet.bg }]}>
                   <Ionicons name={pet.icon as any} size={36} color={pet.color} />
@@ -149,7 +149,7 @@ export default function OnboardingMascotaScreen() {
             style={[s.nextBtn, !form.pet_type && s.nextBtnDisabled]}
             onPress={() => form.pet_type && setStep(1)}
             disabled={!form.pet_type}
-            data-testid="onboarding-next-0"
+            testID="onboarding-next-0"
           >
             <Text style={s.nextBtnText}>{T('next')}</Text>
             <Ionicons name="arrow-forward" size={20} color="#FFF" />
@@ -171,31 +171,31 @@ export default function OnboardingMascotaScreen() {
             </View>
             <View style={s.fieldGroup}>
               <Text style={s.fieldLabel}>{T('name')} *</Text>
-              <TextInput style={s.input} value={form.name} onChangeText={v => update('name', v)} placeholder={T('namePlaceholder')} placeholderTextColor={colors.gray} data-testid="pet-name-input" />
+              <TextInput style={s.input} value={form.name} onChangeText={v => update('name', v)} placeholder={T('namePlaceholder')} placeholderTextColor={colors.gray} testID="pet-name-input" />
             </View>
             <View style={s.fieldGroup}>
               <Text style={s.fieldLabel}>{T('breed')}</Text>
-              <TextInput style={s.input} value={form.breed} onChangeText={v => update('breed', v)} placeholder={T('breedPlaceholder')} placeholderTextColor={colors.gray} data-testid="pet-breed-input" />
+              <TextInput style={s.input} value={form.breed} onChangeText={v => update('breed', v)} placeholder={T('breedPlaceholder')} placeholderTextColor={colors.gray} testID="pet-breed-input" />
             </View>
             <View style={s.fieldGroup}>
               <Text style={s.fieldLabel}>{T('sex')}</Text>
               <View style={s.toggleRow}>
-                <TouchableOpacity style={[s.toggleBtn, form.sex === 'male' && s.toggleActive]} onPress={() => update('sex', 'male')} data-testid="pet-sex-male">
+                <TouchableOpacity style={[s.toggleBtn, form.sex === 'male' && s.toggleActive]} onPress={() => update('sex', 'male')} testID="pet-sex-male">
                   <Ionicons name="male" size={18} color={form.sex === 'male' ? '#FFF' : colors.text} />
                   <Text style={[s.toggleText, form.sex === 'male' && s.toggleTextActive]}>{T('male')}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[s.toggleBtn, form.sex === 'female' && s.toggleActiveF]} onPress={() => update('sex', 'female')} data-testid="pet-sex-female">
+                <TouchableOpacity style={[s.toggleBtn, form.sex === 'female' && s.toggleActiveF]} onPress={() => update('sex', 'female')} testID="pet-sex-female">
                   <Ionicons name="female" size={18} color={form.sex === 'female' ? '#FFF' : colors.text} />
                   <Text style={[s.toggleText, form.sex === 'female' && s.toggleTextActive]}>{T('female')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={s.btnRow}>
-              <TouchableOpacity style={s.backBtn} onPress={() => setStep(0)} data-testid="onboarding-back-1">
+              <TouchableOpacity style={s.backBtn} onPress={() => setStep(0)} testID="onboarding-back-1">
                 <Ionicons name="arrow-back" size={20} color={colors.text} />
                 <Text style={s.backBtnText}>{T('back')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[s.nextBtn, { flex: 1 }]} onPress={() => form.name.trim() ? setStep(2) : Alert.alert('', T('required'))} data-testid="onboarding-next-1">
+              <TouchableOpacity style={[s.nextBtn, { flex: 1 }]} onPress={() => form.name.trim() ? setStep(2) : Alert.alert('', T('required'))} testID="onboarding-next-1">
                 <Text style={s.nextBtnText}>{T('next')}</Text>
                 <Ionicons name="arrow-forward" size={20} color="#FFF" />
               </TouchableOpacity>
@@ -219,19 +219,19 @@ export default function OnboardingMascotaScreen() {
             <View style={[s.fieldGroup, { flex: 1 }]}>
               <Text style={s.fieldLabel}>{T('ageMonths')}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <TextInput style={[s.input, { flex: 1 }]} value={form.age} onChangeText={v => update('age', v)} placeholder={T('agePlaceholder')} placeholderTextColor={colors.gray} keyboardType="numeric" data-testid="pet-age-input" />
+                <TextInput style={[s.input, { flex: 1 }]} value={form.age} onChangeText={v => update('age', v)} placeholder={T('agePlaceholder')} placeholderTextColor={colors.gray} keyboardType="numeric" testID="pet-age-input" />
                 <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
                   <TouchableOpacity
                     style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: form.ageUnit === 'months' ? colors.primary : 'transparent' }}
                     onPress={() => update('ageUnit', 'months')}
-                    data-testid="age-unit-months"
+                    testID="age-unit-months"
                   >
                     <Text style={{ color: form.ageUnit === 'months' ? '#fff' : colors.text, fontWeight: '600', fontSize: 13 }}>{T('ageUnitMonths')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: form.ageUnit === 'years' ? colors.primary : 'transparent' }}
                     onPress={() => update('ageUnit', 'years')}
-                    data-testid="age-unit-years"
+                    testID="age-unit-years"
                   >
                     <Text style={{ color: form.ageUnit === 'years' ? '#fff' : colors.text, fontWeight: '600', fontSize: 13 }}>{T('ageUnitYears')}</Text>
                   </TouchableOpacity>
@@ -240,34 +240,34 @@ export default function OnboardingMascotaScreen() {
             </View>
             <View style={[s.fieldGroup, { flex: 1 }]}>
               <Text style={s.fieldLabel}>{T('weightKg')}</Text>
-              <TextInput style={s.input} value={form.weight} onChangeText={v => update('weight', v)} placeholder={T('weightPlaceholder')} placeholderTextColor={colors.gray} keyboardType="decimal-pad" data-testid="pet-weight-input" />
+              <TextInput style={s.input} value={form.weight} onChangeText={v => update('weight', v)} placeholder={T('weightPlaceholder')} placeholderTextColor={colors.gray} keyboardType="decimal-pad" testID="pet-weight-input" />
             </View>
           </View>
           <View style={s.fieldGroup}>
             <Text style={s.fieldLabel}>{T('neutered')}</Text>
             <View style={s.toggleRow}>
-              <TouchableOpacity style={[s.toggleBtn, form.neutered && s.toggleActive]} onPress={() => update('neutered', true)} data-testid="pet-neutered-yes">
+              <TouchableOpacity style={[s.toggleBtn, form.neutered && s.toggleActive]} onPress={() => update('neutered', true)} testID="pet-neutered-yes">
                 <Text style={[s.toggleText, form.neutered && s.toggleTextActive]}>{T('yes')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[s.toggleBtn, !form.neutered && s.toggleActiveNo]} onPress={() => update('neutered', false)} data-testid="pet-neutered-no">
+              <TouchableOpacity style={[s.toggleBtn, !form.neutered && s.toggleActiveNo]} onPress={() => update('neutered', false)} testID="pet-neutered-no">
                 <Text style={[s.toggleText, !form.neutered && s.toggleTextActive]}>{T('no')}</Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={s.fieldGroup}>
             <Text style={s.fieldLabel}>{T('chipId')}</Text>
-            <TextInput style={s.input} value={form.chip_id} onChangeText={v => update('chip_id', v)} placeholder={T('chipPlaceholder')} placeholderTextColor={colors.gray} data-testid="pet-chip-input" />
+            <TextInput style={s.input} value={form.chip_id} onChangeText={v => update('chip_id', v)} placeholder={T('chipPlaceholder')} placeholderTextColor={colors.gray} testID="pet-chip-input" />
           </View>
           <View style={s.fieldGroup}>
             <Text style={s.fieldLabel}>{T('allergies')}</Text>
-            <TextInput style={[s.input, { height: 80, textAlignVertical: 'top' }]} value={form.allergies} onChangeText={v => update('allergies', v)} placeholder={T('allergiesPlaceholder')} placeholderTextColor={colors.gray} multiline data-testid="pet-allergies-input" />
+            <TextInput style={[s.input, { height: 80, textAlignVertical: 'top' }]} value={form.allergies} onChangeText={v => update('allergies', v)} placeholder={T('allergiesPlaceholder')} placeholderTextColor={colors.gray} multiline testID="pet-allergies-input" />
           </View>
           <View style={s.btnRow}>
-            <TouchableOpacity style={s.backBtn} onPress={() => setStep(1)} data-testid="onboarding-back-2">
+            <TouchableOpacity style={s.backBtn} onPress={() => setStep(1)} testID="onboarding-back-2">
               <Ionicons name="arrow-back" size={20} color={colors.text} />
               <Text style={s.backBtnText}>{T('back')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[s.finishBtn, { flex: 1 }]} onPress={handleFinish} disabled={saving} data-testid="onboarding-finish">
+            <TouchableOpacity style={[s.finishBtn, { flex: 1 }]} onPress={handleFinish} disabled={saving} testID="onboarding-finish">
               {saving ? (
                 <Text style={s.finishBtnText}>{T('saving')}</Text>
               ) : (

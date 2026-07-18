@@ -73,7 +73,7 @@ export default function CalendarPicker({ value, onSelect, label, placeholder }: 
       <TouchableOpacity
         style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background, borderRadius: BorderRadius.md, padding: Spacing.md, borderWidth: 1, borderColor: colors.grayLight }}
         onPress={() => setVisible(true)}
-        data-testid="calendar-picker-btn"
+        testID="calendar-picker-btn"
       >
         <Ionicons name="calendar-outline" size={20} color={colors.primary} style={{ marginRight: Spacing.sm }} />
         <Text style={{ flex: 1, fontSize: FontSizes.md, color: displayValue ? colors.text : colors.gray }}>
@@ -87,11 +87,11 @@ export default function CalendarPicker({ value, onSelect, label, placeholder }: 
           <View style={[s.calendarBox, { backgroundColor: colors.white }]} onStartShouldSetResponder={() => true}>
             {/* Month nav */}
             <View style={s.nav}>
-              <TouchableOpacity onPress={prevMonth} style={s.navBtn} data-testid="cal-prev-month">
+              <TouchableOpacity onPress={prevMonth} style={s.navBtn} testID="cal-prev-month">
                 <Ionicons name="chevron-back" size={22} color={colors.text} />
               </TouchableOpacity>
               <Text style={[s.navTitle, { color: colors.text }]}>{MONTHS_ES[viewMonth]} {viewYear}</Text>
-              <TouchableOpacity onPress={nextMonth} style={s.navBtn} data-testid="cal-next-month">
+              <TouchableOpacity onPress={nextMonth} style={s.navBtn} testID="cal-next-month">
                 <Ionicons name="chevron-forward" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
@@ -115,7 +115,7 @@ export default function CalendarPicker({ value, onSelect, label, placeholder }: 
                   ]}
                   onPress={() => day && pickDay(day)}
                   disabled={!day}
-                  data-testid={day ? `cal-day-${day}` : undefined}
+                  testID={day ? `cal-day-${day}` : undefined}
                 >
                   {day && (
                     <Text style={[s.cellText, { color: isSelected(day) ? '#FFF' : colors.text }]}>{day}</Text>
@@ -133,7 +133,7 @@ export default function CalendarPicker({ value, onSelect, label, placeholder }: 
                 setViewMonth(t.getMonth());
                 pickDay(t.getDate());
               }}
-              data-testid="cal-today-btn"
+              testID="cal-today-btn"
             >
               <Text style={{ color: colors.primary, fontWeight: '600', fontSize: FontSizes.sm }}>Hoy</Text>
             </TouchableOpacity>

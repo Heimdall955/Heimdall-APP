@@ -191,7 +191,7 @@ export default function ChatScreen() {
     const isUser = message.role === 'user';
     const hasAttachment = message.file_type || (message.content && message.content.startsWith('['));
     return (
-      <View key={message.id} style={[s.messageContainer, isUser ? s.userMessage : s.assistantMessage]} data-testid={`message-${message.id}`}>
+      <View key={message.id} style={[s.messageContainer, isUser ? s.userMessage : s.assistantMessage]} testID={`message-${message.id}`}>
         {!isUser && <View style={s.avatarContainer}><Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 32, height: 32 }} resizeMode="cover" /></View>}
         <View style={[s.messageBubble, isUser ? s.userBubble : s.assistantBubble]}>
           {isUser && hasAttachment && <View style={{ marginBottom: 4 }}><Ionicons name={message.file_type === 'pdf' || message.content?.includes('[PDF]') ? 'document-text' : message.file_type === 'video' || message.content?.includes('[VIDEO]') ? 'videocam' : 'camera'} size={16} color="#FFF" /></View>}
@@ -201,18 +201,18 @@ export default function ChatScreen() {
             renderFormattedText(message.content, colors.text)
           )}
           {!isUser && (
-            <View style={s.ratingRow} data-testid={`rating-${message.id}`}>
+            <View style={s.ratingRow} testID={`rating-${message.id}`}>
               <TouchableOpacity
                 onPress={() => rateMessage(message.id, 'up')}
                 style={[s.ratingBtn, message.rating === 'up' && { backgroundColor: colors.primary + '20' }]}
-                data-testid={`rate-up-${message.id}`}
+                testID={`rate-up-${message.id}`}
               >
                 <Ionicons name={message.rating === 'up' ? 'thumbs-up' : 'thumbs-up-outline'} size={15} color={message.rating === 'up' ? colors.primary : colors.gray} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => rateMessage(message.id, 'down')}
                 style={[s.ratingBtn, message.rating === 'down' && { backgroundColor: colors.error + '20' }]}
-                data-testid={`rate-down-${message.id}`}
+                testID={`rate-down-${message.id}`}
               >
                 <Ionicons name={message.rating === 'down' ? 'thumbs-down' : 'thumbs-down-outline'} size={15} color={message.rating === 'down' ? colors.error : colors.gray} />
               </TouchableOpacity>
@@ -246,7 +246,7 @@ export default function ChatScreen() {
               <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: Spacing.lg }}>{welcomeMessage.text}</Text>
 
               {/* Quick Actions */}
-              <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl, width: '100%' }} data-testid="quick-actions">
+              <View style={{ flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl, width: '100%' }} testID="quick-actions">
                 <TouchableOpacity style={s.quickActionCard} onPress={pickImage}>
                   <Ionicons name="camera" size={28} color={colors.primary} />
                   <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>{labels.photo}</Text>
@@ -289,7 +289,7 @@ export default function ChatScreen() {
 
         {/* Quick Bar */}
         {!isLoading && (
-          <View style={s.quickBar} data-testid="quick-bar">
+          <View style={s.quickBar} testID="quick-bar">
             <TouchableOpacity style={s.quickBarBtn} onPress={pickImage}>
               <Ionicons name="camera" size={20} color={colors.primary} />
               <Text style={{ fontSize: FontSizes.xs, fontWeight: '600', color: colors.text }}>{labels.photo}</Text>
@@ -308,11 +308,11 @@ export default function ChatScreen() {
         {/* Input */}
         <View style={s.inputContainer}>
           <View style={s.inputWrapper}>
-            <TouchableOpacity style={{ padding: Spacing.sm, justifyContent: 'center' }} onPress={() => setShowAttachMenu(true)} data-testid="attach-button">
+            <TouchableOpacity style={{ padding: Spacing.sm, justifyContent: 'center' }} onPress={() => setShowAttachMenu(true)} testID="attach-button">
               <Ionicons name="add-circle" size={28} color={colors.primary} />
             </TouchableOpacity>
             <TextInput style={s.textInput} placeholder={t('typeMessage') || 'Escribe tu mensaje...'} placeholderTextColor={colors.gray} value={inputText} onChangeText={setInputText} multiline maxLength={1000} />
-            <TouchableOpacity style={[s.sendButton, (!inputText.trim() || isLoading) && { backgroundColor: colors.grayLight }]} onPress={() => sendMessage(inputText)} disabled={!inputText.trim() || isLoading} data-testid="send-button">
+            <TouchableOpacity style={[s.sendButton, (!inputText.trim() || isLoading) && { backgroundColor: colors.grayLight }]} onPress={() => sendMessage(inputText)} disabled={!inputText.trim() || isLoading} testID="send-button">
               <Ionicons name="send" size={20} color={inputText.trim() && !isLoading ? '#FFF' : colors.gray} />
             </TouchableOpacity>
           </View>
@@ -321,7 +321,7 @@ export default function ChatScreen() {
         {/* Attach Modal */}
         <Modal visible={showAttachMenu} transparent animationType="slide" onRequestClose={() => setShowAttachMenu(false)}>
           <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAttachMenu(false)}>
-            <View style={s.attachMenu} data-testid="attach-menu">
+            <View style={s.attachMenu} testID="attach-menu">
               <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: Spacing.lg }}>{labels.attachTitle}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                 {[{ icon: 'camera', color: colors.primary, bg: colors.primaryLight, label: labels.photo, desc: labels.photoDesc, fn: pickImage },

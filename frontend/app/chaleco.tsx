@@ -73,7 +73,7 @@ export default function ChalecoScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={s.header}>
-          <TouchableOpacity onPress={() => router.back()} style={s.backBtn} data-testid="vest-back-btn">
+          <TouchableOpacity onPress={() => router.back()} style={s.backBtn} testID="vest-back-btn">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
@@ -81,7 +81,7 @@ export default function ChalecoScreen() {
             <Text style={s.subtitle}>ESP32 BLE</Text>
           </View>
           {isConnected && (
-            <View style={s.connectedBadge} data-testid="connected-badge">
+            <View style={s.connectedBadge} testID="connected-badge">
               <View style={s.connectedDot} />
               <Text style={s.connectedText}>Online</Text>
             </View>
@@ -113,7 +113,7 @@ export default function ChalecoScreen() {
             <TouchableOpacity
               style={[s.scanBtn, isScanning && { backgroundColor: colors.error }]}
               onPress={isScanning ? stopScan : handleStartScan}
-              data-testid="scan-btn"
+              testID="scan-btn"
             >
               <Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={22} color="#FFF" />
               <Text style={s.scanBtnText}>{isScanning ? 'Detener' : 'Buscar dispositivos'}</Text>
@@ -133,7 +133,7 @@ export default function ChalecoScreen() {
                   style={[s.deviceCard, device.isHeimdallVest && s.deviceCardHeimdall]}
                   onPress={() => handleConnect(device.id)}
                   disabled={connectingDeviceId !== null}
-                  data-testid={`device-${device.id}`}
+                  testID={`device-${device.id}`}
                 >
                   <View style={[s.deviceIcon, device.isHeimdallVest && { backgroundColor: colors.primary }]}>
                     <Ionicons name={device.isHeimdallVest ? 'paw' : 'bluetooth'} size={22} color={device.isHeimdallVest ? '#FFF' : colors.primary} />
@@ -169,7 +169,7 @@ export default function ChalecoScreen() {
             {/* Vital signs grid */}
             <View style={s.vitalsGrid}>
               {/* Heart Rate - Large */}
-              <Card style={s.vitalCardLg} data-testid="heart-rate-card">
+              <Card style={s.vitalCardLg} testID="heart-rate-card">
                 <View style={s.vitalHeader}>
                   <View style={[s.vitalIcon, { backgroundColor: '#FF4B4B18' }]}>
                     <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
@@ -191,7 +191,7 @@ export default function ChalecoScreen() {
               </Card>
 
               {/* Temperature */}
-              <Card style={s.vitalCardLg} data-testid="temperature-card">
+              <Card style={s.vitalCardLg} testID="temperature-card">
                 <View style={s.vitalHeader}>
                   <View style={[s.vitalIcon, { backgroundColor: '#FF980018' }]}>
                     <Ionicons name="thermometer" size={24} color="#FF9800" />
@@ -213,7 +213,7 @@ export default function ChalecoScreen() {
 
             <View style={s.vitalsGrid}>
               {/* Activity */}
-              <Card style={s.vitalCardSm} data-testid="activity-card">
+              <Card style={s.vitalCardSm} testID="activity-card">
                 <View style={[s.vitalIcon, { backgroundColor: getActivityColor(biometricData.movement) + '18', alignSelf: 'flex-start' }]}>
                   <Ionicons name="walk" size={22} color={getActivityColor(biometricData.movement)} />
                 </View>
@@ -224,7 +224,7 @@ export default function ChalecoScreen() {
               </Card>
 
               {/* Battery */}
-              <Card style={s.vitalCardSm} data-testid="battery-card">
+              <Card style={s.vitalCardSm} testID="battery-card">
                 <View style={[s.vitalIcon, { backgroundColor: biometricData.battery > 20 ? '#4CAF5018' : '#FF4B4B18', alignSelf: 'flex-start' }]}>
                   <Ionicons name={biometricData.battery > 50 ? 'battery-full' : biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} size={22} color={biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B'} />
                 </View>
@@ -246,7 +246,7 @@ export default function ChalecoScreen() {
                   <Text style={s.deviceInfoName}>{biometricData.deviceName || 'HEIMDALL Vest'}</Text>
                   <Text style={s.deviceInfoSub}>ESP32 BLE</Text>
                 </View>
-                <TouchableOpacity style={s.disconnectBtn} onPress={handleDisconnect} data-testid="disconnect-btn">
+                <TouchableOpacity style={s.disconnectBtn} onPress={handleDisconnect} testID="disconnect-btn">
                   <Ionicons name="power" size={18} color="#FF4B4B" />
                   <Text style={s.disconnectText}>Desconectar</Text>
                 </TouchableOpacity>

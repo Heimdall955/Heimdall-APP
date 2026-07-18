@@ -73,7 +73,7 @@ export default function ProgresoScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} data-testid="progress-back-btn">
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} testID="progress-back-btn">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Mi Progreso</Text>
@@ -82,7 +82,7 @@ export default function ProgresoScreen() {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Big Stats Ring */}
-        <View style={styles.ringSection} data-testid="global-progress">
+        <View style={styles.ringSection} testID="global-progress">
           <View style={styles.ringOuter}>
             <View style={styles.ringInner}>
               <Text style={styles.ringPercent}>{globalPercent}%</Text>
@@ -93,7 +93,7 @@ export default function ProgresoScreen() {
         </View>
 
         {/* Stats Row */}
-        <View style={styles.statsRow} data-testid="stats-row">
+        <View style={styles.statsRow} testID="stats-row">
           <StatBox icon="flame" color="#E67E22" value={stats.streak_days} label="Racha" colors={colors} styles={styles} />
           <StatBox icon="flash" color={colors.accent} value={stats.xp} label="XP Total" colors={colors} styles={styles} />
           <StatBox icon="trophy" color={colors.primary} value={stats.level} label="Nivel" colors={colors} styles={styles} />
@@ -113,7 +113,7 @@ export default function ProgresoScreen() {
               key={program.id}
               style={styles.programRow}
               onPress={() => router.push(`/programa?id=${program.id}`)}
-              data-testid={`program-${program.id}`}
+              testID={`program-${program.id}`}
             >
               <View style={[styles.programIcon, { backgroundColor: program.color + '20' }]}>
                 <Ionicons name={program.icon} size={22} color={program.color} />

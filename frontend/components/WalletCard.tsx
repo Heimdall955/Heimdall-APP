@@ -87,7 +87,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({ dogId, dogName, dogBreed
       <View style={{ backgroundColor: '#1B4D3E', borderRadius: BorderRadius.lg, padding: Spacing.md, ...shadows.md as any }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.md }}>
           <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
-            <Image source={require('../assets/images/heimdall-logo.png')} style={{ width: 40, height: 40 }} resizeMode="cover" />
+            <Image source={require('../assets/images/heimdall-avatar.png')} style={{ width: 40, height: 40 }} resizeMode="cover" />
           </View>
           <View style={{ flex: 1, marginLeft: Spacing.sm }}>
             <Text style={{ fontSize: FontSizes.lg, fontWeight: 'bold', color: '#FFF' }}>HANI Passport</Text>
@@ -124,7 +124,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({ dogId, dogName, dogBreed
         </View>
         <TouchableOpacity
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF', borderRadius: 50, paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg, gap: Spacing.sm }}
-          onPress={handleAddToWallet} disabled={loading} data-testid="add-to-wallet-btn"
+          onPress={handleAddToWallet} disabled={loading} testID="add-to-wallet-btn"
         >
           {loading ? <ActivityIndicator color={colors.primary} /> : success ? (
             <><Ionicons name="checkmark-circle" size={22} color={colors.primary} /><Text style={{ fontSize: FontSizes.md, fontWeight: '600', color: colors.text }}>{language === 'en' ? 'Added!' : language === 'it' ? 'Aggiunto!' : 'Anadido!'}</Text></>

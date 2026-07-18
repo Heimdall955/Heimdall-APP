@@ -328,7 +328,7 @@ export default function PerfilScreen() {
         {/* Dog Profile Card */}
         <Card style={styles.profileCard} variant="elevated">
           <View style={styles.profileHeader}>
-            <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} data-testid="dog-photo-btn">
+            <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} testID="dog-photo-btn">
               {dogImage ? <Image source={{ uri: dogImage }} style={styles.avatarImage} /> : (
                 <View style={styles.avatar}><Ionicons name="paw" size={40} color={colors.white} /></View>
               )}
@@ -338,7 +338,7 @@ export default function PerfilScreen() {
               <Text style={styles.dogName}>{currentDog?.name || 'Tu perro'}</Text>
               <Text style={styles.ownerName}>de {user?.name}</Text>
             </View>
-            <TouchableOpacity style={styles.editButton} onPress={() => setShowEditModal(true)} data-testid="edit-profile-btn">
+            <TouchableOpacity style={styles.editButton} onPress={() => setShowEditModal(true)} testID="edit-profile-btn">
               <Ionicons name="create-outline" size={20} color={colors.primary} />
             </TouchableOpacity>
           </View>
@@ -355,7 +355,7 @@ export default function PerfilScreen() {
         </Card>
 
         {/* Gamification */}
-        <View style={styles.section} data-testid="gamification-section">
+        <View style={styles.section} testID="gamification-section">
           <Text style={styles.sectionTitle}>{t('myRewards')}</Text>
           <Card variant="elevated" style={{ marginBottom: 0 }}>
             <View style={styles.gamLevelRow}>
@@ -377,7 +377,7 @@ export default function PerfilScreen() {
         </View>
 
         {/* Achievements */}
-        <View style={styles.section} data-testid="achievements-section">
+        <View style={styles.section} testID="achievements-section">
           <Text style={styles.sectionTitle}>{t('achievements')}</Text>
           <Card variant="elevated">
             <View style={styles.achGrid}>
@@ -396,10 +396,10 @@ export default function PerfilScreen() {
         </View>
 
         {/* Pack Section */}
-        <View style={styles.section} data-testid="pack-section">
+        <View style={styles.section} testID="pack-section">
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('myPack')}</Text>
-            <TouchableOpacity style={styles.inviteBtn} onPress={() => setShowInviteModal(true)} data-testid="invite-btn">
+            <TouchableOpacity style={styles.inviteBtn} onPress={() => setShowInviteModal(true)} testID="invite-btn">
               <Ionicons name="person-add" size={16} color={colors.white} />
               <Text style={styles.inviteBtnText}>{t('invite')}</Text>
             </TouchableOpacity>
@@ -443,7 +443,7 @@ export default function PerfilScreen() {
         </View>
 
         {/* Clinical File */}
-        <View style={styles.section} data-testid="clinical-section">
+        <View style={styles.section} testID="clinical-section">
           <Text style={styles.sectionTitle}>{t('clinicalFile')}</Text>
           <Card variant="elevated">
             <View style={styles.clinicalRow}><Ionicons name="location-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('country')}</Text><Text style={styles.clinicalValue}>{clinical.country || '--'}</Text></View>
@@ -451,7 +451,7 @@ export default function PerfilScreen() {
             <View style={styles.clinicalRow}><Ionicons name="alert-circle-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{t('allergies')}</Text><Text style={styles.clinicalValue}>{clinical.allergies || t('noneRegistered')}</Text></View>
             <View style={styles.clinicalRow}><Ionicons name="fitness-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{language === 'en' ? 'Neutered' : language === 'it' ? 'Sterilizzato' : 'Esterilizado'}</Text><Text style={styles.clinicalValue}>{clinical.neutered ? (language === 'en' ? 'Yes' : 'Sí') : 'No'}</Text></View>
             <View style={styles.clinicalRow}><Ionicons name="medical-outline" size={20} color={colors.textSecondary} /><Text style={styles.clinicalLabel}>{language === 'en' ? 'Medication' : language === 'it' ? 'Farmaci' : 'Medicación'}</Text><Text style={styles.clinicalValue}>{clinical.current_medication || '--'}</Text></View>
-            <TouchableOpacity style={styles.clinicalEdit} onPress={() => setShowClinicalModal(true)} data-testid="edit-clinical-btn">
+            <TouchableOpacity style={styles.clinicalEdit} onPress={() => setShowClinicalModal(true)} testID="edit-clinical-btn">
               <Text style={styles.clinicalEditText}>{t('editClinicalFile')}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.primary} />
             </TouchableOpacity>
@@ -459,12 +459,12 @@ export default function PerfilScreen() {
 
           {/* Medical Events Preview */}
           {medicalEvents.length > 0 && (
-            <View style={{ marginTop: Spacing.md }} data-testid="medical-events-preview">
+            <View style={{ marginTop: Spacing.md }} testID="medical-events-preview">
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm }}>
                 <Text style={{ fontSize: FontSizes.sm, fontWeight: '700', color: colors.text }}>
                   {language === 'en' ? 'Medical History' : language === 'it' ? 'Storia medica' : 'Historial Médico'} ({medicalEvents.length})
                 </Text>
-                <TouchableOpacity onPress={() => router.push('/historial-medico')} data-testid="view-all-medical-btn">
+                <TouchableOpacity onPress={() => router.push('/historial-medico')} testID="view-all-medical-btn">
                   <Text style={{ fontSize: FontSizes.xs, color: colors.primary, fontWeight: '600' }}>
                     {language === 'en' ? 'View all' : language === 'it' ? 'Vedi tutto' : 'Ver todo'}
                   </Text>
@@ -481,7 +481,7 @@ export default function PerfilScreen() {
                 const cfg = typeConfig[ev.type] || typeConfig.note;
                 const dateStr = (() => { try { return new Date(ev.date || ev.event_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return '--'; } })();
                 return (
-                  <Card key={ev.id || idx} style={{ marginBottom: Spacing.xs, padding: Spacing.sm }} data-testid={`medical-event-${idx}`}>
+                  <Card key={ev.id || idx} style={{ marginBottom: Spacing.xs, padding: Spacing.sm }} testID={`medical-event-${idx}`}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: cfg.color + '20', alignItems: 'center', justifyContent: 'center' }}>
                         <Ionicons name={cfg.icon as any} size={18} color={cfg.color} />
@@ -505,7 +505,7 @@ export default function PerfilScreen() {
         <View style={styles.section}>
           <Card variant="elevated">
             {menuItems.map((item, index) => (
-              <TouchableOpacity key={item.id} style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]} onPress={item.onPress} data-testid={`menu-${item.id}`}>
+              <TouchableOpacity key={item.id} style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]} onPress={item.onPress} testID={`menu-${item.id}`}>
                 <Ionicons name={item.icon as any} size={22} color={item.danger ? colors.error : colors.text} />
                 <Text style={[styles.menuItemText, item.danger && { color: colors.error }]}>{item.label}</Text>
                 {item.showValue && <Text style={styles.menuItemValue}>{getLanguageFlag(language)} {item.showValue}</Text>}
@@ -558,7 +558,7 @@ export default function PerfilScreen() {
                           setEditAgeUnit('months');
                         }
                       }}
-                      data-testid="edit-age-unit-months"
+                      testID="edit-age-unit-months"
                     >
                       <Text style={{ color: editAgeUnit === 'months' ? '#fff' : colors.text, fontWeight: '600', fontSize: 12 }}>{language === 'en' ? 'Months' : language === 'it' ? 'Mesi' : 'Meses'}</Text>
                     </TouchableOpacity>
@@ -571,7 +571,7 @@ export default function PerfilScreen() {
                           setEditAgeUnit('years');
                         }
                       }}
-                      data-testid="edit-age-unit-years"
+                      testID="edit-age-unit-years"
                     >
                       <Text style={{ color: editAgeUnit === 'years' ? '#fff' : colors.text, fontWeight: '600', fontSize: 12 }}>{language === 'en' ? 'Years' : language === 'it' ? 'Anni' : 'Años'}</Text>
                     </TouchableOpacity>
@@ -592,7 +592,7 @@ export default function PerfilScreen() {
                   { value: 'rodent', label: language === 'en' ? 'Rodent' : language === 'it' ? 'Roditore' : 'Roedor', icon: '🐹' },
                   { value: 'bird', label: language === 'en' ? 'Bird' : language === 'it' ? 'Uccello' : 'Pájaro', icon: '🐦' },
                 ].map(opt => (
-                  <TouchableOpacity key={opt.value} data-testid={`pet-type-${opt.value}`}
+                  <TouchableOpacity key={opt.value} testID={`pet-type-${opt.value}`}
                     style={[styles.unitBtn, editPetType === opt.value && styles.unitBtnActive]}
                     onPress={() => setEditPetType(opt.value)}>
                     <Text style={[styles.unitBtnText, editPetType === opt.value && { color: colors.white }]}>{opt.icon} {opt.label}</Text>
@@ -608,7 +608,7 @@ export default function PerfilScreen() {
                   { value: 'male', label: language === 'en' ? 'Male' : language === 'it' ? 'Maschio' : 'Macho' },
                   { value: 'female', label: language === 'en' ? 'Female' : language === 'it' ? 'Femmina' : 'Hembra' },
                 ].map(opt => (
-                  <TouchableOpacity key={opt.value} data-testid={`pet-sex-${opt.value}`}
+                  <TouchableOpacity key={opt.value} testID={`pet-sex-${opt.value}`}
                     style={[styles.unitBtn, editSex === opt.value && styles.unitBtnActive]}
                     onPress={() => setEditSex(opt.value)}>
                     <Text style={[styles.unitBtnText, editSex === opt.value && { color: colors.white }]}>{opt.label}</Text>
@@ -619,14 +619,14 @@ export default function PerfilScreen() {
             {/* Neutered */}
             <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
               <Text style={styles.inputLabel}>{language === 'en' ? 'Neutered/Spayed' : language === 'it' ? 'Sterilizzato/a' : 'Esterilizado/a'}</Text>
-              <Switch value={editNeutered} onValueChange={setEditNeutered} trackColor={{ true: colors.primary }} data-testid="pet-neutered-switch" />
+              <Switch value={editNeutered} onValueChange={setEditNeutered} trackColor={{ true: colors.primary }} testID="pet-neutered-switch" />
             </View>
             {/* Allergies */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{language === 'en' ? 'Allergies' : language === 'it' ? 'Allergie' : 'Alergias'}</Text>
               <TextInput style={[styles.input, { minHeight: 60 }]} value={editAllergies} onChangeText={setEditAllergies} multiline
                 placeholder={language === 'en' ? 'None known' : language === 'it' ? 'Nessuna nota' : 'Ninguna conocida'} placeholderTextColor={colors.gray}
-                data-testid="pet-allergies-input" />
+                testID="pet-allergies-input" />
             </View>
           </ScrollView>
           <Button title={saving ? '...' : t('save')} onPress={handleSaveProfile} loading={saving} disabled={saving} style={{ marginTop: Spacing.md }} />
@@ -711,7 +711,7 @@ export default function PerfilScreen() {
               label: language === 'en' ? 'Heimdall misses you' : language === 'it' ? 'Heimdall ti manca' : 'Heimdall te echa de menos',
               desc: language === 'en' ? "If you haven't visited in days" : language === 'it' ? 'Se non entri da giorni' : 'Si llevas dias sin entrar' },
           ]).map(item => (
-            <View key={item.key} style={[styles.settingRow, { paddingVertical: Spacing.md }]} data-testid={`notif-toggle-${item.key}`}>
+            <View key={item.key} style={[styles.settingRow, { paddingVertical: Spacing.md }]} testID={`notif-toggle-${item.key}`}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flex: 1 }}>
                 <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: item.color + '18', alignItems: 'center', justifyContent: 'center' }}>
                   <Ionicons name={item.icon as any} size={20} color={item.color} />

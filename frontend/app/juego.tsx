@@ -80,7 +80,7 @@ export default function JuegoScreen() {
           </View>
 
           {rewardData && (
-            <View style={styles.statsRow} data-testid="game-reward-stats">
+            <View style={styles.statsRow} testID="game-reward-stats">
               <Text style={styles.statsText}>{t('level')} {rewardData.level} - {rewardData.xp} XP</Text>
               {rewardData.leveled_up && (
                 <Text style={styles.levelUpText}>{t('levelUp')} {rewardData.level}!</Text>

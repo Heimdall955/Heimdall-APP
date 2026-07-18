@@ -72,6 +72,15 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Verificado contra el VPS: login ✅, /api/auth/request-reset ✅ (email Resend), /api/chat ✅ (respuesta LLM OK). El backend del VPS estaba correcto todo el tiempo.
 - IMPORTANTE PARA FUTUROS AGENTES: nunca depender de frontend/.env para la URL de producción; los forks lo reescriben. config/backend.ts es la fuente de verdad.
 
+## Rediseño visual completo (18 Jul 2026)
+- Nuevo branding basado en mockup del usuario: fondo crema #F6F4EE, esmeralda #128C67, verde pino #0C4A3E (tarjetas hero), dorado #B98A1D, títulos serif (Georgia/serif nativa vía Fonts.serif en constants/theme.ts).
+- Paleta global cambiada en contexts/ThemeContext.tsx (Light y Dark) — rebrandea todas las pantallas automáticamente.
+- Home (index.tsx) rehecho: header con avatar mascota, tarjeta recompensa (trofeo + hueso dorado), hero "Analiza y entiende la salud de tu animal" con ilustración mascota veterinaria y CTA pill "Empezar análisis" → Chat, accesos rápidos en tarjetas con chevron (todos conectados), resto de secciones restyled.
+- Tab bar (_layout.tsx): esquinas redondeadas, avatar mascota en botón central (Educación).
+- Ilustraciones nuevas generadas (Gemini, estilo del mockup) en assets/images: heimdall-vet-hero.png, heimdall-avatar.png, golden-bone.png, trophy-badge.png, tree-of-life.png (fondo blanco eliminado por flood-fill PIL, optimizadas).
+- data-testid → testID en todos los componentes RN (estándar React Native Web).
+- Testing agent iteración 20: TODOS los flujos PASS (login, home, 5 tabs, chat IA e2e, modo oscuro).
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)

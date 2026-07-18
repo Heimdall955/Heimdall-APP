@@ -72,7 +72,7 @@ export default function EjercicioScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       {/* Clean Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} data-testid="exercise-back-btn">
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} testID="exercise-back-btn">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
@@ -114,12 +114,12 @@ export default function EjercicioScreen() {
               <TouchableOpacity
                 style={styles.exHeader}
                 onPress={() => setEjercicioActual(isOpen ? -1 : index)}
-                data-testid={`exercise-item-${index}`}
+                testID={`exercise-item-${index}`}
               >
                 <TouchableOpacity
                   style={[styles.checkbox, isDone && { backgroundColor: ejercicio.color, borderColor: ejercicio.color }]}
                   onPress={() => toggleCompletado(index)}
-                  data-testid={`exercise-check-${index}`}
+                  testID={`exercise-check-${index}`}
                 >
                   {isDone && <Ionicons name="checkmark" size={16} color="#FFF" />}
                 </TouchableOpacity>
@@ -148,7 +148,7 @@ export default function EjercicioScreen() {
         {todosCompletados && (
           <View style={styles.completeSection}>
             {rewardData && (
-              <View style={[styles.rewardCard, { backgroundColor: ejercicio.color + '12' }]} data-testid="exercise-reward-banner">
+              <View style={[styles.rewardCard, { backgroundColor: ejercicio.color + '12' }]} testID="exercise-reward-banner">
                 <Ionicons name="trophy" size={28} color={ejercicio.color} />
                 <Text style={[styles.rewardAmount, { color: ejercicio.color }]}>+{rewardData.bones_added} {t('bones')}</Text>
                 <Text style={styles.rewardXP}>{t('level')} {rewardData.level} - {rewardData.xp} XP</Text>
@@ -160,7 +160,7 @@ export default function EjercicioScreen() {
             <TouchableOpacity
               style={[styles.completeBtn, { backgroundColor: ejercicio.color }]}
               onPress={() => router.back()}
-              data-testid="exercise-complete-button"
+              testID="exercise-complete-button"
             >
               <Ionicons name="checkmark-circle" size={22} color="#FFF" />
               <Text style={styles.completeBtnText}>{t('done')}</Text>

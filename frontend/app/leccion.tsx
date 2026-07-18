@@ -841,7 +841,7 @@ export default function LeccionScreen() {
 
           {/* Level Up notification */}
           {rewardData?.leveled_up && (
-            <View style={styles.levelUpBanner} data-testid="level-up-banner">
+            <View style={styles.levelUpBanner} testID="level-up-banner">
               <Ionicons name="arrow-up-circle" size={28} color={colors.accent} />
               <Text style={styles.levelUpText}>{t('levelUp')} {rewardData.level}!</Text>
             </View>
@@ -849,7 +849,7 @@ export default function LeccionScreen() {
 
           {/* New Achievements */}
           {rewardData?.new_achievements && rewardData.new_achievements.length > 0 && (
-            <View style={styles.newAchievementsContainer} data-testid="new-achievements">
+            <View style={styles.newAchievementsContainer} testID="new-achievements">
               <Text style={styles.newAchievementsTitle}>{t('newAchievement')}</Text>
               {rewardData.new_achievements.map((ach: any) => (
                 <View key={ach.id} style={styles.achievementItem}>
@@ -866,7 +866,7 @@ export default function LeccionScreen() {
 
           {/* Updated total stats */}
           {rewardData && (
-            <View style={styles.totalStatsRow} data-testid="total-stats">
+            <View style={styles.totalStatsRow} testID="total-stats">
               <View style={styles.totalStatItem}>
                 <Text style={styles.totalStatValue}>{rewardData.bones}</Text>
                 <Text style={styles.totalStatLabel}>{t('totalBones')}</Text>

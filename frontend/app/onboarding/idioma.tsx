@@ -24,7 +24,7 @@ export default function IdiomaScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Image source={require('../../assets/images/heimdall-character.png')} style={{ width: 120, height: 120, borderRadius: 60 }} resizeMode="cover" />
+          <Image source={require('../../assets/images/heimdall-avatar.png')} style={{ width: 120, height: 120, borderRadius: 60 }} resizeMode="cover" />
           <Text style={styles.title}>HEIMDALL</Text>
           <Text style={styles.subtitle}>Bienestar Canino Inteligente</Text>
         </View>

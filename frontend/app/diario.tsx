@@ -110,7 +110,7 @@ export default function DiarioScreen() {
   return (
     <SafeAreaView style={[s.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} data-testid="diary-back-btn">
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} testID="diary-back-btn">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={s.headerTitle}>{t('emotionDiary')}</Text>
@@ -127,7 +127,7 @@ export default function DiarioScreen() {
                 key={em.id}
                 style={[s.emotionBtn, selected === em.id && { backgroundColor: em.bg, borderColor: em.color, borderWidth: 2 }]}
                 onPress={() => setSelected(em.id)}
-                data-testid={`emotion-${em.id}`}
+                testID={`emotion-${em.id}`}
               >
                 <Ionicons name={em.icon as any} size={28} color={selected === em.id ? em.color : colors.gray} />
                 <Text style={[s.emotionLabel, selected === em.id && { color: em.color, fontWeight: '700' }]}>{em.label}</Text>
@@ -147,7 +147,7 @@ export default function DiarioScreen() {
             style={[s.saveBtn, !selected && { opacity: 0.5 }]}
             onPress={saveEntry}
             disabled={!selected || saving}
-            data-testid="save-diary-btn"
+            testID="save-diary-btn"
           >
             <Text style={s.saveBtnText}>{saving ? t('saving') : todayLogged ? t('update') : t('save')}</Text>
           </TouchableOpacity>
@@ -206,7 +206,7 @@ export default function DiarioScreen() {
               const dayStr = date.toLocaleDateString(language === 'en' ? 'en-US' : language === 'it' ? 'it-IT' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
               const isToday = new Date().toDateString() === date.toDateString();
               return (
-                <View key={entry.id || idx} style={[s.historyCard, { borderLeftColor: em?.color || colors.grayLight }]} data-testid={`diary-entry-${idx}`}>
+                <View key={entry.id || idx} style={[s.historyCard, { borderLeftColor: em?.color || colors.grayLight }]} testID={`diary-entry-${idx}`}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: entry.note ? 8 : 0 }}>
                     <View style={[s.historyDot, { backgroundColor: em?.bg || colors.grayLight }]}>
                       <Ionicons name={(em?.icon || 'ellipse') as any} size={18} color={em?.color || colors.gray} />

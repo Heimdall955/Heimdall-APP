@@ -190,7 +190,7 @@ export default function PaseosScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, paddingBottom: 0 }}>
-          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: Spacing.md }} data-testid="walks-back-btn">
+          <TouchableOpacity onPress={() => router.back()} style={{ marginRight: Spacing.md }} testID="walks-back-btn">
             <Ionicons name="arrow-back" size={24} color={C.text} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
@@ -210,7 +210,7 @@ export default function PaseosScreen() {
 
         {/* Main pedometer circle */}
         <View style={{ alignItems: 'center', paddingVertical: Spacing.xl }}>
-          <Animated.View style={[st.circle, { backgroundColor: isWalking ? C.primary : C.white, transform: [{ scale: pulseAnim }], ...S.medium }]} data-testid="pedometer-circle">
+          <Animated.View style={[st.circle, { backgroundColor: isWalking ? C.primary : C.white, transform: [{ scale: pulseAnim }], ...S.medium }]} testID="pedometer-circle">
             <Text style={{ fontSize: 42, fontWeight: '900', color: isWalking ? '#FFF' : C.text }}>{steps}</Text>
             <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: isWalking ? 'rgba(255,255,255,0.8)' : C.textSecondary, marginTop: -4 }}>{t('steps')}</Text>
           </Animated.View>
@@ -246,7 +246,7 @@ export default function PaseosScreen() {
         <TouchableOpacity
           style={[st.mainBtn, { backgroundColor: isWalking ? '#FF4B4B' : C.primary }]}
           onPress={isWalking ? stopWalk : startWalk}
-          data-testid="walk-toggle-btn"
+          testID="walk-toggle-btn"
         >
           <Ionicons name={isWalking ? 'stop-circle' : 'play-circle'} size={28} color="#FFF" />
           <Text style={st.mainBtnText}>{isWalking ? t('stop') : t('start')}</Text>
@@ -290,7 +290,7 @@ export default function PaseosScreen() {
               const dateStr = d.toLocaleDateString(language === 'en' ? 'en-US' : language === 'it' ? 'it-IT' : 'es-ES', { day: 'numeric', month: 'short' });
               const dur = w.duration_seconds ? `${Math.floor(w.duration_seconds / 60)} min` : '--';
               return (
-                <View key={w.id || i} style={[st.walkItem, { backgroundColor: C.white, ...S.small }]} data-testid={`walk-history-${i}`}>
+                <View key={w.id || i} style={[st.walkItem, { backgroundColor: C.white, ...S.small }]} testID={`walk-history-${i}`}>
                   <View style={[st.walkIcon, { backgroundColor: C.primary + '15' }]}>
                     <Ionicons name="walk" size={20} color={C.primary} />
                   </View>

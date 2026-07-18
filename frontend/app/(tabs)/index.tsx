@@ -136,10 +136,10 @@ export default function HomeScreen() {
             </View>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity style={[s.iconBtn, { marginRight: 10 }]} onPress={toggleTheme} accessibilityLabel="Toggle theme" data-testid="theme-toggle-btn">
+            <TouchableOpacity style={[s.iconBtn, { marginRight: 10 }]} onPress={toggleTheme} accessibilityLabel="Toggle theme" testID="theme-toggle-btn">
               <Ionicons name={isDark ? 'sunny' : 'moon-outline'} size={21} color={isDark ? colors.accent : colors.text} />
             </TouchableOpacity>
-            <TouchableOpacity style={s.iconBtn} data-testid="notifications-btn">
+            <TouchableOpacity style={s.iconBtn} testID="notifications-btn">
               <Ionicons name="notifications-outline" size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
@@ -147,7 +147,7 @@ export default function HomeScreen() {
 
         {/* Reward Card */}
         {dogStatus.bones > 0 && (
-          <TouchableOpacity style={s.rewardCard} onPress={() => router.push('/(tabs)/perfil')} activeOpacity={0.85} data-testid="reward-banner">
+          <TouchableOpacity style={s.rewardCard} onPress={() => router.push('/(tabs)/perfil')} activeOpacity={0.85} testID="reward-banner">
             <Image source={require('../../assets/images/trophy-badge.png')} style={s.trophyImg} resizeMode="contain" />
             <View style={{ flex: 1 }}>
               <Text style={s.rewardText}>{t('greatJob')}</Text>
@@ -166,7 +166,7 @@ export default function HomeScreen() {
           style={s.section}
           onPress={() => router.push('/(tabs)/chat')}
           activeOpacity={0.9}
-          data-testid="ai-analysis-banner"
+          testID="ai-analysis-banner"
         >
           <View style={s.analysisBanner}>
             <View style={{ position: 'absolute', top: -40, right: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: '#FFFFFF08' }} />
@@ -207,7 +207,7 @@ export default function HomeScreen() {
           </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm }}>
             {quickAccessItems.map((item) => (
-              <TouchableOpacity key={item.id} style={s.quickCard} onPress={() => handleQuickAccess(item.route)} activeOpacity={0.8} data-testid={`quick-access-${item.id}`}>
+              <TouchableOpacity key={item.id} style={s.quickCard} onPress={() => handleQuickAccess(item.route)} activeOpacity={0.8} testID={`quick-access-${item.id}`}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                   <View style={[s.quickIcon, { backgroundColor: item.bg }]}>
                     <Ionicons name={item.icon as any} size={22} color={item.color} />
@@ -221,13 +221,13 @@ export default function HomeScreen() {
         </View>
 
         {/* Health Activity */}
-        <View style={s.section} data-testid="health-activity-section">
+        <View style={s.section} testID="health-activity-section">
           <View style={s.sectionHeader}>
             <Text style={s.sectionTitle}>{t('healthActivity')}</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/salud')}><Text style={s.viewAllLink}>{t('viewAll')}</Text></TouchableOpacity>
           </View>
           <View style={{ gap: Spacing.sm }}>
-            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/(tabs)/chat')} data-testid="last-consultation-card">
+            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/(tabs)/chat')} testID="last-consultation-card">
               <View style={[s.healthCardIcon, { backgroundColor: colors.primaryLight }]}>
                 <Ionicons name="chatbubbles" size={21} color={colors.primary} />
               </View>
@@ -240,7 +240,7 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/historial-medico')} data-testid="last-medical-card">
+            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/historial-medico')} testID="last-medical-card">
               <View style={[s.healthCardIcon, { backgroundColor: '#FBEEDF' }]}>
                 <Ionicons name="medical" size={21} color={colors.accentOrange} />
               </View>
@@ -253,7 +253,7 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/diario')} data-testid="emotion-state-card">
+            <TouchableOpacity style={s.healthCard} onPress={() => router.push('/diario')} testID="emotion-state-card">
               <View style={[s.healthCardIcon, { backgroundColor: todayEmotion ? colors.primaryLight : '#EFEAFA' }]}>
                 <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={21} color={todayEmotion ? colors.primary : colors.accentPurple} />
               </View>
@@ -269,7 +269,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Emotion Diary Banner */}
-        <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} activeOpacity={0.85} data-testid="emotion-diary-card">
+        <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} activeOpacity={0.85} testID="emotion-diary-card">
           <View style={{ backgroundColor: colors.primaryDark, borderRadius: BorderRadius.xxl, padding: Spacing.lg, overflow: 'hidden' }}>
             <View style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFFFFF0A' }} />
             <View style={{ position: 'absolute', bottom: -30, left: -10, width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFFFFF07' }} />
@@ -316,7 +316,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         {/* Weekly Summary */}
-        <View style={s.section} data-testid="weekly-summary-section">
+        <View style={s.section} testID="weekly-summary-section">
           <View style={s.sectionHeader}>
             <Text style={s.sectionTitle}>{t('weeklyProgress')}</Text>
             <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary, fontWeight: '500' }}>{t('thisWeek')}</Text>
@@ -348,7 +348,7 @@ export default function HomeScreen() {
         </View>
 
         {/* What does Heimdall do? */}
-        <View style={s.section} data-testid="what-heimdall-does-section">
+        <View style={s.section} testID="what-heimdall-does-section">
           <Text style={s.sectionTitle}>{t('whatDoesHeimdall')}</Text>
           <View style={{ gap: Spacing.sm, marginTop: Spacing.md }}>
             {[

@@ -213,7 +213,7 @@ export default function EducacionScreen() {
             </View>
           </View>
           
-          <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/progreso')} data-testid="view-progress-btn">
+          <TouchableOpacity style={styles.nextButton} onPress={() => router.push('/progreso')} testID="view-progress-btn">
             <Ionicons name="bar-chart" size={16} color={colors.white} style={{ marginRight: 6 }} />
             <Text style={styles.nextButtonText}>Mi Progreso</Text>
           </TouchableOpacity>

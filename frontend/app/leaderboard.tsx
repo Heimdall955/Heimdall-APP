@@ -70,7 +70,7 @@ export default function LeaderboardScreen() {
     const heights = [100, 140, 80];
 
     return (
-      <View style={styles.podiumContainer} data-testid="leaderboard-podium">
+      <View style={styles.podiumContainer} testID="leaderboard-podium">
         {podiumOrder.map((entry, idx) => {
           const actualRank = entry.rank;
           const podiumHeight = top3.length >= 3 ? heights[idx] : 140;
@@ -103,7 +103,7 @@ export default function LeaderboardScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} data-testid="leaderboard-back">
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} testID="leaderboard-back">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('leaderboardTitle')}</Text>
@@ -119,7 +119,7 @@ export default function LeaderboardScreen() {
 
         {/* Current user rank if not in top */}
         {currentUserRank && currentUserRank > 3 && (
-          <View style={styles.myRankCard} data-testid="leaderboard-my-rank">
+          <View style={styles.myRankCard} testID="leaderboard-my-rank">
             <Ionicons name="person" size={20} color={colors.primary} />
             <Text style={styles.myRankText}>{t('yourPosition')}: </Text>
             <Text style={styles.myRankNumber}>#{currentUserRank}</Text>
@@ -133,7 +133,7 @@ export default function LeaderboardScreen() {
             <View
               key={entry.user_id}
               style={[styles.listItem, entry.is_current_user && styles.listItemMe]}
-              data-testid={`leaderboard-entry-${entry.rank}`}
+              testID={`leaderboard-entry-${entry.rank}`}
             >
               <View style={styles.rankBadge}>
                 {entry.rank <= 3 ? (

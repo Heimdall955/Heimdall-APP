@@ -31,7 +31,7 @@ export default function AyudaScreen() {
   return (
     <SafeAreaView style={s.container} edges={['top']}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} data-testid="help-back-btn">
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} testID="help-back-btn">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={s.title}>{t('helpTitle')}</Text>
@@ -47,7 +47,7 @@ export default function AyudaScreen() {
               key={i}
               style={[s.faqItem, i < faqs.length - 1 && s.faqBorder]}
               onPress={() => setExpanded(expanded === i ? null : i)}
-              data-testid={`faq-item-${i}`}
+              testID={`faq-item-${i}`}
             >
               <View style={s.faqHeader}>
                 <Ionicons name={faq.icon as any} size={20} color={colors.primary} />
@@ -62,7 +62,7 @@ export default function AyudaScreen() {
         {/* Actions */}
         <Text style={[s.sectionTitle, { marginTop: Spacing.lg }]}>{t('contactSupport')}</Text>
         {actions.map((action, i) => (
-          <TouchableOpacity key={i} onPress={action.onPress} data-testid={`help-action-${i}`}>
+          <TouchableOpacity key={i} onPress={action.onPress} testID={`help-action-${i}`}>
             <Card variant="elevated" style={s.actionCard}>
               <View style={[s.actionIcon, { backgroundColor: action.color + '18' }]}>
                 <Ionicons name={action.icon as any} size={22} color={action.color} />

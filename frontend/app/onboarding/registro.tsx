@@ -207,7 +207,7 @@ export default function RegistroScreen() {
               <TouchableOpacity 
                 style={{ alignSelf: 'flex-end', marginTop: -Spacing.xs, marginBottom: Spacing.sm }}
                 onPress={() => { setResetEmail(email); setShowResetFlow(true); setResetStep('email'); }}
-                data-testid="forgot-password-link"
+                testID="forgot-password-link"
               >
                 <Text style={{ fontSize: FontSizes.sm, color: Colors.primary, fontWeight: '500' }}>
                   {t('forgotPassword') || '¿Olvidaste tu contraseña?'}
