@@ -231,40 +231,43 @@ export default function HomeScreen() {
           <View style={{ gap: Spacing.sm }}>
             <TouchableOpacity style={s.healthCard} onPress={() => router.push('/(tabs)/chat')} testID="last-consultation-card">
               <View style={[s.healthCardIcon, { backgroundColor: colors.primaryLight }]}>
-                <Ionicons name="chatbubbles" size={21} color={colors.primary} />
+                <Ionicons name="chatbubble-ellipses" size={24} color={colors.primary} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, paddingRight: 86 }}>
                 <Text style={[s.healthCardTitle, { color: colors.textSecondary }]}>{t('lastConsultation')}</Text>
                 <Text style={[s.healthCardValue, { color: lastConsultation ? colors.primary : colors.textSecondary }]}>
                   {lastConsultation ? formatRelativeDate(lastConsultation) : t('noConsultationsYet')}
                 </Text>
               </View>
+              <Image source={require('../../assets/images/dog-tablet-peek.png')} style={s.cardArtDog} resizeMode="contain" />
               <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
 
             <TouchableOpacity style={s.healthCard} onPress={() => router.push('/historial-medico')} testID="last-medical-card">
-              <View style={[s.healthCardIcon, { backgroundColor: '#FBEEDF' }]}>
-                <Ionicons name="medical" size={21} color={colors.accentOrange} />
+              <View style={[s.healthCardIcon, { backgroundColor: '#FCEFDD' }]}>
+                <Ionicons name="medical" size={24} color={colors.accentOrange} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, paddingRight: 86 }}>
                 <Text style={[s.healthCardTitle, { color: colors.textSecondary }]}>{t('lastMedicalEvent')}</Text>
                 <Text style={[s.healthCardValue, { color: lastMedicalEvent ? colors.text : colors.textSecondary }]}>
                   {lastMedicalEvent ? `${getMedicalTypeLabel(lastMedicalEvent.type)} - ${formatRelativeDate(lastMedicalEvent.date)}` : t('noEventsYet')}
                 </Text>
               </View>
+              <Image source={require('../../assets/images/shield-vial.png')} style={s.cardArt} resizeMode="contain" />
               <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
 
             <TouchableOpacity style={s.healthCard} onPress={() => router.push('/diario')} testID="emotion-state-card">
-              <View style={[s.healthCardIcon, { backgroundColor: todayEmotion ? colors.primaryLight : '#EFEAFA' }]}>
-                <Ionicons name={todayEmotion ? 'happy' : 'journal'} size={21} color={todayEmotion ? colors.primary : colors.accentPurple} />
+              <View style={[s.healthCardIcon, { backgroundColor: '#EDE7F8' }]}>
+                <Ionicons name="pause" size={24} color={'#8B6FD8'} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, paddingRight: 86 }}>
                 <Text style={[s.healthCardTitle, { color: colors.textSecondary }]}>{t('emotionalState')}</Text>
                 <Text style={[s.healthCardValue, { color: todayEmotion ? colors.text : colors.textSecondary }]}>
                   {todayEmotion ? getEmotionLabel(todayEmotion) : t('notRegisteredToday')}
                 </Text>
               </View>
+              <Image source={require('../../assets/images/gold-feather.png')} style={s.cardArtFeather} resizeMode="contain" />
               <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
             </TouchableOpacity>
           </View>
@@ -272,46 +275,44 @@ export default function HomeScreen() {
 
         {/* Emotion Diary Banner */}
         <TouchableOpacity style={s.section} onPress={() => router.push('/diario')} activeOpacity={0.85} testID="emotion-diary-card">
-          <View style={{ backgroundColor: colors.primaryDark, borderRadius: BorderRadius.xxl, padding: Spacing.lg, overflow: 'hidden' }}>
-            <View style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFFFFF0A' }} />
-            <View style={{ position: 'absolute', bottom: -30, left: -10, width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFFFFF07' }} />
+          <View style={s.diaryBanner}>
+            <Image source={require('../../assets/images/dog-writing.png')} style={s.diaryDog} resizeMode="contain" />
+            <Ionicons name="chevron-forward" size={20} color={'#B4A8D4'} style={{ position: 'absolute', top: 18, right: 14 }} />
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: '#FFFFFF14', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#FFFFFF20' }}>
-                <Ionicons name={todayEmotion ? 'checkmark-circle' : 'journal'} size={24} color={'#E9D9A8'} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+              <View style={s.diaryIconSquare}>
+                <Ionicons name="pause" size={26} color={'#8B6FD8'} />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: FontSizes.lg, fontFamily: Fonts.serif, fontWeight: '700', color: '#FDFBF5' }}>
+              <View style={{ flex: 1, paddingRight: 96 }}>
+                <Text style={s.diaryTitle}>
                   {todayEmotion ? t('todayYouFeel') : t('howDoYouFeel')}
                 </Text>
-                <Text style={{ fontSize: FontSizes.xs, color: '#A9C6BC', marginTop: 2 }}>
-                  {todayEmotion ? t('emotionDiary') : t('diaryEmpty').substring(0, 50) + '...'}
+                <Text style={s.diarySubtitle} numberOfLines={3}>
+                  {todayEmotion ? t('emotionDiary') : t('diaryEmpty').split('.')[0] + '.'}
                 </Text>
               </View>
             </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14, paddingHorizontal: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 18, paddingRight: 110 }}>
               {[
-                { icon: 'happy', color: '#7FD8A8', id: 'happy' },
-                { icon: 'leaf', color: '#7FC4D8', id: 'calm' },
-                { icon: 'alert-circle', color: '#E8C170', id: 'worried' },
-                { icon: 'sad', color: '#C8A8E8', id: 'sad' },
-                { icon: 'thunderstorm', color: '#E89A8A', id: 'stressed' },
+                { icon: 'happy', color: '#2BAE94', id: 'happy' },
+                { icon: 'leaf', color: '#3FA96C', id: 'calm' },
+                { icon: 'alert-circle', color: '#E8B93C', id: 'worried' },
+                { icon: 'sad', color: '#5B8DD8', id: 'sad' },
+                { icon: 'thunderstorm', color: '#7E57C2', id: 'stressed' },
               ].map(e => (
-                <View key={e.id} style={{
-                  width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: todayEmotion === e.id ? e.color + '30' : '#FFFFFF0C',
-                  borderWidth: todayEmotion === e.id ? 1.5 : 0, borderColor: e.color,
-                }}>
-                  <Ionicons name={e.icon as any} size={22} color={todayEmotion === e.id ? e.color : '#6E8E83'} />
+                <View key={e.id} style={[s.diaryEmotionSquare, todayEmotion === e.id && { borderWidth: 2, borderColor: e.color, backgroundColor: e.color + '18' }]}>
+                  <Ionicons name={e.icon as any} size={24} color={e.color} />
                 </View>
               ))}
             </View>
 
-            <View style={{ backgroundColor: '#FFFFFF12', borderRadius: BorderRadius.full, paddingVertical: 11, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: '#FFFFFF1E' }}>
-              <Ionicons name={todayEmotion ? 'eye' : 'add-circle'} size={18} color={'#E9D9A8'} />
-              <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: '#E9D9A8' }}>
-                {todayEmotion ? t('weeklyInsight') : t('emotionDiary')}
+            <View style={s.diaryCta}>
+              <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#FFFFFF30', alignItems: 'center', justifyContent: 'center' }}>
+                <Ionicons name={todayEmotion ? 'eye' : 'add'} size={15} color={'#FFF'} />
+              </View>
+              <Text numberOfLines={1} style={{ fontSize: FontSizes.sm, fontWeight: '700', color: '#FFF' }}>
+                {todayEmotion ? t('weeklyInsight') : t('startEmotionDiary')}
               </Text>
             </View>
           </View>
@@ -457,8 +458,18 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   quickLabel: { fontSize: FontSizes.sm, fontWeight: '600', color: C.text, marginTop: Spacing.sm },
   exerciseCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.xl, marginBottom: Spacing.sm, ...S.sm },
   exerciseIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
-  healthCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.xl, ...S.sm },
-  healthCardIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  healthCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.cardBg, padding: Spacing.md, borderRadius: BorderRadius.xl, minHeight: 92, overflow: 'hidden', position: 'relative', ...S.sm },
+  healthCardIcon: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
   healthCardTitle: { fontSize: FontSizes.sm, fontWeight: '500', marginBottom: 2 },
-  healthCardValue: { fontSize: FontSizes.md, fontWeight: '700' },
+  healthCardValue: { fontSize: FontSizes.lg, fontWeight: '700' },
+  cardArtDog: { position: 'absolute', right: 30, bottom: 0, width: 86, height: 82 },
+  cardArt: { position: 'absolute', right: 30, bottom: 4, width: 82, height: 84 },
+  cardArtFeather: { position: 'absolute', right: 32, bottom: 12, width: 90, height: 66 },
+  diaryBanner: { backgroundColor: '#EDE9F7', borderRadius: 28, padding: Spacing.lg, overflow: 'hidden', position: 'relative' },
+  diaryDog: { position: 'absolute', right: 2, bottom: 0, width: 118, height: 210 },
+  diaryIconSquare: { width: 54, height: 54, borderRadius: 18, backgroundColor: '#DFD6F2', alignItems: 'center', justifyContent: 'center' },
+  diaryTitle: { fontSize: 21, fontFamily: Fonts.serif, fontWeight: '700', color: '#2A2440' },
+  diarySubtitle: { fontSize: FontSizes.xs, color: '#6E6787', marginTop: 3, lineHeight: 17 },
+  diaryEmotionSquare: { width: 50, height: 50, borderRadius: 15, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', ...S.sm },
+  diaryCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#7E57C2', borderRadius: BorderRadius.full, paddingVertical: 13, paddingHorizontal: 12, marginRight: 98 },
 });
