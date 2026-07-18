@@ -107,7 +107,6 @@ export default function ChatScreen() {
           language: getLanguageName(language),
         }, { headers: { Authorization: `Bearer ${token}` }, timeout: 60000 });
         setMessages(prev => [...prev, response.data]);
-        setUsage(prev => ({ ...prev, photos: prev.photos + 1 }));
       } catch (error: any) {
         Alert.alert(t('error'), error?.response?.data?.detail || 'Error al enviar foto');
         setMessages(prev => prev.filter(m => m.id !== userMsg.id));

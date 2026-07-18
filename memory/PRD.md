@@ -105,6 +105,13 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 ## Pantalla de idiomas rediseñada (18 Jul 2026)
 - app/onboarding/idioma.tsx reescrita según mockup: escena acuarela (bosque + castillo + retrato circular con aro dorado del perro, asset language-hero.png), título HEIMDALL serif verde #1E4D3B con divisor ornamental dorado + árbol de la vida, banderas reales (flag-es/en/it.png), tarjeta seleccionada con borde verde y check, footer con escudo-huella dorado (shield-paw.png) y tagline.
 
+## Preparación release Google Play v119 (18 Jul 2026)
+- app.json: versionCode 119, versionName 1.1.0, package app.emergent.hanigpsfixf4b1b81d.
+- Verificado: config/backend.ts producción → https://heimdall.escudolegado.com; eas.json production env OK; VPS live.
+- BUG REAL corregido pre-release: chat.tsx línea 110 llamaba a setUsage (inexistente) tras subir foto → crash/error falso al enviar fotos. Eliminado.
+- Nota: LanguageContext tiene claves duplicadas preexistentes (PRO + emociones) — inofensivo en runtime (gana la última), limpiar en el futuro.
+- Al publicar v119 en Play: subir LATEST_ANDROID_VERSION_CODE a 119 en el .env del VPS y reiniciar uvicorn (activa el aviso de actualización in-app).
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)

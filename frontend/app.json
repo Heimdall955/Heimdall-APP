@@ -2,7 +2,7 @@
   "expo": {
     "name": "Heimdall",
     "slug": "heimdall",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "heimdall",
