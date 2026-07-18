@@ -126,7 +126,7 @@ export default function HomeScreen() {
           <View style={s.headerLeft}>
             <View style={{ position: 'relative' }}>
               <View style={s.avatarRing}>
-                <Image source={require('../../assets/images/heimdall-avatar.png')} style={s.headerLogo} resizeMode="cover" />
+                <Image source={require('../../assets/images/heimdall-logo-round.png')} style={s.headerLogo} resizeMode="contain" />
               </View>
               <View style={s.onlineIndicator} />
             </View>
@@ -172,9 +172,11 @@ export default function HomeScreen() {
             <View style={{ position: 'absolute', top: -40, right: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: '#FFFFFF08' }} />
             <View style={{ position: 'absolute', bottom: -30, left: -20, width: 110, height: 110, borderRadius: 55, backgroundColor: '#FFFFFF06' }} />
 
-            <Image source={require('../../assets/images/heimdall-vet-hero.png')} style={s.heroMascot} resizeMode="contain" />
+            <View style={s.heroMascot}>
+              <Image source={require('../../assets/images/heimdall-vet-clinic.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            </View>
 
-            <View style={{ width: '58%' }}>
+            <View style={{ width: '55%' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 18 }}>
                 {[
                   { icon: 'camera', color: '#8FD6BE', bg: '#FFFFFF14' },
@@ -428,7 +430,7 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   scrollContent: { padding: Spacing.md },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  avatarRing: { width: 58, height: 58, borderRadius: 29, borderWidth: 2, borderColor: C.accent + '60', alignItems: 'center', justifyContent: 'center', backgroundColor: C.accentLight, overflow: 'hidden' },
+  avatarRing: { width: 58, height: 58, borderRadius: 29, borderWidth: 2, borderColor: C.accent + '60', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B0812', overflow: 'hidden' },
   headerLogo: { width: 54, height: 54, borderRadius: 27 },
   onlineIndicator: { position: 'absolute', bottom: 1, right: 1, width: 14, height: 14, borderRadius: 7, backgroundColor: C.primary, borderWidth: 2, borderColor: C.background },
   appName: { fontSize: 26, fontFamily: Fonts.serif, fontWeight: '700', color: C.text, letterSpacing: 0.3 },
@@ -445,7 +447,7 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   sectionTitle: { fontSize: 22, fontFamily: Fonts.serif, fontWeight: '700', color: C.text },
   viewAllLink: { fontSize: FontSizes.md, fontWeight: '600', color: C.primary },
   analysisBanner: { backgroundColor: C.primaryDark, borderRadius: 28, padding: Spacing.lg, overflow: 'hidden', position: 'relative', minHeight: 290 },
-  heroMascot: { position: 'absolute', right: -14, bottom: 52, width: 185, height: 265 },
+  heroMascot: { position: 'absolute', right: 12, top: 12, bottom: 12, width: '42%', borderRadius: 20, overflow: 'hidden' },
   analysisBannerTitle: { fontSize: 25, fontFamily: Fonts.serif, fontWeight: '700', color: '#FDFBF5', marginBottom: 10, lineHeight: 32 },
   analysisBannerSubtitle: { fontSize: FontSizes.sm, color: '#B9D2C9', marginBottom: 18, lineHeight: 20 },
   analysisBannerCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.full, backgroundColor: C.primary, alignSelf: 'flex-start', ...S.md },

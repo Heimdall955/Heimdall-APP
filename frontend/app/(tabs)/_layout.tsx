@@ -69,11 +69,11 @@ export default function TabsLayout() {
         options={{
           title: t('education'),
           tabBarIcon: ({ focused }) => (
-            <View style={[styles.centerTab, { backgroundColor: colors.cardBg, borderColor: focused ? colors.primary : colors.grayLight, ...shadows.md as any }]}>
+            <View style={styles.centerTab}>
               <Image
-                source={require('../../assets/images/heimdall-avatar.png')}
+                source={require('../../assets/images/heimdall-logo-round.png')}
                 style={styles.logoImage}
-                resizeMode="cover"
+                resizeMode="contain"
               />
             </View>
           ),
@@ -117,12 +117,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -24,
-    borderWidth: 2,
-    overflow: 'hidden',
   },
   logoImage: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
   },
 });

@@ -81,6 +81,10 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - data-testid → testID en todos los componentes RN (estándar React Native Web).
 - Testing agent iteración 20: TODOS los flujos PASS (login, home, 5 tabs, chat IA e2e, modo oscuro).
 
+## Ajustes de branding (18 Jul 2026, 2ª ronda)
+- Logo oficial Heimdall (H dorada con huella, fondo negro) sustituye al avatar del perro en: círculo del header del Home y botón central del tab bar (asset: heimdall-logo-gold.png + heimdall-logo-round.png con máscara circular PIL).
+- Hero "Analiza y entiende": nueva ilustración heimdall-vet-clinic.png (perro veterinario con fondo de clínica/oficina desenfocada, como el mockup) en panel redondeado a la derecha de la tarjeta. Patrón RN-web: View absoluto con overflow hidden + Image 100%x100% cover.
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
