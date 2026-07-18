@@ -89,6 +89,13 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Tarjetas Actividad de salud: iconos cuadrados redondeados (chat verde, asterisco naranja, pause morado) + ilustraciones a la derecha (perro con tablet recortado de heimdall-vet-hero, shield-vial.png, gold-feather.png).
 - Banner "¿Cómo os sentís hoy?": fondo lavanda #EDE9F7, título serif, 5 emociones en cuadrados blancos, botón pill morado #7E57C2 "Empezar diario emocional" (clave i18n nueva startEmotionDiary es/en/it), perro escribiendo (dog-writing.png, mismo personaje).
 
+## Multi-mascota + Aviso de actualización (18 Jul 2026)
+- MULTI-MASCOTA: sección "Mis mascotas" en Perfil (chips horizontales + botón Añadir mascota), pantalla nueva app/agregar-mascota.tsx (POST /api/dogs), AuthContext.selectDog persiste current_dog_id en SecureStore y refreshDogs lo respeta. Perfil refresca lista con useFocusEffect. i18n es/en/it (claves myPets, addPet, savePet, petAdded, etc.).
+- AVISO ACTUALIZACIÓN: GET /api/app/version (lee LATEST_ANDROID_VERSION_CODE y PLAY_STORE_URL del .env) + components/UpdateChecker.tsx montado en app/_layout.tsx — modal "Nueva versión disponible" solo en Android release cuando versionCode instalado < publicado. Abre market://details.
+- WORKFLOW DE RELEASE: tras publicar una nueva versión en Google Play, actualizar LATEST_ANDROID_VERSION_CODE en el .env del VPS y reiniciar uvicorn para que los usuarios antiguos vean el aviso. Actualmente = 118.
+- Deploy VPS hecho (server.py + .env) y verificado. Testing agent iteración 21: backend 4/4, frontend OK (2 fixes aplicados: navegación tras guardar en web, refreshDogs en focus). Testing agent arregló Button.tsx para reenviar testID.
+- Email de recuperación FUNCIONANDO: dominio verificado en Resend era el subdominio heimdall.escudolegado.com → SENDER_EMAIL cambiado a no-reply@heimdall.escudolegado.com en VPS. Usuario confirmó recepción.
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)

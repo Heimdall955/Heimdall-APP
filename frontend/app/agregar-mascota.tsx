@@ -60,7 +60,8 @@ export default function AgregarMascotaScreen() {
       if (res.data?.id) {
         await selectDog(res.data);
       }
-      Alert.alert('✅', t('petAdded'), [{ text: 'OK', onPress: () => router.back() }]);
+      router.back();
+      setTimeout(() => Alert.alert('✅', t('petAdded')), 350);
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.detail || t('petAddError'));
     } finally {
