@@ -96,6 +96,12 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Deploy VPS hecho (server.py + .env) y verificado. Testing agent iteración 21: backend 4/4, frontend OK (2 fixes aplicados: navegación tras guardar en web, refreshDogs en focus). Testing agent arregló Button.tsx para reenviar testID.
 - Email de recuperación FUNCIONANDO: dominio verificado en Resend era el subdominio heimdall.escudolegado.com → SENDER_EMAIL cambiado a no-reply@heimdall.escudolegado.com en VPS. Usuario confirmó recepción.
 
+## Selector con fotos + Diario de epilepsia (18 Jul 2026)
+- components/PetSelector.tsx: selector reutilizable con fotos (SecureStore dog_image_{id}, fallback huella), usado en Home (compact, bajo header) y Perfil.
+- Home: eliminada sección HANI Passport (WalletCard sigue existiendo como componente, solo quitada del Home); en su lugar tarjeta azul "Diario de epilepsia" → /epilepsia.
+- app/epilepsia.tsx: stats (totales/este mes/última), modal registrar crisis (fecha, duración, intensidad leve/moderada/fuerte, desencadenante, notas), lista con borrar. Backend: POST/GET/DELETE /api/epilepsy sobre medical_events con event_type='seizure' → las crisis entran automáticamente en el contexto del Chat IA. i18n es/en/it.
+- Desplegado en VPS y verificado. Testing agent iteración 22: frontend 100% PASS, limpieza de datos de prueba hecha.
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
