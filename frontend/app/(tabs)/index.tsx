@@ -10,7 +10,7 @@ import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Card } from '../../components/ui';
-import { WalletCard } from '../../components/WalletCard';
+import { PetSelector } from '../../components/PetSelector';
 import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
 import { BACKEND_URL } from '../../config/backend';
 
@@ -143,6 +143,11 @@ export default function HomeScreen() {
               <Ionicons name="notifications-outline" size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* Pet Selector */}
+        <View style={{ marginBottom: Spacing.md }}>
+          <PetSelector compact />
         </View>
 
         {/* Reward Card */}
@@ -369,13 +374,19 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* HANI Passport */}
-        {currentDog && (
-          <View style={s.section}>
-            <Text style={[s.sectionTitle, { marginBottom: Spacing.md }]}>HANI Passport</Text>
-            <WalletCard dogId={currentDog.id} dogName={currentDog.name} dogBreed={currentDog.breed} dogAge={currentDog.age} dogWeight={currentDog.weight} chipId={currentDog.chip_id} dogPhoto={currentDog.avatar} />
+        {/* Epilepsy Diary */}
+        <TouchableOpacity style={s.section} onPress={() => router.push('/epilepsia')} activeOpacity={0.85} testID="epilepsy-diary-card">
+          <View style={s.epilepsyCard}>
+            <View style={s.epilepsyIcon}>
+              <Ionicons name="pulse" size={26} color={'#4A7DDA'} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.epilepsyTitle}>{t('epilepsyDiary')}</Text>
+              <Text style={s.epilepsySubtitle} numberOfLines={2}>{t('epilepsySubtitle')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={'#4A7DDA'} />
           </View>
-        )}
+        </TouchableOpacity>
 
         {/* Exercise Library Preview */}
         <View style={s.section}>
@@ -472,4 +483,8 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   diarySubtitle: { fontSize: FontSizes.xs, color: '#6E6787', marginTop: 3, lineHeight: 17 },
   diaryEmotionSquare: { width: 50, height: 50, borderRadius: 15, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', ...S.sm },
   diaryCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#7E57C2', borderRadius: BorderRadius.full, paddingVertical: 13, paddingHorizontal: 12, marginRight: 98 },
+  epilepsyCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, backgroundColor: '#E7EEF9', borderRadius: BorderRadius.xxl, padding: Spacing.lg },
+  epilepsyIcon: { width: 54, height: 54, borderRadius: 18, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  epilepsyTitle: { fontSize: 19, fontFamily: Fonts.serif, fontWeight: '700', color: '#2A3D5C' },
+  epilepsySubtitle: { fontSize: FontSizes.sm, color: '#4E6693', marginTop: 3, lineHeight: 18 },
 });

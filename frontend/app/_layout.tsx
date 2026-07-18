@@ -38,6 +38,7 @@ function InnerLayout() {
         <Stack.Screen name="ayuda" options={{ presentation: 'card' }} />
         <Stack.Screen name="onboarding-mascota" options={{ presentation: 'card', gestureEnabled: false }} />
         <Stack.Screen name="agregar-mascota" options={{ presentation: 'card' }} />
+        <Stack.Screen name="epilepsia" options={{ presentation: 'card' }} />
       </Stack>
     </>
   );

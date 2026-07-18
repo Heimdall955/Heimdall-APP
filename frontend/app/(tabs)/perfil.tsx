@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { PetSelector } from '../../components/PetSelector';
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -329,43 +330,7 @@ export default function PerfilScreen() {
         {/* My Pets Selector */}
         <View style={{ marginBottom: Spacing.md }} testID="my-pets-section">
           <Text style={[styles.sectionTitle, { marginBottom: Spacing.sm }]}>{t('myPets')}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: Spacing.sm, paddingRight: Spacing.md }}>
-            {dogs.map((dog: any) => {
-              const isActive = currentDog?.id === dog.id;
-              return (
-                <TouchableOpacity
-                  key={dog.id}
-                  onPress={() => selectDog(dog)}
-                  testID={`pet-chip-${dog.id}`}
-                  style={{
-                    flexDirection: 'row', alignItems: 'center', gap: 8,
-                    paddingVertical: 8, paddingHorizontal: 14,
-                    borderRadius: 999, backgroundColor: isActive ? colors.primary : colors.cardBg,
-                    borderWidth: 1.5, borderColor: isActive ? colors.primary : colors.grayLight,
-                  }}
-                >
-                  <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: isActive ? '#FFFFFF30' : colors.primaryLight, alignItems: 'center', justifyContent: 'center' }}>
-                    <Ionicons name="paw" size={15} color={isActive ? '#FFF' : colors.primary} />
-                  </View>
-                  <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: isActive ? '#FFF' : colors.text }}>{dog.name}</Text>
-                  {isActive && <Ionicons name="checkmark-circle" size={16} color="#FFF" />}
-                </TouchableOpacity>
-              );
-            })}
-            <TouchableOpacity
-              onPress={() => router.push('/agregar-mascota')}
-              testID="add-pet-btn"
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: 6,
-                paddingVertical: 8, paddingHorizontal: 14,
-                borderRadius: 999, backgroundColor: colors.accentLight,
-                borderWidth: 1.5, borderColor: colors.accent + '50', borderStyle: 'dashed',
-              }}
-            >
-              <Ionicons name="add-circle" size={22} color={colors.accent} />
-              <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: colors.accent }}>{t('addPet')}</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          <PetSelector />
         </View>
 
         {/* Dog Profile Card */}

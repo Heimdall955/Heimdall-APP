@@ -1951,6 +1951,75 @@ async def delete_medical_event(event_id: str, user: User = Depends(require_auth)
         logger.error(f"Error deleting medical event: {e}")
         raise HTTPException(status_code=500, detail="Error al eliminar evento")
 
+# ==================== EPILEPSY DIARY ENDPOINTS ====================
+
+class SeizureCreate(BaseModel):
+    dog_id: str
+    date: str
+    duration_minutes: Optional[float] = None
+    severity: Optional[str] = None
+    trigger: Optional[str] = None
+    notes: Optional[str] = None
+
+@api_router.post("/epilepsy")
+async def create_seizure(data: SeizureCreate, user: User = Depends(require_auth)):
+    now = datetime.now(timezone.utc).isoformat()
+    payload = {
+        "duration_minutes": data.duration_minutes,
+        "severity": data.severity,
+        "trigger": data.trigger,
+        "notes": data.notes,
+    }
+    event = {
+        "dog_id": data.dog_id,
+        "event_type": "seizure",
+        "title": "Crisis epiléptica",
+        "description": json.dumps(payload, ensure_ascii=False),
+        "event_date": data.date,
+        "created_at": now,
+    }
+    try:
+        result = supabase.table("medical_events").insert(event).execute()
+        return {"id": str(result.data[0]["id"]), "dog_id": data.dog_id, "date": data.date, **payload}
+    except Exception as e:
+        logger.error(f"Error creating seizure: {e}")
+        raise HTTPException(status_code=500, detail="Error al registrar la crisis")
+
+@api_router.get("/epilepsy/{dog_id}")
+async def get_seizures(dog_id: str, user: User = Depends(require_auth)):
+    try:
+        result = supabase.table("medical_events").select("*").eq("dog_id", dog_id).eq("event_type", "seizure").order("event_date", desc=True).execute()
+        seizures = []
+        for ev in result.data:
+            detail = {}
+            try:
+                detail = json.loads(ev.get("description") or "{}")
+            except Exception:
+                detail = {"notes": ev.get("description")}
+            seizures.append({
+                "id": str(ev["id"]),
+                "dog_id": ev["dog_id"],
+                "date": ev["event_date"],
+                "duration_minutes": detail.get("duration_minutes"),
+                "severity": detail.get("severity"),
+                "trigger": detail.get("trigger"),
+                "notes": detail.get("notes"),
+                "created_at": ev["created_at"],
+            })
+        return seizures
+    except Exception as e:
+        logger.error(f"Error getting seizures: {e}")
+        return []
+
+@api_router.delete("/epilepsy/{event_id}")
+async def delete_seizure(event_id: str, user: User = Depends(require_auth)):
+    try:
+        supabase.table("medical_events").delete().eq("id", event_id).eq("event_type", "seizure").execute()
+        return {"message": "Crisis eliminada"}
+    except Exception as e:
+        logger.error(f"Error deleting seizure: {e}")
+        raise HTTPException(status_code=500, detail="Error al eliminar la crisis")
+
 # ==================== CLINICAL FILE ENDPOINTS ====================
 
 class ClinicalFileUpdate(BaseModel):
