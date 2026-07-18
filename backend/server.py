@@ -628,6 +628,15 @@ async def logout(request: Request):
             del sessions[session_token]
     return {"message": "Sesión cerrada"}
 
+# ==================== APP VERSION ====================
+
+@api_router.get("/app/version")
+async def get_app_version():
+    return {
+        "android_version_code": int(os.environ.get("LATEST_ANDROID_VERSION_CODE", "0")),
+        "store_url": os.environ.get("PLAY_STORE_URL", "https://play.google.com/store/apps/details?id=app.emergent.hanigpsfixf4b1b81d"),
+    }
+
 # ==================== DOGS ENDPOINTS ====================
 
 @api_router.post("/dogs")

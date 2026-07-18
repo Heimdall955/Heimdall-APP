@@ -1,0 +1,34 @@
+{
+  "summary": "Verified Heimdall multi-mascota + app version features end-to-end (backend + web preview). Backend: GET /api/app/version returns android_version_code=118 and Google Play store_url. POST /api/dogs creates a pet, GET /api/dogs lists it and DELETE /api/dogs/{id} removes it. Frontend: after login as alexhernandez81, Perfil tab shows 'Mis mascotas' section (testID=my-pets-section) with Hani chip active and 'Añadir mascota' button (testID=add-pet-btn). Add pet flow works: form (testID='age-unit-years', 'sex-male-btn', 'save-pet-btn') submits, backend receives correct payload (age=36 months = 3 years * 12), TestPet becomes the active pet (profile card shows 'TestPet / 3 años / 8 kg'), both chips visible in selector, clicking Hani chip switches selection back (card shows 'Hani / 2 años / 10 kg / Mix'), Inicio tab loads correctly. Final API DELETE cleaned up TestPet successfully.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "app/agregar-mascota.tsx (Alert.alert onPress callback)", "issue": "After successful pet creation, Alert.alert('✅', ..., [{text:'OK', onPress: () => router.back()}]) fires the alert but router.back() is NEVER executed on React Native Web. window.alert (RN Web's Alert impl) does not invoke the buttons[i].onPress callback, so the user is stuck on the /agregar-mascota screen after saving. On native (iOS/Android) this works, but web preview / any web build is broken. Recommendation: navigate router.back() (or router.replace('/perfil')) BEFORE calling Alert.alert, or use Platform.OS==='web' branch to skip Alert and just navigate, or use a custom modal.", "selector": "[data-testid=\"save-pet-btn\"]", "priority": "HIGH"},
+      {"component": "components/ui/Button.tsx", "issue": "FIXED by testing agent - Button component did not forward the testID prop to underlying TouchableOpacity so save-pet-btn was invisible in the DOM. Added testID?:string prop and passed it through.", "selector": "[data-testid=\"save-pet-btn\"]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Perfil tab focus refresh", "issue": "After deleting a pet via API (or coming back to Perfil tab from another tab), the 'Mis mascotas' chips list does not automatically re-fetch. Users may see stale chips until app reload. Consider calling refreshDogs() on Perfil useFocusEffect.", "affected_selectors": ["[data-testid=\"my-pets-section\"]"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_heimdall_features.py", "/app/test_reports/pytest/pytest_heimdall.xml"],
+  "action_items": [
+    "HIGH: Fix Alert.alert onPress not firing on React Native Web in agregar-mascota.tsx - user gets stuck on the form after successful save. Suggestion: on web, navigate router.back() immediately after successful POST without Alert, or use Platform-specific branch, or move router.back() out of the onPress callback.",
+    "MEDIUM: Add useFocusEffect(refreshDogs) in perfil.tsx so 'Mis mascotas' updates when returning from other screens or after external mutations.",
+    "LOW: Perfil route (/perfil) is accessible without an authenticated session (shows empty 'Tu perro' state). Add an auth guard to redirect to /login."
+  ],
+  "critical_code_review_comments": [
+    "Button.tsx did not forward testID (fixed). Consider auditing all UI components (Card, Input, StatusBadge, ProgressCircle) to ensure they forward testID for QA automation.",
+    "agregar-mascota.tsx uses Alert.alert with an onPress callback for post-save navigation - this pattern is broken on React Native Web. Prefer navigating first, then showing a toast/snackbar.",
+    "backend server.py is 3070 lines - well over the 700-line guideline. Consider splitting into modular routers (auth, dogs, app, chat, etc.).",
+    "AuthContext.selectDog persists current_dog_id to SecureStore correctly and refreshDogs() respects it - good.",
+    "GET /api/app/version reads LATEST_ANDROID_VERSION_CODE from env (defaulting to 0). Good practice to keep in .env."
+  ],
+  "updated_files": ["/app/frontend/components/ui/Button.tsx", "/app/backend/tests/test_heimdall_features.py"],
+  "success_rate": {"backend": "100% (4/4 pytest)", "frontend": "Functional 90% - all flows work, but Alert callback on save breaks navigation on web (works on native)"},
+  "test_credentials": {"email": "alexhernandez81@gmail.com", "password": "123456"},
+  "seed_data_creation": "Created TestPet during UI test and TESTPetPytest during backend pytest - BOTH DELETED via API after use. No residual test data remains.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend endpoints all validated. UI: use testIDs add-pet-btn, my-pets-section, age-unit-years/months, sex-male-btn/sex-female-btn, save-pet-btn, add-pet-back-btn. Button component now forwards testID (fixed this iteration). Main issue for main agent: Alert.alert onPress callback in agregar-mascota.tsx does not fire on React Native Web, so router.back() never runs after save. On native (Android release) this works. Preview URL only tests web, so main agent should either fix the Alert flow for web parity or accept that the flow works only on native. UpdateChecker (Android release only) was intentionally not UI-tested per review request - only its backend /api/app/version endpoint was verified."
+}

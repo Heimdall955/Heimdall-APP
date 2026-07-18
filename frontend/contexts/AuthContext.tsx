@@ -21,6 +21,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   setCurrentDog: (dog: Dog) => void;
+  selectDog: (dog: Dog) => Promise<void>;
   refreshDogs: () => Promise<void>;
   onboardingCompleted: boolean;
   setOnboardingCompleted: (value: boolean) => void;
@@ -205,8 +206,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await api.get('/dogs');
       setDogs(response.data);
       if (response.data.length > 0) {
-        // Si hay perros, el onboarding está completado
-        if (!currentDog) {
+        const savedId = await SecureStore.getItemAsync('current_dog_id');
+        const found = savedId ? response.data.find((d: Dog) => d.id === savedId) : null;
+        if (found) {
+          setCurrentDog(found);
+        } else if (!currentDog) {
           setCurrentDog(response.data[0]);
         }
         // Marcar onboarding como completado si hay perros
@@ -218,6 +222,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.log('Failed to fetch dogs:', error);
     }
+  };
+
+  const selectDog = async (dog: Dog) => {
+    setCurrentDog(dog);
+    await SecureStore.setItemAsync('current_dog_id', dog.id);
   };
 
   return (
@@ -235,6 +244,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithGoogle,
         logout,
         setCurrentDog,
+        selectDog,
         refreshDogs,
         onboardingCompleted,
         setOnboardingCompleted,

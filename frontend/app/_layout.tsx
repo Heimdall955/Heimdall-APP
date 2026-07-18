@@ -9,6 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 import notificationService from '../services/NotificationService';
+import { UpdateChecker } from '../components/UpdateChecker';
 
 function InnerLayout() {
   const { isDark } = useTheme();
@@ -19,6 +20,7 @@ function InnerLayout() {
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
+      <UpdateChecker />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" />
@@ -35,6 +37,7 @@ function InnerLayout() {
         <Stack.Screen name="privacidad" options={{ presentation: 'card' }} />
         <Stack.Screen name="ayuda" options={{ presentation: 'card' }} />
         <Stack.Screen name="onboarding-mascota" options={{ presentation: 'card', gestureEnabled: false }} />
+        <Stack.Screen name="agregar-mascota" options={{ presentation: 'card' }} />
       </Stack>
     </>
   );

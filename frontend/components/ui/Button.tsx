@@ -13,11 +13,12 @@ interface ButtonProps {
   icon?: React.ReactNode;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  testID?: string;
 }
 
 export function Button({
   title, onPress, variant = 'primary', size = 'md',
-  disabled = false, loading = false, icon, style, textStyle,
+  disabled = false, loading = false, icon, style, textStyle, testID,
 }: ButtonProps) {
   const { colors } = useTheme();
 
@@ -55,6 +56,7 @@ export function Button({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
+      testID={testID}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : colors.primary} />
