@@ -135,3 +135,10 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
 - P2: Decidir tecnología del chaleco (Bluetooth vs WiFi) e implementar conectividad real
 - P2: Google Play Store - subir nueva versión con backend permanente
+
+## FIX rechazo Google Play: permiso ACCESS_FINE_LOCATION duplicado (Jun 2026)
+- Causa raíz: react-native-ble-plx declara ACCESS_FINE_LOCATION sin maxSdkVersion en su AndroidManifest; el plugin withAndroidFeatures.js la declaraba con maxSdkVersion=30 → dos declaraciones incompatibles tras el manifest merge → rechazo de Play Console.
+- Fix: plugins/withAndroidFeatures.js añade xmlns:tools al root del manifest y tools:node="replace" en ACCESS_FINE_LOCATION, BLUETOOTH, BLUETOOTH_ADMIN y BLUETOOTH_SCAN → una única declaración final que sustituye la de la librería.
+- Verificado (iteración 26, 3/3 PASS): prebuild genera exactamente 1 declaración ACCESS_FINE_LOCATION (maxSdk 30 + replace), COARSE/BACKGROUND/ACTIVITY_RECOGNITION con tools:node=remove; regresión frontend OK (login, dashboard, /chaleco con demo etiquetado 'DATOS SIMULADOS', /epilepsia).
+- Nota: el merged manifest final solo se puede confirmar en el build EAS (no hay Android SDK en el contenedor), pero tools:node=replace es la resolución estándar de este conflicto.
+- SIGUIENTE PASO USUARIO: nuevo build EAS (subir versionCode a 121) y resubir el .aab a Google Play.
