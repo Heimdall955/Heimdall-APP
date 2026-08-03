@@ -34,7 +34,7 @@ const WELCOME_MESSAGES = {
   it: { title: 'Ciao! Sono Heimdall', text: 'Sono il tuo guardiano conversazionale. Sono qui per accompagnarti, guidarti e proteggere il tuo migliore amico. Come posso aiutarti?', suggestions: 'Prova a chiedere:' },
 };
 const ATTACHMENT_LABELS = {
-  es: { photo: 'Foto', video: 'Video', bloodTest: 'Analisis', attachTitle: 'Adjuntar archivo', photoDesc: 'Foto de tu mascota', videoDesc: 'Video corto (max 4s)', bloodDesc: 'Analisis de sangre (PDF)' },
+  es: { photo: 'Foto', video: 'Video', bloodTest: 'Análisis', attachTitle: 'Adjuntar archivo', photoDesc: 'Foto de tu mascota', videoDesc: 'Vídeo corto (máx 4s)', bloodDesc: 'Análisis de sangre (PDF)' },
   en: { photo: 'Photo', video: 'Video', bloodTest: 'Analysis', attachTitle: 'Attach file', photoDesc: 'Photo of your pet', videoDesc: 'Short video (max 4s)', bloodDesc: 'Blood test (PDF)' },
   it: { photo: 'Foto', video: 'Video', bloodTest: 'Analisi', attachTitle: 'Allega file', photoDesc: 'Foto del tuo animale', videoDesc: 'Video breve (max 4s)', bloodDesc: 'Analisi del sangue (PDF)' },
 };

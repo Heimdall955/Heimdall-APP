@@ -122,6 +122,14 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - i18n es/en/it: demoDataLabel, sensorNoData, noMeasurementsYet, demoMode, exitDemoMode; copys ESP32→BioVest.
 - Testing agent iteración 23: 7/8 PASS + 2 fixes aplicados (alerts web, copys); testing agent arregló Card.tsx para reenviar testID. Backend/Supabase NO tocados. PENDIENTE FASES FUTURAS: ECG, IMU, HRV, almacenamiento Supabase, gráficas históricas, alertas vet.
 
+## Indicador última lectura + 8 comprobaciones + release v120 (3 Ago 2026)
+- chaleco.tsx: indicador con lastUpdatedAt (solo sensor REAL): 'Recibiendo datos · Última lectura hace X s' (verde, <30s), 'Sin datos recientes. Comprueba la colocación del chaleco.' (>30s), 'No se están recibiendo datos del sensor.' (nunca hubo lectura). No aparece en demo. Ticker 1s solo con real conectado. i18n es/en/it (receivingData, lastReadingAgo, noRecentData).
+- 8 COMPROBACIONES DEL USUARIO: TODAS PASS (iteración 24: compila, demo identificado, fallo BT sin simulación, sin números inventados, tabs OK, web OK, listo para build nativo; TypeScript = 0 errores tras limpiar: duplicados i18n ×36, shadows.medium/small→md/sm en rutas, colors.border→grayLight, CalendarPicker estilos, chatRes null-checks, keyboardType). Modelo BiometricData confirmado = spec exacta.
+- Pulido pre-release (iteración 25, 6/6 PASS): chaleco 100% i18n (13 claves nuevas ×3 idiomas + howToConnect/turnOnVest/pressSearchButton/selectDevice en en/it), tildes corregidas (Última consulta IA, ¿Qué hace Heimdall?, Batería, Frecuencia Cardíaca, alert web móviles/teléfono, rutas.tsx: Calorías/¡Meta alcanzada!/podómetro, chat: Análisis/Vídeo).
+- BUG HIGH corregido: clave 'emotionDiary' no existía → se veía cruda en /diario y Home. Añadida es/en/it y verificada por captura (raw key = 0).
+- RELEASE PREPARADO: versionCode 120, versionName 1.2.0, package OK, URL producción blindada, VPS live. Al publicar: subir LATEST_ANDROID_VERSION_CODE a 120 en el VPS.
+- Deuda menor anotada: dividir LanguageContext (>1700 líneas) en locales/, t() con warning en dev si falta clave, migrar diccionario local de rutas.tsx a LanguageContext.
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
