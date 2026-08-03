@@ -163,9 +163,6 @@ export default function SaludScreen() {
                 <Ionicons name="shirt" size={28} color="#C8A960" />
               </View>
               <View style={styles.vestBannerContent}>
-                <View style={styles.vestBannerBadge}>
-                  <Text style={styles.vestBannerBadgeText}>{t('demoData')}</Text>
-                </View>
                 <Text style={styles.vestBannerTitle}>{t('vestComingSoon')}</Text>
                 <Text style={styles.vestBannerDesc}>{t('vestComingSoonDesc')}</Text>
                 <View style={styles.vestBannerBtn}>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Platform } from 'react-native';
+import { showAlert } from '../utils/alert';
 import bluetoothService, { BiometricData, ScannedDevice } from '../services/bluetooth';
 
 interface BluetoothContextType {
@@ -64,7 +65,7 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
 
   const startScan = useCallback(async () => {
     if (Platform.OS === 'web') {
-      Alert.alert(
+      showAlert(
         'Bluetooth no disponible',
         'El escaneo Bluetooth solo funciona en dispositivos moviles. Para probarlo, instala la app en tu telefono.',
       );
@@ -95,7 +96,7 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
       setConnectionState('error');
       
       const isExpoGo = error.message?.includes('Expo Go') || error.message?.includes('development build');
-      Alert.alert(
+      showAlert(
         isExpoGo ? 'Build nativo necesario' : 'Error de Bluetooth',
         isExpoGo
           ? 'Para usar el Bluetooth real necesitas compilar la app con EAS Build. Contacta al equipo de desarrollo para crear el build.'

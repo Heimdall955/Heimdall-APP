@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
+import { showAlert } from '../utils/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -47,7 +48,7 @@ export default function ChalecoScreen() {
     const success = await connectToDevice(deviceId);
     setConnectingDeviceId(null);
     if (success) {
-      Alert.alert('Conectado', 'Chaleco HEIMDALL conectado correctamente');
+      showAlert('Conectado', 'Chaleco HEIMDALL conectado correctamente');
     }
   };
 
@@ -56,7 +57,7 @@ export default function ChalecoScreen() {
       stopSimulation();
       return;
     }
-    Alert.alert('Desconectar', 'Quieres desconectar el chaleco?', [
+    showAlert('Desconectar', 'Quieres desconectar el chaleco?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Desconectar', style: 'destructive', onPress: disconnect },
     ]);

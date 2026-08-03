@@ -112,6 +112,16 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Nota: LanguageContext tiene claves duplicadas preexistentes (PRO + emociones) — inofensivo en runtime (gana la última), limpiar en el futuro.
 - Al publicar v119 en Play: subir LATEST_ANDROID_VERSION_CODE a 119 en el .env del VPS y reiniciar uvicorn (activa el aviso de actualización in-app).
 
+## FASE 1 Movesense HR2 — BLE seguro sin datos ficticios (3 Ago 2026)
+- services/bluetooth.ts REESCRITO: parser estándar Heart Rate Measurement (byte flags, HR 8/16 bits, energy expended, RR uint16 LE 1/1024s→ms), lectura batería BLE estándar (0x180F/0x2A19, poll 60s), escaneo filtrado (Movesense / HEIMDALL BioVest / servicio 180D — no cualquier dispositivo), ELIMINADA startRealDeviceSimulation y todo fallback simulado.
+- BiometricData nuevo: heartRate null, rrIntervals, battery null, movement+'unknown', signalQuality 'unknown' (nunca inventada), source 'real'|'demo', lastUpdatedAt. Demo nunca se mezcla con sesión real (servicio la rechaza si hay sensor conectado).
+- chaleco.tsx: sin temperatura, sin clasificaciones por umbrales BPM (60/100/120 eliminados también en index.tsx), 'ESP32 BLE'→'HEIMDALL BioVest', botón 'Modo demostración' + banner permanente 'DATOS SIMULADOS', aviso 'No se están recibiendo datos del sensor.' cuando sensor real sin lecturas.
+- salud.tsx: historial ficticio [72,78...] eliminado (solo mediciones reales entran; vacío → 'Todavía no hay mediciones.'), círculos de porcentajes inventados eliminados, badge demo, batería null-safe. NOTA: historial HR en estado local (persistencia/gráficas reales = fase posterior por especificación del usuario).
+- Permisos Android (app.json + withAndroidFeatures.js, verificado con expo config introspect): BLUETOOTH_SCAN neverForLocation + BLUETOOTH_CONNECT (12+), ACCESS_FINE_LOCATION maxSdk 30, BLUETOOTH/ADMIN maxSdk 30; desbloqueado FINE_LOCATION del blockedPermissions.
+- utils/alert.ts (showAlert): alerts funcionales también en web (react-native-web Alert es no-op) — usado en BluetoothContext y chaleco.
+- i18n es/en/it: demoDataLabel, sensorNoData, noMeasurementsYet, demoMode, exitDemoMode; copys ESP32→BioVest.
+- Testing agent iteración 23: 7/8 PASS + 2 fixes aplicados (alerts web, copys); testing agent arregló Card.tsx para reenviar testID. Backend/Supabase NO tocados. PENDIENTE FASES FUTURAS: ECG, IMU, HRV, almacenamiento Supabase, gráficas históricas, alertas vet.
+
 ## Tareas Pendientes
 - P0: Usuario debe Save to Github + Build AAB (versionCode 119) desde la plataforma y subirlo a Google Play
 - P1: Ejecutar EAS build con la nueva configuración (eas build --platform android --profile production)
