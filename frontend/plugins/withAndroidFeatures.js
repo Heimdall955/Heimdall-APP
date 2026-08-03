@@ -33,7 +33,39 @@ const withAndroidFeatures = (config) => {
       }
     });
 
-    // 2. Fix content provider authority conflicts
+    // 2. Bluetooth permissions correctly scoped:
+    //    - BLUETOOTH_SCAN with neverForLocation (Android 12+, no location needed)
+    //    - ACCESS_FINE_LOCATION only up to Android 11 (required for legacy BLE scan)
+    //    - Legacy BLUETOOTH / BLUETOOTH_ADMIN only up to Android 11
+    if (!manifest['uses-permission']) {
+      manifest['uses-permission'] = [];
+    }
+    const permissions = manifest['uses-permission'];
+
+    const upsertPermission = (name, attrs = {}) => {
+      let perm = permissions.find((p) => p.$?.['android:name'] === name);
+      if (!perm) {
+        perm = { $: { 'android:name': name } };
+        permissions.push(perm);
+      }
+      Object.assign(perm.$, attrs);
+    };
+
+    upsertPermission('android.permission.BLUETOOTH_SCAN', {
+      'android:usesPermissionFlags': 'neverForLocation',
+    });
+    upsertPermission('android.permission.BLUETOOTH_CONNECT');
+    upsertPermission('android.permission.ACCESS_FINE_LOCATION', {
+      'android:maxSdkVersion': '30',
+    });
+    upsertPermission('android.permission.BLUETOOTH', {
+      'android:maxSdkVersion': '30',
+    });
+    upsertPermission('android.permission.BLUETOOTH_ADMIN', {
+      'android:maxSdkVersion': '30',
+    });
+
+    // 3. Fix content provider authority conflicts
     // Replace old com.heimdall.app authorities with new package name
     const application = manifest.application?.[0];
     if (application?.provider) {

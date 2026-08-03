@@ -8,7 +8,7 @@ import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Card, ProgressCircle } from '../../components/ui';
+import { Card } from '../../components/ui';
 import { Spacing, BorderRadius, FontSizes, Fonts } from '../../constants/theme';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -39,17 +39,14 @@ export default function SaludScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'24h' | '7d'>('24h');
   const [medicalEvents, setMedicalEvents] = useState<MedicalEvent[]>([]);
-  const [heartRateHistory, setHeartRateHistory] = useState<number[]>([72, 78, 85, 72, 68, 75, 82, 78]);
+  const [heartRateHistory, setHeartRateHistory] = useState<number[]>([]);
 
-  // Update heart rate history from biometric data
+  // Solo se registran mediciones REALES del sensor (nunca datos demo)
   useEffect(() => {
-    if (isConnected && biometricData.heartRate > 0) {
-      setHeartRateHistory(prev => {
-        const newHistory = [...prev.slice(-11), biometricData.heartRate];
-        return newHistory;
-      });
+    if (isConnected && biometricData.source === 'real' && biometricData.heartRate !== null && biometricData.heartRate > 0) {
+      setHeartRateHistory(prev => [...prev.slice(-11), biometricData.heartRate as number]);
     }
-  }, [isConnected, biometricData.heartRate]);
+  }, [isConnected, biometricData.heartRate, biometricData.source]);
 
   const loadMedicalEvents = useCallback(async () => {
     if (!currentDog) return;
@@ -78,14 +75,6 @@ export default function SaludScreen() {
   useEffect(() => {
     loadMedicalEvents();
   }, [loadMedicalEvents]);
-
-  // Calculate health metrics based on biometric data
-  const healthMetrics = {
-    physical: isConnected ? Math.min(100, Math.max(50, 100 - Math.abs(biometricData.heartRate - 75))) : 75,
-    sleep: isConnected && biometricData.movement === 'low' ? 88 : 75,
-    mental: isConnected ? (biometricData.heartRate < 100 ? 92 : 70) : 85,
-    nutrition: 85,
-  };
 
   const heartRateData = chartPeriod === '24h' 
     ? heartRateHistory.slice(-8)
@@ -139,13 +128,18 @@ export default function SaludScreen() {
             </View>
             <View style={styles.batteryContainer}>
               <Ionicons 
-                name={biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} 
+                name={(biometricData.battery ?? 0) > 20 ? 'battery-half' : 'battery-dead'} 
                 size={20} 
-                color={biometricData.battery > 20 ? colors.success : colors.error} 
+                color={isConnected && biometricData.battery !== null ? (biometricData.battery > 20 ? colors.success : colors.error) : colors.gray} 
               />
-              <Text style={styles.batteryText}>{isConnected ? biometricData.battery : '--'}%</Text>
+              <Text style={styles.batteryText}>{isConnected && biometricData.battery !== null ? `${biometricData.battery}%` : '--%'}</Text>
             </View>
           </View>
+          {isConnected && biometricData.source === 'demo' && (
+            <View style={{ alignSelf: 'flex-start', backgroundColor: '#FEF3C7', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: Spacing.sm }} testID="salud-demo-badge">
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#B45309', letterSpacing: 0.5 }}>{t('demoDataLabel')}</Text>
+            </View>
+          )}
           <TouchableOpacity 
             style={[styles.sensorsButton, !isConnected && styles.sensorsButtonActive]} 
             onPress={toggleSensors}
@@ -187,40 +181,27 @@ export default function SaludScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('vitalSigns')}</Text>
           <Card variant="elevated">
-            <View style={styles.healthGrid}>
-              <View style={styles.healthItem}>
-                <ProgressCircle 
-                  percentage={healthMetrics.physical} 
-                  size={80} 
-                  color={colors.primary}
-                  label={t('activity')}
-                />
+            {isConnected && biometricData.heartRate !== null ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm }}>
+                <Ionicons name="heart" size={26} color={colors.error} />
+                <View>
+                  <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text }}>{biometricData.heartRate} {t('bpm').toUpperCase()}</Text>
+                  <Text style={{ fontSize: FontSizes.sm, color: colors.textSecondary }}>
+                    {biometricData.source === 'demo' ? t('demoDataLabel') : t('heartRate')}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.healthItem}>
-                <ProgressCircle 
-                  percentage={healthMetrics.sleep} 
-                  size={80} 
-                  color={colors.info}
-                  label={t('sleeping')}
-                />
+            ) : isConnected ? (
+              <View style={{ alignItems: 'center', paddingVertical: Spacing.lg, gap: 8 }}>
+                <Ionicons name="warning-outline" size={28} color={colors.warning} />
+                <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center' }}>{t('sensorNoData')}</Text>
               </View>
-              <View style={styles.healthItem}>
-                <ProgressCircle 
-                  percentage={healthMetrics.mental} 
-                  size={80} 
-                  color={colors.accentEducation}
-                  label={t('stress')}
-                />
+            ) : (
+              <View style={{ alignItems: 'center', paddingVertical: Spacing.lg, gap: 8 }}>
+                <Ionicons name="pulse-outline" size={28} color={colors.textLight} />
+                <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center' }}>{t('noMeasurementsYet')}</Text>
               </View>
-              <View style={styles.healthItem}>
-                <ProgressCircle 
-                  percentage={healthMetrics.nutrition} 
-                  size={80} 
-                  color={colors.success}
-                  label={t('normal')}
-                />
-              </View>
-            </View>
+            )}
           </Card>
         </View>
 
@@ -244,33 +225,42 @@ export default function SaludScreen() {
             </View>
           </View>
           <Card variant="elevated">
-            <View style={styles.cardioHeader}>
-              <Ionicons name="heart" size={24} color={colors.error} />
-              <View style={styles.cardioInfo}>
-                <Text style={styles.cardioValue}>
-                  {heartRateData[heartRateData.length - 1]} {t('bpm').toUpperCase()}
-                </Text>
-                <Text style={styles.cardioLabel}>{t('heartRate')}</Text>
+            {heartRateData.length === 0 ? (
+              <View style={{ alignItems: 'center', paddingVertical: Spacing.xl, gap: 10 }} testID="no-measurements-box">
+                <Ionicons name="pulse-outline" size={36} color={colors.textLight} />
+                <Text style={{ fontSize: FontSizes.md, color: colors.textSecondary, textAlign: 'center' }}>{t('noMeasurementsYet')}</Text>
               </View>
-            </View>
-            {/* Simple bar chart */}
-            <View style={styles.chartContainer}>
-              {heartRateData.map((value, index) => (
-                <View key={index} style={styles.chartBar}>
-                  <View 
-                    style={[
-                      styles.chartBarFill, 
-                      { height: `${(value / 100) * 100}%` }
-                    ]} 
-                  />
+            ) : (
+              <>
+                <View style={styles.cardioHeader}>
+                  <Ionicons name="heart" size={24} color={colors.error} />
+                  <View style={styles.cardioInfo}>
+                    <Text style={styles.cardioValue}>
+                      {heartRateData[heartRateData.length - 1]} {t('bpm').toUpperCase()}
+                    </Text>
+                    <Text style={styles.cardioLabel}>{t('heartRate')}</Text>
+                  </View>
                 </View>
-              ))}
-            </View>
-            <View style={styles.chartLabels}>
-              <Text style={styles.chartLabel}>Min: {Math.min(...heartRateData)}</Text>
-              <Text style={styles.chartLabel}>Prom: {Math.round(heartRateData.reduce((a, b) => a + b) / heartRateData.length)}</Text>
-              <Text style={styles.chartLabel}>Max: {Math.max(...heartRateData)}</Text>
-            </View>
+                {/* Simple bar chart */}
+                <View style={styles.chartContainer}>
+                  {heartRateData.map((value, index) => (
+                    <View key={index} style={styles.chartBar}>
+                      <View 
+                        style={[
+                          styles.chartBarFill, 
+                          { height: `${Math.min(100, (value / 200) * 100)}%` }
+                        ]} 
+                      />
+                    </View>
+                  ))}
+                </View>
+                <View style={styles.chartLabels}>
+                  <Text style={styles.chartLabel}>Min: {Math.min(...heartRateData)}</Text>
+                  <Text style={styles.chartLabel}>Prom: {Math.round(heartRateData.reduce((a, b) => a + b) / heartRateData.length)}</Text>
+                  <Text style={styles.chartLabel}>Max: {Math.max(...heartRateData)}</Text>
+                </View>
+              </>
+            )}
           </Card>
         </View>
 

@@ -6,7 +6,6 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import axios from 'axios';
 import { SecureStore } from '../../utils/secureStore';
 import { useAuth } from '../../contexts/AuthContext';
-import { useBluetooth } from '../../contexts/BluetoothContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Card } from '../../components/ui';
@@ -29,7 +28,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentDog, user } = useAuth();
-  const { isConnected, biometricData } = useBluetooth();
   const { t, language } = useLanguage();
   const { colors, shadows, isDark, toggleTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
@@ -82,16 +80,6 @@ export default function HomeScreen() {
 
   useEffect(() => { loadGamificationStats(); }, [loadGamificationStats]);
   useFocusEffect(useCallback(() => { loadGamificationStats(); }, [loadGamificationStats]));
-
-  useEffect(() => {
-    if (isConnected && biometricData.connected) {
-      let status: DogStatus['status'] = 'calm';
-      if (biometricData.movement === 'high') status = biometricData.heartRate > 100 ? 'playing' : 'active';
-      else if (biometricData.movement === 'low' && biometricData.heartRate < 60) status = 'sleeping';
-      else if (biometricData.heartRate > 120) status = 'anxious';
-      setDogStatus(prev => ({ ...prev, status }));
-    }
-  }, [isConnected, biometricData]);
 
   const onRefresh = async () => { setRefreshing(true); await loadGamificationStats(); setRefreshing(false); };
   const handleQuickAccess = (route: string | null) => { if (route) router.push(route as any); };

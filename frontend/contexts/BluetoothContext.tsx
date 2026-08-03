@@ -5,6 +5,7 @@ import bluetoothService, { BiometricData, ScannedDevice } from '../services/blue
 interface BluetoothContextType {
   isScanning: boolean;
   isConnected: boolean;
+  isDemo: boolean;
   biometricData: BiometricData;
   scannedDevices: ScannedDevice[];
   connectionState: 'idle' | 'scanning' | 'connected' | 'disconnected' | 'error';
@@ -17,12 +18,16 @@ interface BluetoothContextType {
 }
 
 const defaultBiometricData: BiometricData = {
-  heartRate: 0,
-  temperature: 0,
-  movement: 'low',
-  battery: 0,
+  heartRate: null,
+  rrIntervals: [],
+  battery: null,
+  movement: 'unknown',
+  signalQuality: 'unknown',
   connected: false,
+  deviceId: null,
   deviceName: null,
+  source: 'real',
+  lastUpdatedAt: null,
 };
 
 const BluetoothContext = createContext<BluetoothContextType | undefined>(undefined);
@@ -135,16 +140,12 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const startSimulation = useCallback(() => {
+    // El servicio rechaza el modo demo si hay un sensor real conectado (nunca se mezclan)
     bluetoothService.startSimulation();
-    setIsConnected(true);
-    setConnectionState('connected');
   }, []);
 
   const stopSimulation = useCallback(() => {
     bluetoothService.stopSimulation();
-    setIsConnected(false);
-    setConnectionState('disconnected');
-    setBiometricData(defaultBiometricData);
   }, []);
 
   return (
@@ -152,6 +153,7 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
       value={{
         isScanning,
         isConnected,
+        isDemo: isConnected && biometricData.source === 'demo',
         biometricData,
         scannedDevices,
         connectionState,

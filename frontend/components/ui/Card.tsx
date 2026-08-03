@@ -8,9 +8,10 @@ interface CardProps {
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   variant?: 'default' | 'elevated' | 'outlined';
+  testID?: string;
 }
 
-export function Card({ children, style, onPress, variant = 'default' }: CardProps) {
+export function Card({ children, style, onPress, variant = 'default', testID }: CardProps) {
   const { colors, shadows } = useTheme();
 
   const cardStyle = [
@@ -22,11 +23,11 @@ export function Card({ children, style, onPress, variant = 'default' }: CardProp
 
   if (onPress) {
     return (
-      <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={0.8}>
+      <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={0.8} testID={testID}>
         {children}
       </TouchableOpacity>
     );
   }
 
-  return <View style={cardStyle}>{children}</View>;
+  return <View style={cardStyle} testID={testID}>{children}</View>;
 }

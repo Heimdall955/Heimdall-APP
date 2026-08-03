@@ -14,8 +14,8 @@ export default function ChalecoScreen() {
   const { t } = useLanguage();
   const { colors, shadows } = useTheme();
   const {
-    isScanning, isConnected, biometricData, scannedDevices, connectionState,
-    startScan, stopScan, connectToDevice, disconnect,
+    isScanning, isConnected, isDemo, biometricData, scannedDevices, connectionState,
+    startScan, stopScan, connectToDevice, disconnect, startSimulation, stopSimulation,
   } = useBluetooth();
 
   const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
@@ -52,6 +52,10 @@ export default function ChalecoScreen() {
   };
 
   const handleDisconnect = () => {
+    if (isDemo) {
+      stopSimulation();
+      return;
+    }
     Alert.alert('Desconectar', 'Quieres desconectar el chaleco?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Desconectar', style: 'destructive', onPress: disconnect },
@@ -78,15 +82,31 @@ export default function ChalecoScreen() {
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={s.title}>HEIMDALL Vest</Text>
-            <Text style={s.subtitle}>ESP32 BLE</Text>
+            <Text style={s.subtitle}>HEIMDALL BioVest</Text>
           </View>
           {isConnected && (
-            <View style={s.connectedBadge} testID="connected-badge">
-              <View style={s.connectedDot} />
-              <Text style={s.connectedText}>Online</Text>
+            <View style={[s.connectedBadge, isDemo && { backgroundColor: '#FF980018' }]} testID="connected-badge">
+              <View style={[s.connectedDot, isDemo && { backgroundColor: '#FF9800' }]} />
+              <Text style={[s.connectedText, isDemo && { color: '#FF9800' }]}>{isDemo ? 'Demo' : 'Online'}</Text>
             </View>
           )}
         </View>
+
+        {/* Demo data label - always visible in demo mode */}
+        {isConnected && isDemo && (
+          <View style={s.demoBanner} testID="demo-data-banner">
+            <Ionicons name="flask" size={18} color="#B45309" />
+            <Text style={s.demoBannerText}>{t('demoDataLabel')}</Text>
+          </View>
+        )}
+
+        {/* No sensor data warning - real device connected but no readings */}
+        {isConnected && !isDemo && biometricData.heartRate === null && (
+          <View style={s.noDataBanner} testID="no-sensor-data-banner">
+            <Ionicons name="warning" size={18} color="#B45309" />
+            <Text style={s.noDataBannerText}>{t('sensorNoData')}</Text>
+          </View>
+        )}
 
         {/* Connection Card */}
         {!isConnected && (
@@ -118,6 +138,11 @@ export default function ChalecoScreen() {
               <Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={22} color="#FFF" />
               <Text style={s.scanBtnText}>{isScanning ? 'Detener' : 'Buscar dispositivos'}</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity style={s.demoBtn} onPress={startSimulation} testID="demo-mode-btn">
+              <Ionicons name="flask-outline" size={18} color={colors.textSecondary} />
+              <Text style={s.demoBtnText}>{t('demoMode')}</Text>
+            </TouchableOpacity>
           </Card>
         )}
 
@@ -140,7 +165,7 @@ export default function ChalecoScreen() {
                   </View>
                   <View style={s.deviceInfo}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={s.deviceName}>{device.name || 'ESP32'}</Text>
+                      <Text style={s.deviceName}>{device.name || 'Sensor'}</Text>
                       {device.isHeimdallVest && (
                         <View style={s.heimdallTag}><Text style={s.heimdallTagText}>HEIMDALL</Text></View>
                       )}
@@ -179,35 +204,14 @@ export default function ChalecoScreen() {
                   <Text style={s.vitalLabel}>Frecuencia Cardiaca</Text>
                 </View>
                 <View style={s.vitalValueRow}>
-                  <Text style={[s.vitalValueLg, { color: '#FF4B4B' }]}>{biometricData.heartRate}</Text>
+                  <Text style={[s.vitalValueLg, { color: biometricData.heartRate !== null ? '#FF4B4B' : colors.textLight }]}>
+                    {biometricData.heartRate !== null ? biometricData.heartRate : '--'}
+                  </Text>
                   <Text style={s.vitalUnit}>BPM</Text>
                 </View>
-                <View style={s.vitalStatus}>
-                  <View style={[s.statusDot, { backgroundColor: biometricData.heartRate > 120 ? '#FF4B4B' : biometricData.heartRate > 100 ? '#FF9800' : '#4CAF50' }]} />
-                  <Text style={s.statusText}>
-                    {biometricData.heartRate > 120 ? 'Elevada' : biometricData.heartRate > 100 ? 'Activa' : 'Normal'}
-                  </Text>
-                </View>
-              </Card>
-
-              {/* Temperature */}
-              <Card style={s.vitalCardLg} testID="temperature-card">
-                <View style={s.vitalHeader}>
-                  <View style={[s.vitalIcon, { backgroundColor: '#FF980018' }]}>
-                    <Ionicons name="thermometer" size={24} color="#FF9800" />
-                  </View>
-                  <Text style={s.vitalLabel}>Temperatura</Text>
-                </View>
-                <View style={s.vitalValueRow}>
-                  <Text style={[s.vitalValueLg, { color: '#FF9800' }]}>{biometricData.temperature.toFixed(1)}</Text>
-                  <Text style={s.vitalUnit}>C</Text>
-                </View>
-                <View style={s.vitalStatus}>
-                  <View style={[s.statusDot, { backgroundColor: biometricData.temperature > 39.5 ? '#FF4B4B' : biometricData.temperature < 37.5 ? '#2196F3' : '#4CAF50' }]} />
-                  <Text style={s.statusText}>
-                    {biometricData.temperature > 39.5 ? 'Alta' : biometricData.temperature < 37.5 ? 'Baja' : 'Normal'}
-                  </Text>
-                </View>
+                {isDemo && (
+                  <View style={s.demoTag}><Text style={s.demoTagText}>{t('demoDataLabel')}</Text></View>
+                )}
               </Card>
             </View>
 
@@ -219,20 +223,24 @@ export default function ChalecoScreen() {
                 </View>
                 <Text style={s.vitalLabelSm}>Actividad</Text>
                 <Text style={[s.vitalValueSm, { color: getActivityColor(biometricData.movement) }]}>
-                  {biometricData.movement === 'low' ? 'Baja' : biometricData.movement === 'medium' ? 'Media' : 'Alta'}
+                  {biometricData.movement === 'low' ? 'Baja' : biometricData.movement === 'medium' ? 'Media' : biometricData.movement === 'high' ? 'Alta' : '--'}
                 </Text>
               </Card>
 
               {/* Battery */}
               <Card style={s.vitalCardSm} testID="battery-card">
-                <View style={[s.vitalIcon, { backgroundColor: biometricData.battery > 20 ? '#4CAF5018' : '#FF4B4B18', alignSelf: 'flex-start' }]}>
-                  <Ionicons name={biometricData.battery > 50 ? 'battery-full' : biometricData.battery > 20 ? 'battery-half' : 'battery-dead'} size={22} color={biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B'} />
+                <View style={[s.vitalIcon, { backgroundColor: (biometricData.battery ?? 0) > 20 ? '#4CAF5018' : '#8888880F', alignSelf: 'flex-start' }]}>
+                  <Ionicons name={(biometricData.battery ?? 0) > 50 ? 'battery-full' : (biometricData.battery ?? 0) > 20 ? 'battery-half' : 'battery-dead'} size={22} color={biometricData.battery === null ? colors.textLight : biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B'} />
                 </View>
                 <Text style={s.vitalLabelSm}>Bateria</Text>
-                <Text style={[s.vitalValueSm, { color: biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B' }]}>{biometricData.battery}%</Text>
-                <View style={s.batteryTrack}>
-                  <View style={[s.batteryFill, { width: `${biometricData.battery}%`, backgroundColor: biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B' }]} />
-                </View>
+                <Text style={[s.vitalValueSm, { color: biometricData.battery === null ? colors.textLight : biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B' }]}>
+                  {biometricData.battery !== null ? `${biometricData.battery}%` : '--'}
+                </Text>
+                {biometricData.battery !== null && (
+                  <View style={s.batteryTrack}>
+                    <View style={[s.batteryFill, { width: `${biometricData.battery}%`, backgroundColor: biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B' }]} />
+                  </View>
+                )}
               </Card>
             </View>
 
@@ -243,12 +251,12 @@ export default function ChalecoScreen() {
                   <Ionicons name="shirt" size={22} color={colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={s.deviceInfoName}>{biometricData.deviceName || 'HEIMDALL Vest'}</Text>
-                  <Text style={s.deviceInfoSub}>ESP32 BLE</Text>
+                  <Text style={s.deviceInfoName}>{biometricData.deviceName || 'HEIMDALL BioVest'}</Text>
+                  <Text style={s.deviceInfoSub}>{isDemo ? t('demoDataLabel') : 'HEIMDALL BioVest'}</Text>
                 </View>
                 <TouchableOpacity style={s.disconnectBtn} onPress={handleDisconnect} testID="disconnect-btn">
                   <Ionicons name="power" size={18} color="#FF4B4B" />
-                  <Text style={s.disconnectText}>Desconectar</Text>
+                  <Text style={s.disconnectText}>{isDemo ? t('exitDemoMode') : 'Desconectar'}</Text>
                 </TouchableOpacity>
               </View>
             </Card>
@@ -278,7 +286,7 @@ export default function ChalecoScreen() {
 }
 
 function getActivityColor(movement: string) {
-  return movement === 'low' ? '#2196F3' : movement === 'medium' ? '#FF9800' : '#FF4B4B';
+  return movement === 'low' ? '#2196F3' : movement === 'medium' ? '#FF9800' : movement === 'high' ? '#FF4B4B' : '#9AA5A0';
 }
 
 const createStyles = (C: any, S: any) => StyleSheet.create({
@@ -305,6 +313,14 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   scanSubtitle: { fontSize: FontSizes.md, color: C.textSecondary, textAlign: 'center', marginBottom: Spacing.lg, paddingHorizontal: Spacing.lg },
   scanBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, backgroundColor: C.primary, paddingHorizontal: Spacing.xl, paddingVertical: 14, borderRadius: BorderRadius.lg },
   scanBtnText: { fontSize: FontSizes.md, fontWeight: '700', color: '#FFF' },
+  demoBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: Spacing.md, paddingVertical: 10, paddingHorizontal: Spacing.lg, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: C.grayLight },
+  demoBtnText: { fontSize: FontSizes.sm, fontWeight: '600', color: C.textSecondary },
+  demoBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#F59E0B60', borderRadius: BorderRadius.lg, paddingVertical: 10, marginBottom: Spacing.md },
+  demoBannerText: { fontSize: FontSizes.sm, fontWeight: '800', color: '#B45309', letterSpacing: 1 },
+  noDataBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#F59E0B60', borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.md },
+  noDataBannerText: { flex: 1, fontSize: FontSizes.sm, fontWeight: '600', color: '#B45309' },
+  demoTag: { alignSelf: 'flex-start', backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, marginTop: Spacing.sm },
+  demoTagText: { fontSize: 10, fontWeight: '800', color: '#B45309', letterSpacing: 0.5 },
 
   // Devices
   section: { marginBottom: Spacing.lg },

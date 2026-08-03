@@ -1,0 +1,33 @@
+{
+  "summary": "Frontend-only E2E testing (web preview, 390x844) of Movesense HR2 FASE 1 changes: login/Home regression, Chaleco (HEIMDALL BioVest, demo mode, exit demo), Salud empty states + demo/real separation, web scan alert, and tab regressions. 7 of 8 requested flows PASSED. One real defect found: pressing 'Buscar dispositivos' on web is a silent no-op (react-native-web Alert.alert is a no-op stub, so no 'Bluetooth no disponible' message ever appears). Also fixed missing testID forwarding in the shared Card component (heart-rate-card/activity-card/battery-card were not queryable).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "chaleco.tsx / BluetoothContext.startScan", "issue": "En web, pulsar 'Buscar dispositivos' no muestra ningun aviso ni cambia el estado: react-native-web implementa Alert.alert como no-op (node_modules/react-native-web/dist/exports/Alert/index.js -> static alert() {}). Resultado: boton aparentemente muerto en web. No hay crash, pero el usuario no recibe feedback. Afecta tambien a los otros Alert.alert (conectar/desconectar) en web.", "selector": "[data-testid=\"scan-btn\"]", "priority": "HIGH"},
+      {"component": "salud.tsx vest banner", "issue": "El banner 'Proximamente con el Pack Chaleco' (testID vest-coming-soon-banner) sigue mostrando badge 'DATOS DE EJEMPLO' y el texto 'Las metricas que ves son de ejemplo. Conecta el chaleco Heimdall ESP32...' (LanguageContext vestComingSoonDesc, es/en/it). Contradice FASE 1: ya no se muestran metricas de ejemplo y la marca pasa a 'HEIMDALL BioVest' (ESP32 tambien queda en faqBluetoothAnswer y esp32Device).", "selector": "[data-testid=\"vest-coming-soon-banner\"]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Implementar un alert compatible con web (Platform.OS === 'web' -> window.alert/window.confirm o modal in-app) para startScan y para los Alert.alert de conectar/desconectar en chaleco.tsx; hoy en web son silenciosos.",
+    "Actualizar copys ESP32 -> HEIMDALL BioVest y quitar 'DATOS DE EJEMPLO'/'Las metricas que ves son de ejemplo' de vestComingSoonDesc (es/en/it) y faqBluetoothAnswer/esp32Device en LanguageContext.tsx.",
+    "Persistir el historial real de HR: heartRateHistory es useState local de salud.tsx, se pierde al desmontar la pestana (nunca habra grafica real). Moverlo a contexto o backend."
+  ],
+  "critical_code_review_comments": [
+    "salud.tsx: heartRateHistory en estado local -> historial real no persiste entre navegaciones; la grafica quedara siempre vacia aunque llegue un sensor real.",
+    "salud.tsx: el estado vacio de 'Signos Vitales' y el aviso 'sensorNoData' no tienen testID (solo la grafica tiene no-measurements-box).",
+    "salud.tsx toggleSensors llama disconnect() tambien en demo; funciona porque bluetoothService.disconnect() delega a stopDemoMode, pero seria mas explicito usar stopSimulation cuando isDemo.",
+    "components/ui/Card.tsx no aceptaba testID: cualquier testID puesto en <Card> se perdia silenciosamente (afecta a todo el app). Corregido en este ciclo.",
+    "salud.tsx (599 lineas) se acerca al limite de tamano; considerar extraer secciones."
+  ],
+  "updated_files": ["/app/frontend/components/ui/Card.tsx"],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "87% (7/8 flujos)"},
+  "seed_data_creation": "Ninguno. No se creo ni modifico ningun dato (solo lectura + modo demo local).",
+  "test_credentials": "alexhernandez81@gmail.com / 123456 (validas; login OK, Home carga sin errores de consola)",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Flujo web: esperar ~6s, click [data-testid=language-es], rellenar input[placeholder='tu@email.com'] y input[placeholder='••••••••'], click texto 'Iniciar Sesión'. Home -> [data-testid=quick-access-chaleco]. En /chaleco no hay tab bar: volver con [data-testid=vest-back-btn] antes de clicar pestanas. Verificado: subtitulo 'HEIMDALL BioVest' (sin ESP32), demo-mode-btn -> demo-data-banner + badge 'Demo' + heart-rate-card con BPM cambiante (76 -> 63) y etiqueta 'DATOS SIMULADOS' + activity-card + battery-card 78%, SIN tarjeta Temperatura ni clasificaciones Normal/Activa/Elevada. disconnect-btn ('Salir de demo') devuelve al estado desconectado (demo-data-banner count 0). Salud sin demo: no-measurements-box visible, bateria '--%', sin circulos de porcentajes (Salud fisica/Sueno/Estres/Nutricion ausentes). Salud con demo: salud-demo-badge visible, BPM en vivo etiquetado 'DATOS SIMULADOS' y la grafica sigue en 'Todavia no hay mediciones.' (demo no entra al historial). Chat/Educacion/Perfil/Inicio cargan sin errores de consola (0 console errors en toda la sesion). Pendiente/no verificable en web: BLE real y parser HR.",
+  "rca_of_the_issue": "react-native-web sustituye Alert por una clase con 'static alert() {}' (no-op), por lo que Alert.alert en BluetoothContext.startScan no produce ningun dialogo en el preview web; no se captura ningun evento 'dialog' de Playwright y la UI queda igual. Reproduccion: /chaleco -> click [data-testid=scan-btn] -> sin dialogo, sin estado 'Buscando chaleco...'. Mitigacion: helper showAlert() que use window.alert/window.confirm en web o un modal propio."
+}

@@ -5,29 +5,25 @@ const HEART_RATE_SERVICE = '0000180d-0000-1000-8000-00805f9b34fb';
 const HEART_RATE_CHARACTERISTIC = '00002a37-0000-1000-8000-00805f9b34fb';
 const BATTERY_SERVICE = '0000180f-0000-1000-8000-00805f9b34fb';
 const BATTERY_CHARACTERISTIC = '00002a19-0000-1000-8000-00805f9b34fb';
-const HEALTH_THERMOMETER_SERVICE = '00001809-0000-1000-8000-00805f9b34fb';
-const TEMPERATURE_CHARACTERISTIC = '00002a1c-0000-1000-8000-00805f9b34fb';
-
-// Custom ESP32 UUIDs (Heimdall Vest)
-const HEIMDALL_SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
-const HEIMDALL_HEART_RATE_CHAR = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
-const HEIMDALL_TEMPERATURE_CHAR = 'beb5483e-36e1-4688-b7f5-ea07361b26a9';
-const HEIMDALL_MOVEMENT_CHAR = 'beb5483e-36e1-4688-b7f5-ea07361b26aa';
-const HEIMDALL_BATTERY_CHAR = 'beb5483e-36e1-4688-b7f5-ea07361b26ab';
 
 export interface BiometricData {
-  heartRate: number;
-  temperature: number;
-  movement: 'low' | 'medium' | 'high';
-  battery: number;
+  heartRate: number | null;
+  rrIntervals: number[];
+  battery: number | null;
+  movement: 'low' | 'medium' | 'high' | 'unknown';
+  signalQuality: 'good' | 'fair' | 'poor' | 'unknown';
   connected: boolean;
+  deviceId: string | null;
   deviceName: string | null;
+  source: 'real' | 'demo';
+  lastUpdatedAt: string | null;
 }
 
 export interface ScannedDevice {
   id: string;
   name: string | null;
   rssi: number | null;
+  isMovesense: boolean;
   isHeimdallVest: boolean;
 }
 
@@ -35,54 +31,45 @@ type BiometricCallback = (data: BiometricData) => void;
 type ScanCallback = (device: ScannedDevice) => void;
 type StateCallback = (state: 'scanning' | 'connected' | 'disconnected' | 'error') => void;
 
+const emptyData = (): BiometricData => ({
+  heartRate: null,
+  rrIntervals: [],
+  battery: null,
+  movement: 'unknown',
+  signalQuality: 'unknown',
+  connected: false,
+  deviceId: null,
+  deviceName: null,
+  source: 'real',
+  lastUpdatedAt: null,
+});
+
 class BluetoothService {
   private manager: any = null;
   private connectedDevice: any = null;
   private biometricCallback: BiometricCallback | null = null;
   private stateCallback: StateCallback | null = null;
   private isScanning: boolean = false;
-  private simulationInterval: ReturnType<typeof setInterval> | null = null;
-  private isSimulating: boolean = false;
-  private bleAvailable: boolean = false;
+  private demoInterval: ReturnType<typeof setInterval> | null = null;
+  private isDemoMode: boolean = false;
   private subscriptions: any[] = [];
-  private dataPollingInterval: ReturnType<typeof setInterval> | null = null;
+  private batteryPollingInterval: ReturnType<typeof setInterval> | null = null;
 
-  // Current biometric data
-  private currentData: BiometricData = {
-    heartRate: 0,
-    temperature: 0,
-    movement: 'low',
-    battery: 0,
-    connected: false,
-    deviceName: null,
-  };
-
-  constructor() {
-    this.bleAvailable = Platform.OS !== 'web';
-  }
+  private currentData: BiometricData = emptyData();
 
   private async initBLE(): Promise<boolean> {
     if (this.manager) return true;
-    if (Platform.OS === 'web') {
-      console.log('BLE: Web platform detected, BLE not available');
-      return false;
-    }
+    if (Platform.OS === 'web') return false;
 
     try {
-      // Dynamic import to avoid crashes when library is not available
       const blePlx = await import('react-native-ble-plx');
       if (blePlx && blePlx.BleManager) {
         this.manager = new blePlx.BleManager();
-        console.log('BLE Manager initialized successfully');
         return true;
-      } else {
-        console.log('BLE: BleManager not available in module');
-        return false;
       }
+      return false;
     } catch (e: any) {
-      // This will fail in Expo Go because react-native-ble-plx requires native code
       console.log('BLE not available (this is normal in Expo Go):', e?.message || e);
-      console.log('TIP: Use "Usar Simulador" button to test the app, or create a development build for real BLE');
       return false;
     }
   }
@@ -92,22 +79,19 @@ class BluetoothService {
 
     if (Platform.OS === 'android') {
       const apiLevel = Platform.Version;
-      
+
       if (typeof apiLevel === 'number' && apiLevel >= 31) {
-        // Android 12+
+        // Android 12+: solo permisos Bluetooth (BLUETOOTH_SCAN lleva neverForLocation)
         const results = await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         ]);
-        
         return (
           results['android.permission.BLUETOOTH_SCAN'] === 'granted' &&
-          results['android.permission.BLUETOOTH_CONNECT'] === 'granted' &&
-          results['android.permission.ACCESS_FINE_LOCATION'] === 'granted'
+          results['android.permission.BLUETOOTH_CONNECT'] === 'granted'
         );
       } else {
-        // Android < 12
+        // Android 11 o inferior: la ubicación es necesaria para escanear BLE
         const result = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
         );
@@ -115,7 +99,7 @@ class BluetoothService {
       }
     }
 
-    // iOS permissions are handled automatically by the system
+    // iOS: el sistema gestiona el permiso Bluetooth automáticamente
     return true;
   }
 
@@ -126,7 +110,6 @@ class BluetoothService {
     return new Promise((resolve) => {
       try {
         const subscription = this.manager.onStateChange((state: string) => {
-          console.log('Bluetooth state:', state);
           if (state === 'PoweredOn') {
             subscription.remove();
             resolve(true);
@@ -135,14 +118,11 @@ class BluetoothService {
             resolve(false);
           }
         }, true);
-        
-        // Timeout after 5 seconds
         setTimeout(() => {
           subscription.remove();
           resolve(false);
         }, 5000);
       } catch (e) {
-        console.log('Check state error:', e);
         resolve(false);
       }
     });
@@ -158,20 +138,15 @@ class BluetoothService {
 
   async startScan(onDeviceFound: ScanCallback): Promise<void> {
     if (Platform.OS === 'web') {
-      console.log('BLE not available on web');
-      throw new Error('Bluetooth no disponible en navegador web. Usa el simulador para probar.');
+      throw new Error('Bluetooth no disponible en navegador web. Usa el modo demostración para probar la interfaz.');
     }
 
     const initialized = await this.initBLE();
     if (!initialized) {
-      // BLE not available - this is normal in Expo Go
-      throw new Error('Bluetooth no disponible en Expo Go.\n\nPara usar Bluetooth real necesitas crear un "development build" de la app.\n\nPor ahora, usa el "Simulador" para probar la funcionalidad.');
+      throw new Error('Bluetooth no disponible en Expo Go.\n\nPara usar Bluetooth real necesitas un build nativo de la app.\n\nPor ahora, usa el modo demostración para probar la interfaz.');
     }
-    
-    if (this.isScanning) {
-      console.log('Already scanning');
-      return;
-    }
+
+    if (this.isScanning) return;
 
     const hasPermission = await this.requestPermissions();
     if (!hasPermission) {
@@ -187,15 +162,11 @@ class BluetoothService {
 
     this.isScanning = true;
     this.stateCallback?.('scanning');
-    console.log('Starting BLE scan...');
 
     try {
       this.manager.startDeviceScan(
-        null, // Scan all services
-        { 
-          allowDuplicates: false,
-          scanMode: 2, // Low latency scan mode for faster discovery
-        },
+        null,
+        { allowDuplicates: false, scanMode: 2 },
         (error: any, device: any) => {
           if (error) {
             console.error('Scan error:', error);
@@ -203,51 +174,39 @@ class BluetoothService {
             this.stateCallback?.('error');
             return;
           }
+          if (!device) return;
 
-          if (device) {
-            const deviceName = device.name || device.localName || '';
-            const deviceNameLower = deviceName.toLowerCase();
-            
-            // Check if this is a Heimdall/ESP32 device
-            const isHeimdallVest = 
-              deviceNameLower.includes('heimdall') ||
-              deviceNameLower.includes('hani') ||
-              deviceNameLower.includes('vest') ||
-              deviceNameLower.includes('chaleco');
+          const deviceName = device.name || device.localName || '';
+          const lower = deviceName.toLowerCase();
+          const serviceUUIDs: string[] = device.serviceUUIDs || [];
+          const advertisesHeartRate = serviceUUIDs.some(
+            (u: string) => u && u.toLowerCase().includes('180d')
+          );
 
-            // Check for ESP32 or other compatible devices
-            const isCompatibleDevice = 
-              isHeimdallVest ||
-              deviceNameLower.includes('esp32') ||
-              deviceNameLower.includes('esp_') ||
-              deviceNameLower.includes('ble') ||
-              deviceNameLower.includes('hr') ||
-              deviceNameLower.includes('heart') ||
-              // Accept devices with good signal strength and a name
-              (deviceName.length > 0 && device.rssi && device.rssi > -75);
+          const isMovesense = lower.includes('movesense');
+          const isHeimdallVest =
+            lower.includes('heimdall') ||
+            lower.includes('biovest') ||
+            lower.includes('hani');
 
-            if (isCompatibleDevice) {
-              console.log(`Found device: ${deviceName} (${device.id}) RSSI: ${device.rssi}`);
-              onDeviceFound({
-                id: device.id,
-                name: deviceName || `Dispositivo BLE (${device.id.substring(0, 8)})`,
-                rssi: device.rssi,
-                isHeimdallVest,
-              });
-            }
+          // Solo sensores compatibles: Movesense, HEIMDALL BioVest o dispositivos
+          // que anuncian el servicio estándar de frecuencia cardiaca (0x180D).
+          if (isMovesense || isHeimdallVest || advertisesHeartRate) {
+            onDeviceFound({
+              id: device.id,
+              name: deviceName || `Sensor (${device.id.substring(0, 8)})`,
+              rssi: device.rssi,
+              isMovesense,
+              isHeimdallVest: isHeimdallVest || isMovesense,
+            });
           }
         }
       );
 
-      // Auto-stop scan after 30 seconds
       setTimeout(() => {
-        if (this.isScanning) {
-          console.log('Scan timeout - stopping');
-          this.stopScan();
-        }
+        if (this.isScanning) this.stopScan();
       }, 30000);
     } catch (e) {
-      console.error('Start scan error:', e);
       this.stateCallback?.('error');
       throw new Error('Error al iniciar escaneo Bluetooth');
     }
@@ -257,49 +216,43 @@ class BluetoothService {
     if (this.manager && this.isScanning) {
       try {
         this.manager.stopDeviceScan();
-        console.log('Scan stopped');
-      } catch (e) {
-        console.log('Stop scan error:', e);
-      }
+      } catch (e) {}
       this.isScanning = false;
     }
   }
 
   async connectToDevice(deviceId: string): Promise<boolean> {
+    if (this.isDemoMode) this.stopDemoMode();
+
     const initialized = await this.initBLE();
-    if (!initialized || !this.manager) {
-      console.log('BLE not initialized');
-      return false;
-    }
+    if (!initialized || !this.manager) return false;
 
     try {
       this.stopScan();
-      console.log(`Connecting to device: ${deviceId}`);
-
       const device = await this.manager.connectToDevice(deviceId, {
         autoConnect: false,
         timeout: 10000,
       });
 
-      console.log('Device connected, discovering services...');
       await device.discoverAllServicesAndCharacteristics();
-      
+
       this.connectedDevice = device;
-      this.currentData.connected = true;
-      this.currentData.deviceName = device.name || device.localName || 'Dispositivo ESP32';
-      
+      this.currentData = {
+        ...emptyData(),
+        connected: true,
+        deviceId: device.id,
+        deviceName: device.name || device.localName || 'HEIMDALL BioVest',
+        source: 'real',
+      };
+
       this.stateCallback?.('connected');
       this.notifyUpdate();
 
-      // Set up disconnection listener
-      device.onDisconnected((error: any, disconnectedDevice: any) => {
-        console.log('Device disconnected:', error?.message || 'Unknown reason');
+      device.onDisconnected(() => {
         this.handleDisconnection();
       });
 
-      // Start reading data from device
       await this.startReadingData();
-
       return true;
     } catch (error: any) {
       console.error('Connection error:', error);
@@ -310,183 +263,105 @@ class BluetoothService {
 
   private async startReadingData(): Promise<void> {
     if (!this.connectedDevice) return;
-
+    // Si algo falla aquí, NUNCA se generan datos simulados: la interfaz
+    // mostrará "No se están recibiendo datos del sensor."
     try {
-      const services = await this.connectedDevice.services();
-      console.log('Available services:', services.map((s: any) => s.uuid));
-
-      // Try to read from standard Heart Rate service
       await this.setupHeartRateMonitoring();
-      
-      // Try to read from Heimdall custom service
-      await this.setupHeimdallMonitoring();
-
-      // Start polling for data that doesn't support notifications
-      this.startDataPolling();
-
-    } catch (error) {
-      console.log('Error setting up data reading:', error);
-      // Fall back to simulation with real device name
-      this.startRealDeviceSimulation();
+    } catch (e) {
+      console.log('Heart Rate service setup failed:', e);
     }
+    try {
+      await this.readBatteryLevel();
+      this.startBatteryPolling();
+    } catch (e) {
+      console.log('Battery service not available');
+    }
+  }
+
+  // Estándar Bluetooth Heart Rate Measurement (org.bluetooth.characteristic.heart_rate_measurement)
+  private parseHeartRateMeasurement(data: Uint8Array): { heartRate: number; rrIntervals: number[] } | null {
+    if (data.length < 2) return null;
+
+    const flags = data[0];
+    const is16Bit = (flags & 0x01) !== 0;
+    let offset = 1;
+    let heartRate: number;
+
+    if (is16Bit) {
+      if (data.length < 3) return null;
+      heartRate = data[1] | (data[2] << 8);
+      offset = 3;
+    } else {
+      heartRate = data[1];
+      offset = 2;
+    }
+
+    // Energy Expended presente: saltar 2 bytes
+    if ((flags & 0x08) !== 0) {
+      offset += 2;
+    }
+
+    // Intervalos RR presentes: uint16 little-endian en unidades de 1/1024 s
+    const rrIntervals: number[] = [];
+    if ((flags & 0x10) !== 0) {
+      while (offset + 1 < data.length) {
+        const raw = data[offset] | (data[offset + 1] << 8);
+        rrIntervals.push(Math.round((raw * 1000) / 1024)); // → milisegundos
+        offset += 2;
+      }
+    }
+
+    return { heartRate, rrIntervals };
   }
 
   private async setupHeartRateMonitoring(): Promise<void> {
     if (!this.connectedDevice) return;
 
-    try {
-      // Subscribe to heart rate notifications
-      const subscription = this.connectedDevice.monitorCharacteristicForService(
-        HEART_RATE_SERVICE,
-        HEART_RATE_CHARACTERISTIC,
-        (error: any, characteristic: any) => {
-          if (error) {
-            console.log('Heart rate monitor error:', error.message);
-            return;
-          }
-          if (characteristic?.value) {
-            const data = this.decodeBase64(characteristic.value);
-            if (data.length > 1) {
-              // Heart rate is in the second byte for most BLE HR monitors
-              this.currentData.heartRate = data[1];
-              this.notifyUpdate();
-            }
-          }
+    const subscription = this.connectedDevice.monitorCharacteristicForService(
+      HEART_RATE_SERVICE,
+      HEART_RATE_CHARACTERISTIC,
+      (error: any, characteristic: any) => {
+        if (error) {
+          console.log('Heart rate monitor error:', error.message);
+          return;
         }
-      );
-      this.subscriptions.push(subscription);
-      console.log('Heart rate monitoring started');
-    } catch (e) {
-      console.log('Heart rate service not available:', e);
-    }
-  }
-
-  private async setupHeimdallMonitoring(): Promise<void> {
-    if (!this.connectedDevice) return;
-
-    try {
-      // Try to read Heimdall custom characteristics
-      const services = await this.connectedDevice.services();
-      
-      for (const service of services) {
-        const characteristics = await service.characteristics();
-        console.log(`Service ${service.uuid} has ${characteristics.length} characteristics`);
-        
-        for (const char of characteristics) {
-          if (char.isNotifiable) {
-            try {
-              const subscription = char.monitor((error: any, characteristic: any) => {
-                if (!error && characteristic?.value) {
-                  this.parseCharacteristicData(service.uuid, char.uuid, characteristic.value);
-                }
-              });
-              this.subscriptions.push(subscription);
-            } catch (e) {
-              console.log(`Could not subscribe to ${char.uuid}`);
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.log('Heimdall service setup error:', e);
-    }
-  }
-
-  private parseCharacteristicData(serviceUuid: string, charUuid: string, base64Value: string): void {
-    try {
-      const data = this.decodeBase64(base64Value);
-      
-      // Parse based on characteristic UUID
-      if (charUuid.toLowerCase().includes(HEIMDALL_HEART_RATE_CHAR.toLowerCase()) ||
-          charUuid.toLowerCase().includes('heart') || 
-          charUuid.toLowerCase().includes('2a37')) {
-        if (data.length > 0) {
-          this.currentData.heartRate = data.length > 1 ? data[1] : data[0];
-          this.notifyUpdate();
-        }
-      } else if (charUuid.toLowerCase().includes(HEIMDALL_TEMPERATURE_CHAR.toLowerCase()) ||
-                 charUuid.toLowerCase().includes('temp') ||
-                 charUuid.toLowerCase().includes('2a1c')) {
-        if (data.length > 0) {
-          // Temperature might be in different formats
-          const rawTemp = data[0] + (data.length > 1 ? data[1] * 256 : 0);
-          this.currentData.temperature = rawTemp / 100; // Assuming centigrade * 100
-          this.notifyUpdate();
-        }
-      } else if (charUuid.toLowerCase().includes(HEIMDALL_MOVEMENT_CHAR.toLowerCase()) ||
-                 charUuid.toLowerCase().includes('motion') ||
-                 charUuid.toLowerCase().includes('accel')) {
-        if (data.length > 0) {
-          const level = data[0];
-          this.currentData.movement = level < 30 ? 'low' : level < 70 ? 'medium' : 'high';
-          this.notifyUpdate();
-        }
-      } else if (charUuid.toLowerCase().includes(HEIMDALL_BATTERY_CHAR.toLowerCase()) ||
-                 charUuid.toLowerCase().includes('batt') ||
-                 charUuid.toLowerCase().includes('2a19')) {
-        if (data.length > 0) {
-          this.currentData.battery = data[0];
-          this.notifyUpdate();
-        }
-      }
-    } catch (e) {
-      console.log('Parse data error:', e);
-    }
-  }
-
-  private startDataPolling(): void {
-    // Poll for battery and other readable characteristics
-    this.dataPollingInterval = setInterval(async () => {
-      if (!this.connectedDevice) return;
-
-      try {
-        // Try to read battery level
-        const batteryChar = await this.connectedDevice.readCharacteristicForService(
-          BATTERY_SERVICE,
-          BATTERY_CHARACTERISTIC
-        );
-        if (batteryChar?.value) {
-          const data = this.decodeBase64(batteryChar.value);
-          if (data.length > 0) {
-            this.currentData.battery = data[0];
+        if (characteristic?.value) {
+          const bytes = this.decodeBase64(characteristic.value);
+          const parsed = this.parseHeartRateMeasurement(bytes);
+          if (parsed && parsed.heartRate > 0) {
+            this.currentData.heartRate = parsed.heartRate;
+            this.currentData.rrIntervals = parsed.rrIntervals;
+            this.currentData.lastUpdatedAt = new Date().toISOString();
             this.notifyUpdate();
           }
         }
-      } catch (e) {
-        // Battery service may not be available
       }
-    }, 5000);
+    );
+    this.subscriptions.push(subscription);
   }
 
-  private startRealDeviceSimulation(): void {
-    // If we can't read real data, simulate but show we're connected to real device
-    console.log('Starting real device simulation mode');
-    
-    this.dataPollingInterval = setInterval(() => {
-      // Simulate biometric data with some variation
-      const baseHeartRate = 70;
-      const heartRateVariation = Math.sin(Date.now() / 5000) * 15;
-      this.currentData.heartRate = Math.round(baseHeartRate + heartRateVariation + Math.random() * 5);
-
-      this.currentData.temperature = 38.2 + Math.random() * 0.8;
-
-      const movementRandom = Math.random();
-      if (movementRandom < 0.6) {
-        this.currentData.movement = 'low';
-      } else if (movementRandom < 0.9) {
-        this.currentData.movement = 'medium';
-      } else {
-        this.currentData.movement = 'high';
+  private async readBatteryLevel(): Promise<void> {
+    if (!this.connectedDevice) return;
+    const batteryChar = await this.connectedDevice.readCharacteristicForService(
+      BATTERY_SERVICE,
+      BATTERY_CHARACTERISTIC
+    );
+    if (batteryChar?.value) {
+      const bytes = this.decodeBase64(batteryChar.value);
+      if (bytes.length > 0 && bytes[0] >= 0 && bytes[0] <= 100) {
+        this.currentData.battery = bytes[0];
+        this.notifyUpdate();
       }
+    }
+  }
 
-      if (this.currentData.battery === 0) {
-        this.currentData.battery = 85;
-      } else if (Math.random() < 0.1) {
-        this.currentData.battery = Math.max(0, this.currentData.battery - 1);
-      }
-
-      this.notifyUpdate();
-    }, 2000);
+  private startBatteryPolling(): void {
+    this.batteryPollingInterval = setInterval(async () => {
+      if (!this.connectedDevice) return;
+      try {
+        await this.readBatteryLevel();
+      } catch (e) {}
+    }, 60000);
   }
 
   private decodeBase64(base64: string): Uint8Array {
@@ -509,108 +384,111 @@ class BluetoothService {
   }
 
   private handleDisconnection(): void {
-    // Clean up subscriptions
-    this.subscriptions.forEach(sub => {
+    this.subscriptions.forEach((sub) => {
       try {
         sub.remove?.();
       } catch (e) {}
     });
     this.subscriptions = [];
 
-    // Stop data polling
-    if (this.dataPollingInterval) {
-      clearInterval(this.dataPollingInterval);
-      this.dataPollingInterval = null;
+    if (this.batteryPollingInterval) {
+      clearInterval(this.batteryPollingInterval);
+      this.batteryPollingInterval = null;
     }
 
     this.connectedDevice = null;
-    this.currentData = {
-      heartRate: 0,
-      temperature: 0,
-      movement: 'low',
-      battery: 0,
-      connected: false,
-      deviceName: null,
-    };
+    this.currentData = emptyData();
     this.stateCallback?.('disconnected');
     this.notifyUpdate();
   }
 
   async disconnect(): Promise<void> {
-    this.stopSimulation();
-    
-    // Clean up subscriptions
-    this.subscriptions.forEach(sub => {
+    if (this.isDemoMode) {
+      this.stopDemoMode();
+      return;
+    }
+
+    this.subscriptions.forEach((sub) => {
       try {
         sub.remove?.();
       } catch (e) {}
     });
     this.subscriptions = [];
 
-    // Stop data polling
-    if (this.dataPollingInterval) {
-      clearInterval(this.dataPollingInterval);
-      this.dataPollingInterval = null;
+    if (this.batteryPollingInterval) {
+      clearInterval(this.batteryPollingInterval);
+      this.batteryPollingInterval = null;
     }
-    
+
     if (this.connectedDevice) {
       try {
         await this.connectedDevice.cancelConnection();
-        console.log('Device disconnected successfully');
-      } catch (error) {
-        console.error('Disconnect error:', error);
-      }
+      } catch (error) {}
     }
-    
+
     this.handleDisconnection();
   }
 
-  // Simulation mode for testing without real device
-  startSimulation(): void {
-    if (this.isSimulating) return;
-    
-    this.isSimulating = true;
-    this.currentData.connected = true;
-    this.currentData.deviceName = 'Heimdall Vest (Simulador)';
-    this.currentData.battery = 78;
+  // ===== MODO DEMOSTRACIÓN (nunca se mezcla con datos reales) =====
+  startDemoMode(): void {
+    if (this.isDemoMode) return;
+    if (this.connectedDevice) {
+      // Nunca mezclar demo con una sesión real activa
+      console.log('Demo mode blocked: real device connected');
+      return;
+    }
+
+    this.isDemoMode = true;
+    this.currentData = {
+      heartRate: 72,
+      rrIntervals: [],
+      battery: 78,
+      movement: 'low',
+      signalQuality: 'unknown',
+      connected: true,
+      deviceId: 'demo',
+      deviceName: 'HEIMDALL BioVest (Demo)',
+      source: 'demo',
+      lastUpdatedAt: new Date().toISOString(),
+    };
     this.stateCallback?.('connected');
 
-    this.simulationInterval = setInterval(() => {
-      const baseHeartRate = 70;
-      const heartRateVariation = Math.sin(Date.now() / 5000) * 15;
-      this.currentData.heartRate = Math.round(baseHeartRate + heartRateVariation + Math.random() * 5);
+    this.demoInterval = setInterval(() => {
+      const base = 70;
+      const variation = Math.sin(Date.now() / 5000) * 15;
+      this.currentData.heartRate = Math.round(base + variation + Math.random() * 5);
 
-      this.currentData.temperature = 38.2 + Math.random() * 0.8;
+      const r = Math.random();
+      this.currentData.movement = r < 0.6 ? 'low' : r < 0.9 ? 'medium' : 'high';
 
-      const movementRandom = Math.random();
-      if (movementRandom < 0.6) {
-        this.currentData.movement = 'low';
-      } else if (movementRandom < 0.9) {
-        this.currentData.movement = 'medium';
-      } else {
-        this.currentData.movement = 'high';
-      }
-
-      if (Math.random() < 0.1) {
+      if (Math.random() < 0.05 && this.currentData.battery !== null) {
         this.currentData.battery = Math.max(0, this.currentData.battery - 1);
       }
-
+      this.currentData.lastUpdatedAt = new Date().toISOString();
       this.notifyUpdate();
     }, 2000);
 
     this.notifyUpdate();
   }
 
-  stopSimulation(): void {
-    if (this.simulationInterval) {
-      clearInterval(this.simulationInterval);
-      this.simulationInterval = null;
+  stopDemoMode(): void {
+    if (this.demoInterval) {
+      clearInterval(this.demoInterval);
+      this.demoInterval = null;
     }
-    this.isSimulating = false;
-    this.currentData.connected = false;
-    this.currentData.deviceName = null;
+    this.isDemoMode = false;
+    this.currentData = emptyData();
     this.stateCallback?.('disconnected');
     this.notifyUpdate();
+  }
+
+  // Aliases retro-compatibles
+  startSimulation(): void {
+    this.startDemoMode();
+  }
+
+  stopSimulation(): void {
+    this.stopDemoMode();
   }
 
   isConnected(): boolean {
@@ -623,14 +501,12 @@ class BluetoothService {
 
   destroy(): void {
     this.stopScan();
-    this.stopSimulation();
+    this.stopDemoMode();
     this.disconnect();
     if (this.manager) {
       try {
         this.manager.destroy();
-      } catch (e) {
-        console.log('Manager destroy error:', e);
-      }
+      } catch (e) {}
       this.manager = null;
     }
   }
