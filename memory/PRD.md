@@ -142,3 +142,7 @@ App 100% GRATUITA. Sin PRO/Premium/paywalls.
 - Verificado (iteración 26, 3/3 PASS): prebuild genera exactamente 1 declaración ACCESS_FINE_LOCATION (maxSdk 30 + replace), COARSE/BACKGROUND/ACTIVITY_RECOGNITION con tools:node=remove; regresión frontend OK (login, dashboard, /chaleco con demo etiquetado 'DATOS SIMULADOS', /epilepsia).
 - Nota: el merged manifest final solo se puede confirmar en el build EAS (no hay Android SDK en el contenedor), pero tools:node=replace es la resolución estándar de este conflicto.
 - SIGUIENTE PASO USUARIO: nuevo build EAS (subir versionCode a 121) y resubir el .aab a Google Play.
+
+## Release v121 preparado (Jun 2026)
+- app.json: versionCode 121, versionName 1.2.1. Prebuild verificado (versionCode 121 en build.gradle, 1 sola ACCESS_FINE_LOCATION). TypeScript 0 errores. eas.json production con URL blindada.
+- Tras publicar en Play: actualizar LATEST_ANDROID_VERSION_CODE=121 en el .env del VPS y reiniciar uvicorn (activa aviso de actualización in-app). NO hacerlo antes de publicar.
