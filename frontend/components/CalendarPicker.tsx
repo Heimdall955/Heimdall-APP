@@ -110,8 +110,8 @@ export default function CalendarPicker({ value, onSelect, label, placeholder }: 
                   key={i}
                   style={[
                     s.cell,
-                    day && isSelected(day) && { backgroundColor: colors.primary, borderRadius: 20 },
-                    day && isToday(day) && !isSelected(day) && { borderWidth: 1.5, borderColor: colors.primary, borderRadius: 20 },
+                    day && isSelected(day) ? { backgroundColor: colors.primary, borderRadius: 20 } : null,
+                    day && isToday(day) && !isSelected(day) ? { borderWidth: 1.5, borderColor: colors.primary, borderRadius: 20 } : null,
                   ]}
                   onPress={() => day && pickDay(day)}
                   disabled={!day}

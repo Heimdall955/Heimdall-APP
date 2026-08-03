@@ -220,7 +220,7 @@ export default function OnboardingMascotaScreen() {
               <Text style={s.fieldLabel}>{T('ageMonths')}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TextInput style={[s.input, { flex: 1 }]} value={form.age} onChangeText={v => update('age', v)} placeholder={T('agePlaceholder')} placeholderTextColor={colors.gray} keyboardType="numeric" testID="pet-age-input" />
-                <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.grayLight }}>
                   <TouchableOpacity
                     style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: form.ageUnit === 'months' ? colors.primary : 'transparent' }}
                     onPress={() => update('ageUnit', 'months')}

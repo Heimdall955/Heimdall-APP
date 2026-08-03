@@ -71,9 +71,9 @@ export default function HomeScreen() {
       if (weeklyRes?.data) setWeeklySummary(weeklyRes.data);
       if (diaryRes?.data?.logged_today) setTodayEmotion(diaryRes.data.emotion);
       else setTodayEmotion(null);
-      if (chatRes?.data?.length > 0) setLastConsultation(chatRes.data[0].created_at);
+      if (chatRes && chatRes.data && chatRes.data.length > 0) setLastConsultation(chatRes.data[0].created_at);
       else setLastConsultation(null);
-      if (medicalRes?.data?.length > 0) setLastMedicalEvent(medicalRes.data[0]);
+      if (medicalRes && medicalRes.data && medicalRes.data.length > 0) setLastMedicalEvent(medicalRes.data[0]);
       else setLastMedicalEvent(null);
     } catch (error) { console.log('Error loading home data'); }
   }, [currentDog?.id]);

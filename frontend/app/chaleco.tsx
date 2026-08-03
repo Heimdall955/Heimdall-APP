@@ -20,6 +20,20 @@ export default function ChalecoScreen() {
   } = useBluetooth();
 
   const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
+
+  // Ticker para "Última lectura hace X s" — solo con sensor REAL conectado
+  const STALE_SECONDS = 30;
+  const [nowTick, setNowTick] = useState(Date.now());
+  useEffect(() => {
+    if (!isConnected || isDemo) return;
+    const interval = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isConnected, isDemo]);
+
+  const secondsSinceReading: number | null =
+    !isDemo && biometricData.source === 'real' && biometricData.lastUpdatedAt
+      ? Math.max(0, Math.floor((nowTick - new Date(biometricData.lastUpdatedAt).getTime()) / 1000))
+      : null;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -101,12 +115,26 @@ export default function ChalecoScreen() {
           </View>
         )}
 
-        {/* No sensor data warning - real device connected but no readings */}
-        {isConnected && !isDemo && biometricData.heartRate === null && (
-          <View style={s.noDataBanner} testID="no-sensor-data-banner">
-            <Ionicons name="warning" size={18} color="#B45309" />
-            <Text style={s.noDataBannerText}>{t('sensorNoData')}</Text>
-          </View>
+        {/* Real sensor reading status (uses lastUpdatedAt, only real data) */}
+        {isConnected && !isDemo && (
+          biometricData.lastUpdatedAt === null ? (
+            <View style={s.noDataBanner} testID="no-sensor-data-banner">
+              <Ionicons name="warning" size={18} color="#B45309" />
+              <Text style={s.noDataBannerText}>{t('sensorNoData')}</Text>
+            </View>
+          ) : secondsSinceReading !== null && secondsSinceReading > STALE_SECONDS ? (
+            <View style={s.noDataBanner} testID="stale-data-banner">
+              <Ionicons name="time-outline" size={18} color="#B45309" />
+              <Text style={s.noDataBannerText}>{t('noRecentData')}</Text>
+            </View>
+          ) : (
+            <View style={s.liveBanner} testID="receiving-data-banner">
+              <View style={s.liveDot} />
+              <Text style={s.liveBannerText}>
+                {t('receivingData')} · {t('lastReadingAgo').replace('{s}', String(secondsSinceReading ?? 0))}
+              </Text>
+            </View>
+          )
         )}
 
         {/* Connection Card */}
@@ -320,6 +348,9 @@ const createStyles = (C: any, S: any) => StyleSheet.create({
   demoBannerText: { fontSize: FontSizes.sm, fontWeight: '800', color: '#B45309', letterSpacing: 1 },
   noDataBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#F59E0B60', borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.md },
   noDataBannerText: { flex: 1, fontSize: FontSizes.sm, fontWeight: '600', color: '#B45309' },
+  liveBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#DCFCE7', borderWidth: 1, borderColor: '#22C55E50', borderRadius: BorderRadius.lg, padding: Spacing.md, marginBottom: Spacing.md },
+  liveDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: '#16A34A' },
+  liveBannerText: { flex: 1, fontSize: FontSizes.sm, fontWeight: '600', color: '#15803D' },
   demoTag: { alignSelf: 'flex-start', backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, marginTop: Spacing.sm },
   demoTagText: { fontSize: 10, fontWeight: '800', color: '#B45309', letterSpacing: 0.5 },
 

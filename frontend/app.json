@@ -2,7 +2,7 @@
   "expo": {
     "name": "Heimdall",
     "slug": "heimdall",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "heimdall",
@@ -25,7 +25,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A0A0A"
       },
-      "versionCode": 119,
+      "versionCode": 120,
       "package": "app.emergent.hanigpsfixf4b1b81d",
       "permissions": [
         "CAMERA",

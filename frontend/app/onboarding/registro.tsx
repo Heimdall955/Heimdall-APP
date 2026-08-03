@@ -275,7 +275,7 @@ export default function RegistroScreen() {
                   value={resetCode}
                   onChangeText={setResetCode}
                   icon="keypad-outline"
-                  keyboardType="number-pad"
+                  keyboardType="numeric"
                 />
                 <Input
                   label={t('newPassword') || 'Nueva contraseña'}

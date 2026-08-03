@@ -210,7 +210,7 @@ export default function PaseosScreen() {
 
         {/* Main pedometer circle */}
         <View style={{ alignItems: 'center', paddingVertical: Spacing.xl }}>
-          <Animated.View style={[st.circle, { backgroundColor: isWalking ? C.primary : C.white, transform: [{ scale: pulseAnim }], ...S.medium }]} testID="pedometer-circle">
+          <Animated.View style={[st.circle, { backgroundColor: isWalking ? C.primary : C.white, transform: [{ scale: pulseAnim }], ...S.md }]} testID="pedometer-circle">
             <Text style={{ fontSize: 42, fontWeight: '900', color: isWalking ? '#FFF' : C.text }}>{steps}</Text>
             <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: isWalking ? 'rgba(255,255,255,0.8)' : C.textSecondary, marginTop: -4 }}>{t('steps')}</Text>
           </Animated.View>
@@ -234,7 +234,7 @@ export default function PaseosScreen() {
             { icon: 'time', label: t('time'), value: timeStr },
             { icon: 'flame', label: t('calories'), value: `${calories} kcal` },
           ].map((s, i) => (
-            <View key={i} style={[st.statCard, { backgroundColor: C.white, ...S.small }]}>
+            <View key={i} style={[st.statCard, { backgroundColor: C.white, ...S.sm }]}>
               <Ionicons name={s.icon as any} size={22} color={C.primary} />
               <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: C.text, marginTop: 4 }}>{s.value}</Text>
               <Text style={{ fontSize: FontSizes.xs, color: C.textSecondary }}>{s.label}</Text>
@@ -267,7 +267,7 @@ export default function PaseosScreen() {
               { label: t('totalWalks'), value: String(weekStats.walks), icon: 'walk', color: C.success },
               { label: t('bestWalk'), value: weekStats.best.toLocaleString(), icon: 'trophy', color: '#FFB800' },
             ].map((s, i) => (
-              <View key={i} style={[st.weekCard, { backgroundColor: C.white, borderLeftColor: s.color, ...S.small }]}>
+              <View key={i} style={[st.weekCard, { backgroundColor: C.white, borderLeftColor: s.color, ...S.sm }]}>
                 <Ionicons name={s.icon as any} size={20} color={s.color} />
                 <Text style={{ fontSize: FontSizes.lg, fontWeight: '800', color: C.text }}>{s.value}</Text>
                 <Text style={{ fontSize: 10, color: C.textSecondary }}>{s.label}</Text>
@@ -280,7 +280,7 @@ export default function PaseosScreen() {
         <View style={{ padding: Spacing.lg, paddingTop: 0 }}>
           <Text style={{ fontSize: FontSizes.md, fontWeight: '700', color: C.text, marginBottom: Spacing.md }}>{t('history')}</Text>
           {walks.length === 0 ? (
-            <View style={[st.emptyCard, { backgroundColor: C.white, ...S.small }]}>
+            <View style={[st.emptyCard, { backgroundColor: C.white, ...S.sm }]}>
               <Ionicons name="paw" size={40} color={C.grayLight} />
               <Text style={{ fontSize: FontSizes.sm, color: C.textSecondary, marginTop: Spacing.sm, textAlign: 'center' }}>{t('noWalks')}</Text>
             </View>
@@ -290,7 +290,7 @@ export default function PaseosScreen() {
               const dateStr = d.toLocaleDateString(language === 'en' ? 'en-US' : language === 'it' ? 'it-IT' : 'es-ES', { day: 'numeric', month: 'short' });
               const dur = w.duration_seconds ? `${Math.floor(w.duration_seconds / 60)} min` : '--';
               return (
-                <View key={w.id || i} style={[st.walkItem, { backgroundColor: C.white, ...S.small }]} testID={`walk-history-${i}`}>
+                <View key={w.id || i} style={[st.walkItem, { backgroundColor: C.white, ...S.sm }]} testID={`walk-history-${i}`}>
                   <View style={[st.walkIcon, { backgroundColor: C.primary + '15' }]}>
                     <Ionicons name="walk" size={20} color={C.primary} />
                   </View>

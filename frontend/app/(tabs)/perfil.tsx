@@ -556,7 +556,7 @@ export default function PerfilScreen() {
                 <Text style={styles.inputLabel}>{t('dogAge')}</Text>
                 <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                   <TextInput style={[styles.input, { flex: 1 }]} value={editAge} onChangeText={setEditAge} keyboardType="numeric" />
-                  <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                  <View style={{ flexDirection: 'row', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: colors.grayLight }}>
                     <TouchableOpacity
                       style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: editAgeUnit === 'months' ? colors.primary : 'transparent' }}
                       onPress={() => {

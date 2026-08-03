@@ -116,7 +116,7 @@ export default function ProgresoScreen() {
               testID={`program-${program.id}`}
             >
               <View style={[styles.programIcon, { backgroundColor: program.color + '20' }]}>
-                <Ionicons name={program.icon} size={22} color={program.color} />
+                <Ionicons name={program.icon as any} size={22} color={program.color} />
               </View>
               <View style={styles.programInfo}>
                 <View style={styles.programTitleRow}>
