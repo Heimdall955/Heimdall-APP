@@ -67,7 +67,7 @@ export function BluetoothProvider({ children }: { children: ReactNode }) {
     if (Platform.OS === 'web') {
       showAlert(
         'Bluetooth no disponible',
-        'El escaneo Bluetooth solo funciona en dispositivos moviles. Para probarlo, instala la app en tu telefono.',
+        'El escaneo Bluetooth solo funciona en dispositivos móviles. Para probarlo, instala la app en tu teléfono.',
       );
       return;
     }

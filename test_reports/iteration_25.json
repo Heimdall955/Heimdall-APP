@@ -1,0 +1,33 @@
+{
+  "summary": "Verificación frontend-only (web preview, 390x844) del pulido pre-release de la iteración 25. Resultado: 6/6 comprobaciones solicitadas PASAN. Home ES muestra 'Última consulta IA', 'Último evento médico' y '¿Qué hace Heimdall?' con tildes y sin claves crudas ni 'undefined'. Chaleco (quick-access-chaleco) totalmente i18n: 'Conecta tu chaleco', 'Buscar dispositivos', '¿Cómo conectar?' con los 3 pasos; en EN muestra 'Connect your vest' / 'Search devices' / 'How to connect' (hardcode español eliminado, verificado en runtime). scan-btn en web lanza window.alert 'Bluetooth no disponible — El escaneo Bluetooth solo funciona en dispositivos móviles. Para probarlo, instala la app en tu teléfono.' (tildes correctas) sin romper nada. Modo demo: banner 'DATOS SIMULADOS' + tarjetas 'Frecuencia Cardíaca' 87 BPM, 'Actividad' Baja, 'Batería' 78% (sin 'Bateria'/'Cardiaca'); disconnect-btn devuelve al estado desconectado y el banner desaparece. Regresión: Salud ('Todavía no hay mediciones.' x2, '--%'), Chat, Educación y Perfil cargan sin errores. Pantalla de selección de idioma arranca OK (es y en). 0 errores de consola y 0 pageerror en todas las sesiones. Estado final: demo APAGADO / chaleco desconectado. Análisis estático de LanguageContext.tsx: 0 claves duplicadas (es 497, en 496, it 496).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "app/diario.tsx (+ app/(tabs)/index.tsx)", "issue": "CLAVE i18n CRUDA VISIBLE: la cabecera de /diario muestra literalmente 'emotionDiary' porque la clave no existe en NINGUN idioma de LanguageContext.tsx (t() hace fallback a la key). También se usa en Home (index.tsx línea 284) como subtítulo del bloque de diario cuando ya hay emoción registrada hoy, así que aparecería 'emotionDiary' en la Home. Bloqueante para un release en Google Play.", "selector": "text=emotionDiary", "priority": "HIGH"},
+      {"component": "app/rutas.tsx (Paseos)", "issue": "Esta pantalla NO usa LanguageContext: define su propio diccionario local T (es/en/it) y además sin tildes: 'Calorias', 'Meta alcanzada!', 'Sigue asi!', 'Aun no tienes paseos. Sal a caminar!', 'El podometro no esta disponible...', motivate1-4 ('tu', 'al dia', 'estres'). Inconsistente con el pulido de tildes del resto de la app.", "selector": "app/rutas.tsx", "priority": "MEDIUM"},
+      {"component": "Chat quick bar", "issue": "El chip de acción sigue mostrando 'Analisis' sin tilde (debería ser 'Análisis').", "selector": "text=Analisis", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Añadir la clave 'emotionDiary' a es/en/it en contexts/LanguageContext.tsx (hoy se renderiza la clave cruda en la cabecera de /diario y en la Home).",
+    "Migrar app/rutas.tsx al LanguageContext (eliminar el diccionario local T) y corregir tildes: Calorías, ¡Meta alcanzada!, ¡Sigue así!, 'Aún no tienes paseos', 'El podómetro no está disponible', motivate1-4.",
+    "Corregir 'Analisis' -> 'Análisis' en la barra rápida del Chat.",
+    "Eliminar o utilizar la clave muerta 'bleNotAvailableInExpoGo' (existe solo en 'es', no se usa en ningún componente)."
+  ],
+  "critical_code_review_comments": [
+    "contexts/LanguageContext.tsx: 0 duplicados confirmados por análisis AST-lite (es 497 / en 496 / it 496 claves). Única asimetría: 'bleNotAvailableInExpoGo' solo en es y sin uso. Recomendado seguir con el split a locales/es.ts|en.ts|it.ts: el archivo supera las 1700 líneas y es el foco recurrente de duplicados.",
+    "t() hace fallback silencioso a la key (TRANSLATIONS[language][key] || key), lo que permite que claves ausentes lleguen a producción como texto visible (caso 'emotionDiary'). Añadir en dev un console.warn cuando falte la clave o un test/script que compare las claves usadas en t('...') contra las definidas.",
+    "app/chaleco.tsx: todos los textos visibles y los showAlert pasan ya por t() (verificado en es y en). Correcto."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% (6/6 comprobaciones solicitadas); 1 bug adicional encontrado fuera del alcance solicitado (clave cruda emotionDiary)"},
+  "seed_data_creation": "Ninguno. No se guardó ninguna emoción ni mensaje de chat en esta iteración.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "alexhernandez81@gmail.com / 123456 (válidas)",
+  "context_for_next_testing_agent": "Flujo web: esperar ~11s, click [data-testid=language-es] (o language-en), input[placeholder='tu@email.com'] + input[placeholder='••••••••'], click texto 'Iniciar Sesión' (esperar ~9s). Home -> [data-testid=quick-access-chaleco]; scan-btn dispara window.alert (registrar page.on('dialog')); demo-mode-btn / disconnect-btn funcionan. Las pantallas de tabs siguen montadas simultáneamente: usar selectores scoped o .last al navegar por el tab bar (get_by_text('Salud', exact=True).last funciona). Verificado ES y EN en Chaleco. Pendiente: IT no probado en runtime; /diario muestra la clave cruda 'emotionDiary'; app/rutas.tsx (Paseos) no se ha abierto en runtime pero su diccionario local carece de tildes.",
+  "rca_of_the_issue": "La clave 'emotionDiary' se usa en app/diario.tsx (cabecera) y app/(tabs)/index.tsx pero nunca se añadió a TRANSLATIONS en contexts/LanguageContext.tsx; como t() devuelve la propia key en caso de fallo, el usuario ve el identificador técnico. Detectado con un script que compara todas las llamadas t('key') del código con las claves definidas por idioma y confirmado en runtime en /diario."
+}

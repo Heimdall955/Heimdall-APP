@@ -62,7 +62,7 @@ export default function ChalecoScreen() {
     const success = await connectToDevice(deviceId);
     setConnectingDeviceId(null);
     if (success) {
-      showAlert('Conectado', 'Chaleco HEIMDALL conectado correctamente');
+      showAlert(t('vestConnectedTitle'), t('vestConnectedMsg'));
     }
   };
 
@@ -71,9 +71,9 @@ export default function ChalecoScreen() {
       stopSimulation();
       return;
     }
-    showAlert('Desconectar', 'Quieres desconectar el chaleco?', [
+    showAlert(t('disconnectTitle'), t('disconnectConfirm'), [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Desconectar', style: 'destructive', onPress: disconnect },
+      { text: t('disconnectTitle'), style: 'destructive', onPress: disconnect },
     ]);
   };
 
@@ -153,10 +153,10 @@ export default function ChalecoScreen() {
             </View>
 
             <Text style={s.scanTitle}>
-              {isScanning ? 'Buscando chaleco...' : 'Conecta tu chaleco'}
+              {isScanning ? t('searchingVest') : t('connectVestTitle')}
             </Text>
             <Text style={s.scanSubtitle}>
-              {isScanning ? 'Asegurate de que este encendido y cerca' : 'Enciende el chaleco HEIMDALL y pulsa buscar'}
+              {isScanning ? t('ensureVestOn') : t('connectVestSubtitle')}
             </Text>
 
             <TouchableOpacity
@@ -165,7 +165,7 @@ export default function ChalecoScreen() {
               testID="scan-btn"
             >
               <Ionicons name={isScanning ? 'stop' : 'bluetooth'} size={22} color="#FFF" />
-              <Text style={s.scanBtnText}>{isScanning ? 'Detener' : 'Buscar dispositivos'}</Text>
+              <Text style={s.scanBtnText}>{isScanning ? t('stopSearch') : t('searchDevices')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={s.demoBtn} onPress={startSimulation} testID="demo-mode-btn">
@@ -178,7 +178,7 @@ export default function ChalecoScreen() {
         {/* Scanned Devices */}
         {!isConnected && scannedDevices.length > 0 && (
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Dispositivos encontrados</Text>
+            <Text style={s.sectionTitle}>{t('devicesFound')}</Text>
             {scannedDevices.map((device) => {
               const bars = getSignalBars(device.rssi);
               return (
@@ -230,7 +230,7 @@ export default function ChalecoScreen() {
                       <Ionicons name="heart" size={24} color="#FF4B4B" />
                     </Animated.View>
                   </View>
-                  <Text style={s.vitalLabel}>Frecuencia Cardiaca</Text>
+                  <Text style={s.vitalLabel}>{t('heartRate')}</Text>
                 </View>
                 <View style={s.vitalValueRow}>
                   <Text style={[s.vitalValueLg, { color: biometricData.heartRate !== null ? '#FF4B4B' : colors.textLight }]}>
@@ -250,7 +250,7 @@ export default function ChalecoScreen() {
                 <View style={[s.vitalIcon, { backgroundColor: getActivityColor(biometricData.movement) + '18', alignSelf: 'flex-start' }]}>
                   <Ionicons name="walk" size={22} color={getActivityColor(biometricData.movement)} />
                 </View>
-                <Text style={s.vitalLabelSm}>Actividad</Text>
+                <Text style={s.vitalLabelSm}>{t('activity')}</Text>
                 <Text style={[s.vitalValueSm, { color: getActivityColor(biometricData.movement) }]}>
                   {biometricData.movement === 'low' ? 'Baja' : biometricData.movement === 'medium' ? 'Media' : biometricData.movement === 'high' ? 'Alta' : '--'}
                 </Text>
@@ -261,7 +261,7 @@ export default function ChalecoScreen() {
                 <View style={[s.vitalIcon, { backgroundColor: (biometricData.battery ?? 0) > 20 ? '#4CAF5018' : '#8888880F', alignSelf: 'flex-start' }]}>
                   <Ionicons name={(biometricData.battery ?? 0) > 50 ? 'battery-full' : (biometricData.battery ?? 0) > 20 ? 'battery-half' : 'battery-dead'} size={22} color={biometricData.battery === null ? colors.textLight : biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B'} />
                 </View>
-                <Text style={s.vitalLabelSm}>Bateria</Text>
+                <Text style={s.vitalLabelSm}>{t('battery')}</Text>
                 <Text style={[s.vitalValueSm, { color: biometricData.battery === null ? colors.textLight : biometricData.battery > 20 ? '#4CAF50' : '#FF4B4B' }]}>
                   {biometricData.battery !== null ? `${biometricData.battery}%` : '--'}
                 </Text>
@@ -285,7 +285,7 @@ export default function ChalecoScreen() {
                 </View>
                 <TouchableOpacity style={s.disconnectBtn} onPress={handleDisconnect} testID="disconnect-btn">
                   <Ionicons name="power" size={18} color="#FF4B4B" />
-                  <Text style={s.disconnectText}>{isDemo ? t('exitDemoMode') : 'Desconectar'}</Text>
+                  <Text style={s.disconnectText}>{isDemo ? t('exitDemoMode') : t('disconnectTitle')}</Text>
                 </TouchableOpacity>
               </View>
             </Card>
@@ -295,11 +295,11 @@ export default function ChalecoScreen() {
         {/* How to connect guide */}
         {!isConnected && !isScanning && scannedDevices.length === 0 && (
           <Card style={s.guideCard}>
-            <Text style={s.guideTitle}>Como conectar</Text>
+            <Text style={s.guideTitle}>{t('howToConnect')}</Text>
             {[
-              { step: '1', icon: 'power', text: 'Enciende el chaleco HEIMDALL' },
-              { step: '2', icon: 'bluetooth', text: 'Pulsa "Buscar dispositivos"' },
-              { step: '3', icon: 'link', text: 'Selecciona tu chaleco de la lista' },
+              { step: '1', icon: 'power', text: t('turnOnVest') },
+              { step: '2', icon: 'bluetooth', text: t('pressSearchButton') },
+              { step: '3', icon: 'link', text: t('selectDevice') },
             ].map((item, idx) => (
               <View key={idx} style={s.guideStep}>
                 <View style={s.guideNum}><Text style={s.guideNumText}>{item.step}</Text></View>
