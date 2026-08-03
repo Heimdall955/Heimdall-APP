@@ -7,6 +7,10 @@ const withAndroidFeatures = (config) => {
   return withAndroidManifest(config, (config) => {
     const manifest = config.modResults.manifest;
 
+    // Ensure tools namespace is available for tools:node overrides
+    manifest.$ = manifest.$ || {};
+    manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+
     // 1. Mark hardware features as optional (Google Play compliance)
     if (!manifest['uses-feature']) {
       manifest['uses-feature'] = [];
@@ -51,18 +55,25 @@ const withAndroidFeatures = (config) => {
       Object.assign(perm.$, attrs);
     };
 
+    // tools:node="replace" forces a single final declaration, overriding
+    // library manifests (react-native-ble-plx declares ACCESS_FINE_LOCATION
+    // without maxSdkVersion, which caused the Google Play duplicate rejection)
     upsertPermission('android.permission.BLUETOOTH_SCAN', {
       'android:usesPermissionFlags': 'neverForLocation',
+      'tools:node': 'replace',
     });
     upsertPermission('android.permission.BLUETOOTH_CONNECT');
     upsertPermission('android.permission.ACCESS_FINE_LOCATION', {
       'android:maxSdkVersion': '30',
+      'tools:node': 'replace',
     });
     upsertPermission('android.permission.BLUETOOTH', {
       'android:maxSdkVersion': '30',
+      'tools:node': 'replace',
     });
     upsertPermission('android.permission.BLUETOOTH_ADMIN', {
       'android:maxSdkVersion': '30',
+      'tools:node': 'replace',
     });
 
     // 3. Fix content provider authority conflicts

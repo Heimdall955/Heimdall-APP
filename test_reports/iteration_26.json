@@ -1,0 +1,26 @@
+{
+  "summary": "VERIFICACIÓN 1 (bash): ejecutado 'rm -rf android && npx expo prebuild -p android --no-install' con éxito. El AndroidManifest.xml generado contiene EXACTAMENTE UNA declaración de ACCESS_FINE_LOCATION con android:maxSdkVersion=\"30\" y tools:node=\"replace\"; el root <manifest> incluye xmlns:tools; BLUETOOTH_SCAN tiene android:usesPermissionFlags=\"neverForLocation\" + tools:node=\"replace\"; BLUETOOTH y BLUETOOTH_ADMIN con maxSdkVersion=30 + tools:node=\"replace\"; ACCESS_COARSE_LOCATION / ACCESS_BACKGROUND_LOCATION / ACTIVITY_RECOGNITION con tools:node=\"remove\". Confirmado en node_modules/react-native-ble-plx/android/src/main/AndroidManifest.xml que la librería declara ACCESS_FINE_LOCATION sin maxSdkVersion y ACCESS_COARSE_LOCATION (fuente del rechazo de Google Play), por lo que tools:node=replace/remove es la corrección adecuada. Carpeta /app/frontend/android borrada al finalizar. VERIFICACIÓN 2 y 3 (frontend web, viewport móvil 390x844): login con alexhernandez81@gmail.com OK, dashboard con la mascota 'Hani' y 205 HUESOS renderizado; /chaleco carga sin crashear mostrando estado desconectado ('Conecta tu chaleco', 'Buscar dispositivos', 'Modo demostración'); al activar el modo demo se muestran badges explícitos 'Demo' y 'DATOS SIMULADOS' (x3) junto a FC 87 BPM, Actividad y Batería, sin presentar datos falsos como reales; /epilepsia carga correctamente (contadores 0 crisis, 'Registrar crisis', empty state con tildes correctas). 0 elementos de error y 0 pageerrors en ambas pantallas.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Global (consola web)", "issues": ["Warnings de deprecación de RN Web repetidos: 'textShadow*' style props are deprecated, 'shadow*' style props are deprecated, props.pointerEvents is deprecated. No bloquean, solo ruido en consola web.", "Warning 'useNativeDriver is not supported' en animaciones en web (esperado en RN Web)."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "plugins/withAndroidFeatures.js: la sección 3 (reemplazo de authorities com.heimdall.app) es actualmente un no-op: el manifest prebuilt no contiene ningún <provider> con android:authorities. No es un bug, pero se puede eliminar o dejar documentado como salvaguarda.",
+    "La verificación del MERGED manifest (post manifest-merger de Gradle) no se pudo ejecutar en el contenedor: no hay Android SDK ni Java instalados. La validación realizada es del manifest fuente de la app, que es donde tools:node='replace' resuelve el conflicto; la confirmación definitiva llegará en el build EAS/aab.",
+    "app/chaleco.tsx: separación demo/real correcta — 3 marcadores 'DATOS SIMULADOS' + chip 'Demo' + '(Demo)' en el nombre del dispositivo. No se detectan datos biométricos falsos fuera del modo demo."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (backend en VPS externo, no testeado por petición)", "frontend": "100% (3/3 verificaciones solicitadas OK)"},
+  "seed_data_creation": "Ninguno. No se registró ninguna crisis ni se guardó dato alguno.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "alexhernandez81@gmail.com / 123456 (válidas)",
+  "context_for_next_testing_agent": "Flujo web probado: esperar ~12s tras carga, click [data-testid=language-es], rellenar input[placeholder='tu@email.com'] e input[placeholder='••••••••'], click texto 'Iniciar Sesión' (esperar ~12s). Home -> [data-testid=quick-access-chaleco]; en /chaleco existen [data-testid=demo-mode-btn] y [data-testid=scan-btn]; el demo se activa correctamente y muestra 'DATOS SIMULADOS'. /epilepsia accesible por navegación directa a /epilepsia. El prebuild de Android tarda ~40s y requiere borrar /app/frontend/android antes y después. No hay Android SDK/Java en el contenedor, así que el merged manifest no se puede validar localmente.",
+  "rca_of_the_issue": "Rechazo de Google Play causado por react-native-ble-plx declarando android.permission.ACCESS_FINE_LOCATION sin maxSdkVersion mientras el manifest de la app la declaraba con maxSdkVersion=30, generando dos declaraciones incompatibles en el merge. Fix verificado: tools:node='replace' en la declaración de la app (más xmlns:tools en el root) fuerza que la declaración de la app sustituya la de la librería, dejando una única entrada final."
+}
